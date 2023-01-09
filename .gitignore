@@ -12,6 +12,15 @@
 /build
 
 # misc
+/reactcert
+<<<<<<< HEAD
+<<<<<<< HEAD
+
+=======
+>>>>>>> ea1bcf7 (Remove cert file)
+=======
+
+>>>>>>> aee1aaf (Add reactcert to gitignore file.)
 .DS_Store
 .env.local
 .env.development.local

@@ -36,3 +36,61 @@
     transform: rotate(360deg);
   }
 }
+
+.data-sets {
+  margin: 5px;
+}
+
+.selected-data-set {
+  margin: 5px;
+}
+
+.table {
+  width: 90%;
+  border: 1px solid black;
+  display: flex;
+  flex-direction: column;
+}
+
+.title {
+  box-sizing: border-box;
+  display: flex;
+  width: 100%;
+  background-color: lightblue;
+  align-items: center;
+  justify-content: center;
+  padding: 5px;
+  border: 1px solid black;
+}
+
+.table-body {
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+}
+
+.parent>.title {
+  width: 30%;
+}
+
+.parent>.values {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+
+.values>.sub {
+  display: flex;
+  flex-direction: row;
+}
+
+.case {
+  box-sizing: border-box;
+  padding: 10px;
+  width: 30%;
+}
+
+.children {
+  box-sizing: border-box;
+  padding: 10px;
+}
