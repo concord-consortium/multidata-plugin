@@ -14,8 +14,17 @@ export const connect = {
             "action": "get",
             "resource": "dataContextList"
         }
-        const dataContextResult = await codapInterface.sendRequest(tMessage);
-        return dataContextResult.values;
+        const dataContextList = await codapInterface.sendRequest(tMessage);
+        return dataContextList.values;
+    },
+
+    getDataSet: async function (name) {
+      const tMessage = {
+        "action": "get",
+        "resource": `dataContext[${name}]`
+    }
+    const dataContext = await codapInterface.sendRequest(tMessage);
+    return dataContext.values;
     },
 
     getDataSetCollections: async function (name) {
@@ -56,6 +65,22 @@ export const connect = {
       return itemCount.values;
     },
 
+    getItems: async function(dSName) {
+      const itemCount = await this.getItemCount(dSName);
+      let items = [];
+
+      for (let i = 0; i < itemCount; i ++) {
+        const tMessage = {
+          "action": "get",
+          "resource": `dataContext[${dSName}].item[${i}]`,
+        }
+        const item = await codapInterface.sendRequest(tMessage);
+        items.push(item.values.values);
+      }
+
+      return items;
+    },
+
     getCases: async function(dSName, collName) {
       const tMessage = {
         "action": "get",
@@ -68,18 +93,28 @@ export const connect = {
       let cases = [];
 
       for (let i = 0; i < caseCount; i++) {
-        const c = await this.getCaseByIndex(dSName, collName, i);
-        // store details about the case children
-        if (c.case.children && c.case.children.length) {
-          for (let j = 0; j < c.case.children.length; j++) {
-            const child = await this.getCaseByID(dSName, c.case.children[j]);
-            c.case.children[j] = child.case.values;
+        const caseObj = (await this.getCaseByIndex(dSName, collName, i)).case;
+        const processedCase = await this.processCase(dSName, caseObj);
+        cases.push(processedCase);
+      }
+      return cases;
+    },
+
+    processCase: async function(dSName, caseObj) {
+      if (!caseObj.children) {
+        return caseObj;
+      } else {
+        for (let i = 0; i < caseObj.children.length; i++){
+          let childCase = await this.getCaseByID(dSName, caseObj.children[i]);
+          let childCaseObj = childCase.case;
+          if (childCaseObj.children.length) {
+            caseObj.children[i] = await this.processCase(dSName, childCase.case);
+          } else {
+            caseObj.children[i] = childCase.case;
           }
         }
-        cases.push(c.case);
+        return caseObj;
       }
-
-      return cases;
     },
 
     getCaseByIndex: async function(dSName, collName, i) {
