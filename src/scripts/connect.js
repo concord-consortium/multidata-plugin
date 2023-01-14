@@ -28,7 +28,6 @@ export const connect = {
     },
 
     getDataSetCollections: async function (name) {
-      console.log("getDataSetCollections");
       const tMessage = {
         "action": "get",
         "resource": `dataContext[${name}].collectionList`
@@ -101,14 +100,12 @@ export const connect = {
     },
 
     processCase: async function(dSName, caseObj) {
-      if (!caseObj.children) {
-        return caseObj;
-      } else {
+      if (caseObj.children) {
         for (let i = 0; i < caseObj.children.length; i++){
           let childCase = await this.getCaseByID(dSName, caseObj.children[i]);
           let childCaseObj = childCase.case;
           if (childCaseObj.children.length) {
-            caseObj.children[i] = await this.processCase(dSName, childCase.case);
+            caseObj.children[i] = await this.processCase(dSName, childCaseObj);
           } else {
             caseObj.children[i] = childCase.case;
           }

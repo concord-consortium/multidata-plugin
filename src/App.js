@@ -31,57 +31,69 @@ function App() {
     )
   };
 
-  const renderSingleNestedTable = (parentCollection) => {
-    return (
-      <>
-      {parentCollection.cases.map((collCase) => {
-          const childHeaders = Object.keys(collCase.children[0]);
-          return (
-            <tr>
-              <td>{Object.values(collCase.values)[0]}</td>
-              <td>
-                <table>
-                  <tr>{childHeaders.map((header) => <th>{header}</th>)}</tr>
-                  {collCase.children.map((child) => <tr>{Object.values(child.values).map(val => <td>{val}</td>)}</tr>)}
-                </table>
-              </td>
-            </tr>
-          )
-        })}
-      </>
-    );
+  const renderNestedTable = (parentColl) => {
+    return parentColl.cases.map((caseObj) => renderRowFromCaseObj(caseObj));
   }
 
-  const renderMultiNestedTable = (parentColl) => {
-    console.log("collections", collections);
-  }
+  const renderRowFromCaseObj = (caseObj) => {
+    if (!caseObj.children.length) {
+      return (
+        <tr>{(Object.values(caseObj.values)).map(val => <td>{val}</td>)}</tr>
+      )
+    } else {
+      return (
+        <>
+        <tr>
+          {(Object.values(caseObj.values)).map(val => <td>{val}</td>)}
+          <td>
+            <table>
+              <tbody>
+                {caseObj.children.map((child, i) => {
+                  if (i === 0) {
+                    return (
+                      <>
+                      <tr>{(Object.keys(child.values).map(key => <th>{key}</th>))}</tr>
+                      {renderRowFromCaseObj(child)}
+                      </>
+                      );
+                  } else {
+                    return (renderRowFromCaseObj(child));
+                  }
+                })}
+              </tbody>
+            </table>
+          </td>
+        </tr>
+        </>
+      );
+    }}
 
   const renderTable = () => {
     return (
       <table>
-        <tr>
+        <tbody>
+          <tr>
+            {
+              collections.length === 1 ? <th>{collections[0].title}</th> :
+              collections.length === 2 ? collections.map(c => <th>{c.title}</th>) :
+              collections.map((c, i) => {
+                if (i !== collections.length - 1) {
+                  return (<th>{c.title}</th>)
+                }
+              })
+            }
+          </tr>
           {
-            collections.length === 1 ? <th>{collections[0].title}</th> :
-            collections.length === 2 ? collections.map(c => <th>{c.title}</th>) :
-            collections.map((c, i) => {
-              if (i !== collections.length - 1) {
-                return (<th>{c.title}</th>)
-              }
-            })
+            collections.length === 1 ? renderSingleTable() :
+            renderNestedTable(collections.filter(coll => !coll.parent)[0])
           }
-        </tr>
-        {
-          collections.length === 1 ? renderSingleTable() :
-          collections.length === 2 ? renderSingleNestedTable(collections.filter(coll => !coll.parent)[0]) :
-          renderMultiNestedTable(collections.filter(coll => !coll.parent)[0])
-        }
+        </tbody>
       </table>
     );
   }
 
   return (
     <div>
-
       <div className="data-sets">
         <select onChange={handleSelectDataSet}>
           <option default></option>
