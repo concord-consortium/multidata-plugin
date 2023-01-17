@@ -46,7 +46,24 @@
 }
 
 table {
-  width: 70%;
-  background-color: "blue";
+  width: 95%;
+  margin: 0 auto;
+}
+
+table, th, td {
+  border-collapse: collapse;
   border: 1px solid black;
+}
+
+th {
+  height: 35px;
+  background-color: lightblue;
+}
+
+th, td {
+  padding: 7px;
+}
+
+.sub-table {
+  width: 100%;
 }

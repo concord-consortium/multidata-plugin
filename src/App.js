@@ -46,13 +46,17 @@ function App() {
         <tr>
           {(Object.values(caseObj.values)).map(val => <td>{val}</td>)}
           <td>
-            <table>
+            <table className="sub-table">
               <tbody>
                 {caseObj.children.map((child, i) => {
+                  console.log("child.children", child.children);
                   if (i === 0) {
                     return (
                       <>
-                      <tr>{(Object.keys(child.values).map(key => <th>{key}</th>))}</tr>
+                      <tr className="sub-header-row">
+                        {(Object.keys(child.values).map(key => <th>{key}</th>))}
+                        {child.children.length ? <th>{child.children[0].collection.name}</th> : ""}
+                      </tr>
                       {renderRowFromCaseObj(child)}
                       </>
                       );
@@ -70,9 +74,9 @@ function App() {
 
   const renderTable = () => {
     return (
-      <table>
+      <table className="main-table">
         <tbody>
-          <tr>
+          <tr className="main-header-row">
             {
               collections.length === 1 ? <th>{collections[0].title}</th> :
               collections.length === 2 ? collections.map(c => <th>{c.title}</th>) :
