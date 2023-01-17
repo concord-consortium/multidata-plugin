@@ -37,20 +37,29 @@
   }
 }
 
-.data-sets {
-  margin: 5px;
-}
 
 .selected-data-set {
   margin: 5px;
 }
 
-table {
+.main-table {
   width: 95%;
   margin: 0 auto;
+  margin-bottom: 10px;
 }
 
-table, th, td {
+.sub-table {
+  width: 100%;
+  margin: 0 auto;
+  border-collapse: collapse;
+}
+
+.main-table {
+  border-collapse: collapse;
+  border: 1px solid black;
+}
+
+th, td {
   border-collapse: collapse;
   border: 1px solid black;
 }
@@ -64,6 +73,20 @@ th, td {
   padding: 7px;
 }
 
-.sub-table {
-  width: 100%;
+.controls {
+  display: flex;
+  flex-direction: row;
+  gap: 25px;
+  margin-bottom: 10px;
+  margin-left: 10px;
+}
+
+.data-sets, .set-padding {
+  display: flex;
+  flex-direction: row;
+  margin: 5px;
+}
+
+select, input {
+  margin-left: 5px;
 }
