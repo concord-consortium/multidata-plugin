@@ -24,7 +24,15 @@ function App() {
         </tr>
         {items.length && items.map((item) => {
           return (
-            <tr>{Object.values(item).map(val => <td>{val}</td>)}</tr>
+            <tr>{Object.values(item).map(val => {
+              if (typeof val === "string" || typeof val === "number") {
+                  return (
+                  <td>
+                    {val}
+                  </td>
+                  );
+                }
+              })}</tr>
           )
         })}
       </>
@@ -38,23 +46,67 @@ function App() {
   const renderRowFromCaseObj = (caseObj) => {
     if (!caseObj.children.length) {
       return (
-        <tr>{(Object.values(caseObj.values)).map(val => <td>{val}</td>)}</tr>
+        <tr>{(Object.values(caseObj.values)).map(val => {
+          if (typeof val === "string" || typeof val === "number") {
+              return (
+              <td>
+                {val}
+              </td>
+              );
+            }
+          })}</tr>
       )
     } else {
       return (
         <>
         <tr>
-          {(Object.values(caseObj.values)).map(val => <td>{val}</td>)}
+          {(Object.values(caseObj.values)).filter(val => typeof val === "string" || typeof val === "number").length > 1 ?
+            <td>
+              <table>
+                <tbody>
+                  <tr>{(Object.keys(caseObj.values)).map((key) => {
+                    if (typeof caseObj.values[key] === "string" || typeof caseObj.values[key] === "number") {
+                        return (
+                        <th>
+                          {key}
+                        </th>
+                        );
+                      }
+                    })}
+                  </tr>
+                  <tr>
+                    {(Object.values(caseObj.values)).map((val) => {
+                      if (typeof val === "string" || typeof val === "number") {
+                          return (
+                          <td>
+                            {val}
+                          </td>
+                          );
+                        }
+                      })}
+                  </tr>
+                </tbody>
+              </table>
+            </td>
+            :(Object.values(caseObj.values)).map((val) => {
+            if (typeof val === "string" || typeof val === "number") {
+                return (
+                <td>
+                  {val}
+                </td>
+                );
+              }
+            })
+          }
           <td>
             <table className="sub-table">
               <tbody>
                 {caseObj.children.map((child, i) => {
-                  console.log("child.children", child.children);
                   if (i === 0) {
                     return (
                       <>
                       <tr className="sub-header-row">
-                        {(Object.keys(child.values).map(key => <th>{key}</th>))}
+                        {((Object.keys(child.values)).map(key => <th>{key}</th>))}
                         {child.children.length ? <th>{child.children[0].collection.name}</th> : ""}
                       </tr>
                       {renderRowFromCaseObj(child)}
@@ -73,18 +125,14 @@ function App() {
     }}
 
   const renderTable = () => {
+    console.log("collections", collections);
     return (
       <table className="main-table">
         <tbody>
           <tr className="main-header-row">
             {
               collections.length === 1 ? <th>{collections[0].title}</th> :
-              collections.length === 2 ? collections.map(c => <th>{c.title}</th>) :
-              collections.map((c, i) => {
-                if (i !== collections.length - 1) {
-                  return (<th>{c.title}</th>)
-                }
-              })
+              collections.filter((c, i) => i === 0 || i === 1).map((c) => <th>{c.title}</th>)
             }
           </tr>
           {
