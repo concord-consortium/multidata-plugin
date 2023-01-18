@@ -1,62 +1,18 @@
-.App {
-  text-align: center;
-}
-
-.App-logo {
-  height: 40vmin;
-  pointer-events: none;
-}
-
-@media (prefers-reduced-motion: no-preference) {
-  .App-logo {
-    animation: App-logo-spin infinite 20s linear;
-  }
-}
-
-.App-header {
-  background-color: #282c34;
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  font-size: calc(10px + 2vmin);
-  color: white;
-}
-
-.App-link {
-  color: #61dafb;
-}
-
-@keyframes App-logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
-}
 
 
-.selected-data-set {
-  margin: 5px;
-}
-
-.main-table {
-  width: 95%;
+.main-table, .sub-table {
   margin: 0 auto;
   margin-bottom: 10px;
+  border-collapse: collapse;
+  border: 1px solid black;
 }
 
 .sub-table {
   width: 100%;
-  margin: 0 auto;
-  border-collapse: collapse;
 }
 
 .main-table {
-  border-collapse: collapse;
-  border: 1px solid black;
+  width: 95%;
 }
 
 th, td {
@@ -66,10 +22,9 @@ th, td {
 
 th {
   height: 35px;
-  background-color: lightblue;
 }
 
-th, td {
+td {
   padding: 7px;
 }
 
@@ -89,4 +44,24 @@ th, td {
 
 select, input {
   margin-left: 5px;
+}
+
+.collection-0>th, th.collection-0 {
+  background-color: #CEE9FB;
+}
+
+.collection-1>th, th.collection-1 {
+  background-color: #F7EABA;
+}
+
+.collection-2>th, th.collection-2 {
+  background-color: #CCBEE0;
+}
+
+.collection-3>th, th.collection-3 {
+  background-color: #BEE0CA;
+}
+
+.collection-4>th, th.collection-4 {
+  background-color: #E7C3A4;
 }

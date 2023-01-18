@@ -1,17 +1,41 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import './App.css';
 import { useCodapState } from './hooks/useCodapState';
 
+
 function App() {
-  const { dataSets, selectedDataSet, collections, items, handleSelectDataSet } = useCodapState();
+  const {dataSets, selectedDataSet, collections, items, handleSelectDataSet} = useCodapState();
+  const [collectionClasses, setCollectionClasses] = useState([]);
   const [padding, setPadding] = useState(false);
+  const [paddingStyle, setPaddingStyle] = useState({padding: "7px"})
+
+  useEffect(() => {
+    if (collections.length) {
+      const classes = collections.map((coll, idx) => {return {collectionName: coll.name, className: `collection-${idx}`}});
+      setCollectionClasses(classes);
+    }
+  }, [collections])
+
+  useEffect(() => {
+    padding ? setPaddingStyle({padding: "7px"}) : setPaddingStyle({padding: "0px"});
+  }, [padding])
+
+  const getClassName = (caseObj) => {
+    const {collection} = caseObj;
+    const className = collectionClasses.filter((classObj) => classObj.collectionName === collection.name)[0].className || "";
+    return className;
+  }
+
+  const togglePadding = () => {
+    padding ? setPadding(false) : setPadding(true);
+  }
 
   const mapHeadersFromValues = (values) => {
     return (
       <>
         {(Object.keys(values)).map((key) => {
           if (typeof values[key] === "string" || typeof values[key] === "number") {
-              return (<th>{key}</th>);
+              return (<th >{key}</th>);
             }
           }
         )}
@@ -22,7 +46,7 @@ function App() {
   const mapCellsFromValues = (values) => {
     return (
       <>
-        {Object.values(values).map(val => {
+        {(Object.values(values)).map((val) => {
           if (typeof val === "string" || typeof val === "number") {
               return (<td>{val}</td>);
             }
@@ -67,52 +91,56 @@ function App() {
     } else {
       return (
         <>
-        <tr>
-          {(Object.values(values)).filter(val => typeof val === "string" || typeof val === "number").length > 1 ?
-            <td style={{padding: padding ? "7px" : "0px", border: padding ? "1px solid black" : "0px"}}>
-              <table className="sub-table">
+          <tr>
+            {(Object.values(values)).filter(val => typeof val === "string" || typeof val === "number").length > 1 ?
+              <td style={paddingStyle}>
+                <table className={`sub-table ${getClassName(caseObj)}`}>
+                  <tbody>
+                    <tr className="sub-header-row">{mapHeadersFromValues(values)}</tr>
+                    <tr>{mapCellsFromValues(values)}</tr>
+                  </tbody>
+                </table>
+              </td>
+              : mapCellsFromValues(values)
+            }
+
+            <td className={"main-td"} style={paddingStyle}>
+              <table style={paddingStyle} className={`sub-table`}>
                 <tbody>
-                  <tr className="sub-header-row">{mapHeadersFromValues(values)}</tr>
-                  <tr>{mapCellsFromValues(values)}</tr>
+                  {caseObj.children.map((child, i) => {
+                    if (i === 0) {
+                      return (
+                        <>
+                          <tr className={`sub-header-row ${getClassName(child)}`}>
+                            {mapHeadersFromValues(child.values)}
+                            {child.children.length ? <th className={`${getClassName(child.children[0])}`}>{child.children[0].collection.name}</th> : <></>}
+                          </tr>
+                          {renderRowFromCaseObj(child, null, i)}
+                        </>
+                        );
+                    } else {
+                      return (renderRowFromCaseObj(child, null, i));
+                    }
+                  })}
                 </tbody>
               </table>
             </td>
-            : mapCellsFromValues(values)
-          }
-          <td className={"main-td"} style={{padding: padding ? "7px" : "0px"}}>
-            <table style={{padding: padding ? "7px" : "0px", border: padding ? "1px solid black" : "none"}} className="sub-table">
-              <tbody>
-                {caseObj.children.map((child, i) => {
-                  if (i === 0) {
-                    return (
-                      <>
-                        <tr className="sub-header-row">
-                          {mapHeadersFromValues(child.values)}
-                          {child.children.length ? <th>{child.children[0].collection.name}</th> : <></>}
-                        </tr>
-                        {renderRowFromCaseObj(child)}
-                      </>
-                      );
-                  } else {
-                    return (renderRowFromCaseObj(child));
-                  }
-                })}
-              </tbody>
-            </table>
-          </td>
-        </tr>
+
+          </tr>
         </>
       );
     }}
 
   const renderTable = () => {
     return (
-      <table className="main-table">
-        <tbody className="main-tbody">
-          <tr className="main-header-row">
+      <table className={`main-table ${collectionClasses[0].className}`}>
+        <tbody>
+          <tr className={`${collectionClasses[0].className}`}>
             {
-              collections.length === 1 ? <th className="main-header">{collections[0].title}</th> :
-              collections.filter((c, i) => i === 0 || i === 1).map((c) => <th className="main-header">{c.title}</th>)
+              collections.length === 1 ? <th>{collections[0].title}</th> :
+              collections.filter((c, i) => i === 0 || i === 1).map((c, i) => {
+                return <th className={i === 0 ? collectionClasses[0].className : collectionClasses[1].className}>{c.title}</th>
+            })
             }
           </tr>
           {
@@ -122,14 +150,6 @@ function App() {
         </tbody>
       </table>
     );
-  }
-
-  const togglePadding = () => {
-    if (padding) {
-      setPadding(false)
-    } else {
-      setPadding(true);
-    }
   }
 
   return (
@@ -147,7 +167,7 @@ function App() {
           <input type="checkbox" onChange={togglePadding}/>
         </div>
       </div>
-      {selectedDataSet && collections.length && renderTable()}
+      {selectedDataSet && collectionClasses.length && renderTable()}
   </div>);
 }
 
