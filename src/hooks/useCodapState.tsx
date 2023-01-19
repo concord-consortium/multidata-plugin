@@ -1,11 +1,11 @@
-import {useState, useEffect} from "react";
+import React, {useState, useEffect} from "react";
 import { connect } from "../scripts/connect";
 
 export const useCodapState = () => {
-  const [dataSets, setDataSets] = useState(null);
-  const [selectedDataSet, setSelectedDataSet] = useState(null);
-  const [collections, setCollections] = useState([]);
-  const [items, setItems] = useState([]);
+  const [dataSets, setDataSets] = useState<any[]>([]);
+  const [selectedDataSet, setSelectedDataSet] = useState<any>(null);
+  const [collections, setCollections] = useState<ICollections>([]);
+  const [items, setItems] = useState<any[]>([]);
 
   const getDataSets = async () => {
     const sets = await connect.getListOfDatasets();
@@ -26,23 +26,24 @@ export const useCodapState = () => {
       const colls = await connect.getDataSetCollections(selectedDataSet.name);
       setCollections(colls);
     }
-    if (!!selectedDataSet) {
+    if (selectedDataSet) {
       fetchCollections();
     }
   }, [selectedDataSet])
 
   useEffect(() => {
+    console.log("collections", collections);
     const fetchItems = async () => {
-      const items = await connect.getItems(selectedDataSet.name);
-      setItems(items);
+      const fetchedItems = await connect.getItems(selectedDataSet.name);
+      setItems(fetchedItems);
     }
 
-    if (collections.length === 1) {
+    if (collections.length === 1 && selectedDataSet) {
       fetchItems();
     }
   }, [collections])
 
-  const handleSelectDataSet = async (e) => {
+  const handleSelectDataSet = async (e: any) => {
     const selected = dataSets.filter((d) => d.title === e.target.value);
     if (selected.length) {
       const dataSetInfo = await connect.getDataSet(selected[0].name);
@@ -52,7 +53,7 @@ export const useCodapState = () => {
     }
   };
 
-  const getCollectionNameFromId = (id) => {
+  const getCollectionNameFromId = (id: number) => {
     return collections.filter(c => c.id === id)[0].name;
   }
 
