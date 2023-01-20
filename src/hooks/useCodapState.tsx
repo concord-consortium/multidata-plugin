@@ -1,4 +1,4 @@
-import React, {useState, useEffect} from "react";
+import {useState, useEffect} from "react";
 import { connect } from "../scripts/connect";
 
 export const useCodapState = () => {
@@ -10,14 +10,14 @@ export const useCodapState = () => {
   const getDataSets = async () => {
     const sets = await connect.getListOfDatasets();
     setDataSets(sets);
-  }
-
-  const init = async () => {
-    await connect.initialize();
-    getDataSets();
-  }
+  };
 
   useEffect(() => {
+    const init = async () => {
+      await connect.initialize();
+      getDataSets();
+    };
+
     init();
   }, []);
 
@@ -25,23 +25,25 @@ export const useCodapState = () => {
     const fetchCollections = async () => {
       const colls = await connect.getDataSetCollections(selectedDataSet.name);
       setCollections(colls);
-    }
+    };
+
     if (selectedDataSet) {
       fetchCollections();
     }
-  }, [selectedDataSet])
+
+  }, [selectedDataSet]);
 
   useEffect(() => {
-    console.log("collections", collections);
     const fetchItems = async () => {
       const fetchedItems = await connect.getItems(selectedDataSet.name);
       setItems(fetchedItems);
-    }
+    };
 
     if (collections.length === 1 && selectedDataSet) {
       fetchItems();
     }
-  }, [collections])
+
+  }, [collections, selectedDataSet]);
 
   const handleSelectDataSet = async (e: any) => {
     const selected = dataSets.filter((d) => d.title === e.target.value);
@@ -55,7 +57,7 @@ export const useCodapState = () => {
 
   const getCollectionNameFromId = (id: number) => {
     return collections.filter(c => c.id === id)[0].name;
-  }
+  };
 
   return {
     dataSets,
@@ -64,5 +66,5 @@ export const useCodapState = () => {
     handleSelectDataSet,
     getCollectionNameFromId,
     items
-  }
-}
+  };
+};

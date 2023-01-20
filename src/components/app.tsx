@@ -11,29 +11,36 @@ function App() {
   const {dataSets, selectedDataSet, collections, items, handleSelectDataSet} = useCodapState();
   const [collectionClasses, setCollectionClasses] = useState<Array<ICollectionClass>>([]);
   const [padding, setPadding] = useState<boolean>(false);
-  const [paddingStyle, setPaddingStyle] = useState<Record<string, string>>({padding: "7px"})
+  const [paddingStyle, setPaddingStyle] = useState<Record<string, string>>({padding: "0px"});
 
   useEffect(() => {
     if (collections.length) {
-      const classes = collections.map((coll, idx) => {return {collectionName: coll.name, className: `collection-${idx}`}});
+      const classes = collections.map((coll, idx) => {
+        return {
+          collectionName: coll.name,
+          className: `collection-${idx}`
+        };
+      });
       setCollectionClasses(classes);
     }
-  }, [collections])
+  }, [collections]);
 
   useEffect(() => {
     const style =  padding ? {padding: "7px"} : {padding: "0px"};
     setPaddingStyle(style);
-  }, [padding])
+  }, [padding]);
 
   const getClassName = (caseObj: IProcessedCaseObj) => {
     const {collection} = caseObj;
-    const className = collectionClasses.filter((classObj) => classObj.collectionName === collection.name)[0].className || "";
+    const className = collectionClasses.filter((classObj) => {
+      return classObj.collectionName === collection.name;
+    })[0].className || "";
     return className;
-  }
+  };
 
   const togglePadding = () => {
     setPadding(!padding);
-  }
+  };
 
   const mapHeadersFromValues = (values: IValues) => {
     return (
@@ -46,7 +53,7 @@ function App() {
         )}
       </>
     );
-  }
+  };
 
   const mapCellsFromValues = (values: IValues) => {
     return (
@@ -59,7 +66,7 @@ function App() {
         )}
       </>
     );
-  }
+  };
 
   const renderSingleTable = () => {
     const collection = collections[0];
@@ -71,22 +78,22 @@ function App() {
         {items.length && items.map((item, i) => {
           return (
             <tr key={i}>{mapCellsFromValues(item)}</tr>
-          )
+          );
         })}
       </>
-    )
+    );
   };
 
   const renderNestedTable = (parentColl: ICollection) => {
     return parentColl.cases.map((caseObj) => renderRowFromCaseObj(caseObj));
-  }
+  };
 
   const renderRowFromCaseObj = (caseObj: IProcessedCaseObj) => {
     const {children, values} = caseObj;
     if (!children.length) {
       return (
         <tr>{mapCellsFromValues(values)}</tr>
-      )
+      );
     } else {
       return (
         <tr>
@@ -102,7 +109,7 @@ function App() {
             : mapCellsFromValues(values)
           }
 
-          <td className={"main-td"} style={paddingStyle}>
+          <td style={paddingStyle}>
             <table style={paddingStyle} className={`sub-table`}>
               <tbody>
                 {caseObj.children.map((child, i) => {
@@ -112,7 +119,11 @@ function App() {
                       <>
                         <tr className={`sub-header-row ${getClassName(child)}`}>
                           {mapHeadersFromValues(child.values)}
-                          {childHasChildren && <th className={`${getClassName(child.children[0])}`}>{child.children[0].collection.name}</th>}
+                          {childHasChildren &&
+                            <th className={`${getClassName(child.children[0])}`}>
+                              {child.children[0].collection.name}
+                            </th>
+                          }
                         </tr>
                         {renderRowFromCaseObj(child)}
                       </>
@@ -126,7 +137,8 @@ function App() {
           </td>
         </tr>
       );
-    }}
+    }
+  };
 
   const renderTable = () => {
     return (
@@ -136,8 +148,12 @@ function App() {
             {
               collections.length === 1 ? <th>{collections[0].title}</th> :
               collections.filter((c, i) => i === 0 || i === 1).map((c, i) => {
-                return <th key={i} className={i === 0 ? collectionClasses[0].className : collectionClasses[1].className}>{c.title}</th>
-            })
+                return (
+                  <th key={i} className={i === 0 ? collectionClasses[0].className : collectionClasses[1].className}>
+                    {c.title}
+                  </th>
+                );
+              })
             }
           </tr>
           {
@@ -147,7 +163,7 @@ function App() {
         </tbody>
       </table>
     );
-  }
+  };
 
   return (
     <div>
@@ -156,7 +172,7 @@ function App() {
           <span>Select a Dataset:</span>
           <select onChange={handleSelectDataSet}>
             <option></option>
-            {dataSets && dataSets.length && dataSets.map((set, i) => {return (<option key={i}>{set.title}</option>)})}
+            {dataSets && dataSets.length && dataSets.map((set, i) => {return (<option key={i}>{set.title}</option>);})}
           </select>
         </div>
         <div className="set-padding">
