@@ -1,0 +1,69 @@
+
+
+.main-table, .sub-table {
+  margin: 0 auto;
+  margin-bottom: 10px;
+  border-collapse: collapse;
+  border: 1px solid black;
+}
+
+.sub-table {
+  width: 100%;
+}
+
+.main-table {
+  width: 90%;
+}
+
+th, td {
+  border-collapse: collapse;
+  border: 1px solid black;
+}
+
+th {
+  padding-left: 7px;
+  padding-right: 7px;
+  height: 35px;
+}
+
+td {
+  padding: 7px;
+}
+
+.controls {
+  display: flex;
+  flex-direction: row;
+  gap: 25px;
+  margin-bottom: 10px;
+  margin-left: 10px;
+}
+
+.data-sets, .set-padding {
+  display: flex;
+  flex-direction: row;
+  margin: 5px;
+}
+
+select, input {
+  margin-left: 5px;
+}
+
+.collection-0>th, th.collection-0 {
+  background-color: #CEE9FB;
+}
+
+.collection-1>th, th.collection-1 {
+  background-color: #F7EABA;
+}
+
+.collection-2>th, th.collection-2 {
+  background-color: #CCBEE0;
+}
+
+.collection-3>th, th.collection-3 {
+  background-color: #BEE0CA;
+}
+
+.collection-4>th, th.collection-4 {
+  background-color: #E7C3A4;
+}
