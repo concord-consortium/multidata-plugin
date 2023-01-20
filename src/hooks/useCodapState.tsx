@@ -29,8 +29,9 @@ export const useCodapState = () => {
 
     if (selectedDataSet) {
       fetchCollections();
+    } else {
+      setCollections([]);
     }
-
   }, [selectedDataSet]);
 
   useEffect(() => {
@@ -41,8 +42,9 @@ export const useCodapState = () => {
 
     if (collections.length === 1 && selectedDataSet) {
       fetchItems();
+    } else {
+      setItems([]);
     }
-
   }, [collections, selectedDataSet]);
 
   const handleSelectDataSet = async (e: any) => {

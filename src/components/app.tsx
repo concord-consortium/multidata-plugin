@@ -13,6 +13,7 @@ function App() {
   const [padding, setPadding] = useState<boolean>(false);
   const [paddingStyle, setPaddingStyle] = useState<Record<string, string>>({padding: "0px"});
 
+
   useEffect(() => {
     if (collections.length) {
       const classes = collections.map((coll, idx) => {
@@ -22,6 +23,8 @@ function App() {
         };
       });
       setCollectionClasses(classes);
+    } else {
+      setCollectionClasses([]);
     }
   }, [collections]);
 
@@ -181,7 +184,7 @@ function App() {
           <input type="checkbox" onChange={togglePadding}/>
         </div>
       </div>
-      {selectedDataSet && collectionClasses.length && renderTable()}
+      {selectedDataSet && collections.length && collectionClasses.length && renderTable()}
     </div>
   );
 }
