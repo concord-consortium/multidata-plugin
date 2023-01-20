@@ -38,7 +38,8 @@
     "start": "webpack serve --no-https",
     "start:secure": "webpack serve",
     "build": "npm-run-all lint:build build:webpack",
-    "build:webpack": "webpack --mode production"
+    "build:webpack": "webpack --mode production",
+    "build:top-test": "cross-env DEPLOY_PATH=specific/release/ webpack --mode production --output-path top-test/specific/release && cp top-test/specific/release/index-top.html top-test/"
   },
   "repository": {
     "type": "git",
