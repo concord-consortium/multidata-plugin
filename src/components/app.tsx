@@ -148,6 +148,7 @@ function App() {
             {
               collections.length === 1 ? <th>{collections[0].title}</th> :
               collections.filter((c, i) => i === 0 || i === 1).map((c, i) => {
+                console.log("collectionClasses[i]", collectionClasses[i]);
                 return (
                   <th key={i} className={i === 0 ? collectionClasses[0].className : collectionClasses[1].className}>
                     {c.title}
