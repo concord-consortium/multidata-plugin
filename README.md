@@ -1,70 +1,87 @@
-# Getting Started with Create React App
+### Initial steps
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+1. Clone this repo and `cd` into it
+2. Run `npm install` to pull dependencies
+3. Run `npm start` to run `webpack-dev-server` in development mode with hot module replacement
 
-## Available Scripts
+#### Run using HTTPS
 
-In the project directory, you can run:
+Additional steps are required to run using HTTPS.
 
-### `npm start`
+1. install [mkcert](https://github.com/FiloSottile/mkcert) : `brew install mkcert` (install using Scoop or Chocolatey on Windows)
+2. Create and install the trusted CA in keychain if it doesn't already exist:   `mkcert -install`
+3. Ensure you have a `.localhost-ssl` certificate directory in your home directory (create if needed, typically `C:\Users\UserName` on Windows) and cd into that directory
+4. Make the cert files: `mkcert -cert-file localhost.pem -key-file localhost.key localhost 127.0.0.1 ::1`
+5. Run `npm run start:secure` to run `webpack-dev-server` in development mode with hot module replacement
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+Alternately, you can run secure without certificates in Chrome:
+1. Enter `chrome://flags/#allow-insecure-localhost` in Chrome URL bar
+2. Change flag from disabled to enabled
+3. Run `npm run start:secure:no-certs` to run `webpack-dev-server` in development mode with hot module replacement
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+### Building
 
-### `npm test`
+If you want to build a local version run `npm build`, it will create the files in the `dist` folder.
+You *do not* need to build to deploy the code, that is automatic.  See more info in the Deployment section below.
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+### Notes
 
-### `npm run build`
+1. Make sure if you are using Visual Studio Code that you use the workspace version of TypeScript.
+   To ensure that you are open a TypeScript file in VSC and then click on the version number next to
+   `TypeScript React` in the status bar and select 'Use Workspace Version' in the popup menu.
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+## Deployment
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+Production releases to S3 are based on the contents of the /dist folder and are built automatically by GitHub Actions
+for each branch and tag pushed to GitHub.
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+Branches are deployed to http://multidata-plugin.concord.org/branch/<name>.
+If the branch name starts or ends with a number this number is stripped off.
 
-### `npm run eject`
+Tags are deployed to http://multidata-plugin.concord.org/version/<name>.
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+To deploy a production release:
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+1. Increment version number in package.json
+2. Create new entry in CHANGELOG.md
+3. Run `git log --pretty=oneline --reverse <last release tag>...HEAD | grep '#' | grep -v Merge` and add contents (after edits if needed to CHANGELOG.md)
+4. Run `npm run build`
+5. Copy asset size markdown table from previous release and change sizes to match new sizes in `dist`
+6. Create `release-<version>` branch and commit changes, push to GitHub, create PR and merge
+7. Checkout master and pull
+8. Create an annotated tag for the version, of the form `v[x].[y].[z]`, include at least the version in the tag message. On the command line this can be done with a command like `git tag -a v1.2.3 -m "1.2.3 some info about this version"`
+9. Push the tag to github with a command like: `git push origin v1.2.3`.
+10. Use https://github.com/concord-consortium/starter-projects/releases to make this tag into a GitHub release.
+11. Run the release workflow to update http://starter-projects.concord.org/index.html. 
+    1. Navigate to the actions page in GitHub and the click the "Release" workflow. This should take you to this page: https://github.com/concord-consortium/starter-projects/actions/workflows/release.yml. 
+    2. Click the "Run workflow" menu button. 
+    3. Type in the tag name you want to release for example `v1.2.3`.  (Note this won't work until the PR has been merged to master)
+    4. Click the `Run Workflow` button.
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+### Testing
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+Run `npm test` to run jest tests. Run `npm run test:full` to run jest and Cypress tests.
 
-## Learn More
+##### Cypress Run Options
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+Inside of your `package.json` file:
+1. `--browser browser-name`: define browser for running tests
+2. `--group group-name`: assign a group name for tests running
+3. `--spec`: define the spec files to run
+4. `--headed`: show cypress test runner GUI while running test (will exit by default when done)
+5. `--no-exit`: keep cypress test runner GUI open when done running
+6. `--record`: decide whether or not tests will have video recordings
+7. `--key`: specify your secret record key
+8. `--reporter`: specify a mocha reporter
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+##### Cypress Run Examples
 
-### Code Splitting
+1. `cypress run --browser chrome` will run cypress in a chrome browser
+2. `cypress run --headed --no-exit` will open cypress test runner when tests begin to run, and it will remain open when tests are finished running.
+3. `cypress run --spec 'cypress/integration/examples/smoke-test.js'` will point to a smoke-test file rather than running all of the test files for a project.
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
+## License
 
-### Analyzing the Bundle Size
+Starter Projects are Copyright 2018 (c) by the Concord Consortium and is distributed under the [MIT license](http://www.opensource.org/licenses/MIT).
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
-
-### Making a Progressive Web App
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
-
-### Advanced Configuration
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+See license.md for the complete license text.
