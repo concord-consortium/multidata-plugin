@@ -175,7 +175,7 @@ function App() {
           <span>Select a Dataset:</span>
           <select onChange={handleSelectDataSet}>
             <option></option>
-            {dataSets && dataSets.length && dataSets.map((set, i) => {return (<option key={i}>{set.title}</option>);})}
+            {dataSets?.length && dataSets.map((set, i) => {return (<option key={i}>{set.title}</option>);})}
           </select>
         </div>
         <div className="set-padding">
