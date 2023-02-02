@@ -1,23 +1,27 @@
 
 
 .main-table, .sub-table {
-  margin: 0 auto;
-  margin-bottom: 10px;
-  border-collapse: collapse;
-  border: 1px solid black;
+  margin: 0 auto;  border-collapse: collapse;
+  /* border: 1px solid black; */
 }
 
 .sub-table {
   width: 100%;
+  height: 100%;
 }
 
 .main-table {
   width: 90%;
+  margin-bottom: 10px;
 }
 
 th, td {
   border-collapse: collapse;
-  border: 1px solid black;
+}
+
+tr {
+  /*this is ignored but it's so a td element can take up the entire height of a row*/
+  height: 1px;
 }
 
 th {
@@ -28,6 +32,7 @@ th {
 
 td {
   padding: 7px;
+  height: 100%
 }
 
 .controls {
@@ -38,7 +43,11 @@ td {
   margin-left: 10px;
 }
 
-.data-sets, .set-padding {
+.special-td {
+  height: inherit;
+}
+
+.data-sets, .set-padding, .set-headers {
   display: flex;
   flex-direction: row;
   margin: 5px;
@@ -48,16 +57,29 @@ select, input {
   margin-left: 5px;
 }
 
+.main-table.collection-0, .collection-0>tbody>tr>td {
+  border: 1px solid #3c78d8;
+}
+
 .collection-0>th, th.collection-0 {
   background-color: #CEE9FB;
+  border: 1px solid #3c78d8;
 }
 
 .collection-1>th, th.collection-1 {
   background-color: #F7EABA;
 }
 
+.sub-table.collection-1, .collection-1>tbody>tr>td {
+  border: 1px solid #f1c232;
+}
+
 .collection-2>th, th.collection-2 {
   background-color: #CCBEE0;
+}
+
+.sub-table.collection-2, .collection-2>tbody>tr>td {
+  border: 1px solid #8e7cc3;
 }
 
 .collection-3>th, th.collection-3 {
