@@ -70,7 +70,7 @@ select, input {
   background-color: #F7EABA;
 }
 
-.sub-table.collection-1, .collection-1>tbody>tr>td {
+.sub-table.collection-1, .collection-1>tbody>tr>th, .collection-1>tbody>tr>td {
   border: 1px solid #f1c232;
 }
 
@@ -78,7 +78,7 @@ select, input {
   background-color: #CCBEE0;
 }
 
-.sub-table.collection-2, .collection-2>tbody>tr>td {
+.sub-table.collection-2,  .collection-2>tbody>tr>th, .collection-2>tbody>tr>td {
   border: 1px solid #8e7cc3;
 }
 
