@@ -97,7 +97,6 @@ function App() {
   };
 
   const renderRowFromCaseObj = (caseObj: IProcessedCaseObj, index?: null|number) => {
-    console.log("caseObj", caseObj, "index", index);
     const {children, values} = caseObj;
     if (!children.length) {
       return (
