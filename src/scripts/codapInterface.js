@@ -295,9 +295,9 @@ export const codapInterface = {
      * Registers a handler to respond to CODAP-initiated requests and
      * notifications. See {@link https://github.com/concord-consortium/codap/wiki/CODAP-Data-Interactive-API#codap-initiated-actions}
      *
-     * @param actionSpec {'get' || 'notify'} (optional) Action to handle. Defaults to 'notify'.
+     * @param actionSpec {'notify'} (optional) Action to handle. Defaults to 'notify'.
      * @param resourceSpec {String} A resource string.
-     * @param operation {String} (optional) name of operation, e.g. 'create', 'delete',
+     * @param operation {undefined | String} (optional) name of operation, e.g. 'create', 'delete',
      *   'move', 'resize', .... If not specified, all operations will be reported.
      * @param handler {Function} A handler to receive the notifications.
      */

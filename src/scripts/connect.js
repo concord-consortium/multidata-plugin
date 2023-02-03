@@ -1,10 +1,6 @@
 import { codapInterface } from "./codapInterface";
 
 export const connect = {
-    state: {
-      selectedDataSet: null
-    },
-
     initialize: async function () {
         await codapInterface.init(this.iFrameDescriptor, null);
     },
