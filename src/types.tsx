@@ -1,4 +1,9 @@
-interface IDataSet {}
+export interface IDataSet {
+  guid: number,
+  id: number,
+  name: string,
+  title: string
+}
 
 export interface ICollection {
   areParentChildLinksConfigured: boolean,
@@ -17,9 +22,7 @@ export interface ICollection {
   type: string
 }
 
-export type ICollections = Array<ICollection>
-
-interface IItem {}
+export type ICollections = Array<ICollection>;
 
 export interface ICaseObjCommon {
   collection: {

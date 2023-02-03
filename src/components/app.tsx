@@ -120,7 +120,7 @@ function App() {
                     if (i === 0 && !child.children.length) {
                       return (
                         <>
-                          <tr className={`${getClassName(child)}`}>{mapHeadersFromValues(child.values)}</tr>
+                          <tr key={i} className={`${getClassName(child)}`}>{mapHeadersFromValues(child.values)}</tr>
                           {renderRowFromCaseObj(child, i)}
                         </>
                       );
@@ -138,16 +138,15 @@ function App() {
   };
 
   const renderTable = () => {
+    const isSingleCollection = collections.length === 1;
+    const parentColl = collections.filter((coll: ICollection) => !coll.parent);
     return (
       <table className={`main-table ${collectionClasses[0].className}`}>
         <tbody>
           <tr className={`${collectionClasses[0].className}`}>
-            <th colSpan={collections.length === 1 ? items.length : collections.length}>{collections[0].title}</th>
+            <th colSpan={isSingleCollection ? items.length : collections.length}>{collections[0].title}</th>
           </tr>
-          {
-            collections.length === 1 ? renderSingleTable() :
-            renderNestedTable(collections.filter((coll: ICollection) => !coll.parent)[0])
-          }
+          {isSingleCollection ? renderSingleTable() : renderNestedTable(parentColl[0])}
         </tbody>
       </table>
     );

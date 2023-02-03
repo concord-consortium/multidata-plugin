@@ -1,8 +1,9 @@
 import {useState, useEffect} from "react";
 import { connect } from "../scripts/connect";
+import { ICollections, ICollection, IDataSet } from "../types";
 
 export const useCodapState = () => {
-  const [dataSets, setDataSets] = useState<any[]>([]);
+  const [dataSets, setDataSets] = useState<IDataSet[]>([]);
   const [selectedDataSet, setSelectedDataSet] = useState<any>(null);
   const [collections, setCollections] = useState<ICollections>([]);
   const [items, setItems] = useState<any[]>([]);
@@ -58,7 +59,7 @@ export const useCodapState = () => {
   };
 
   const getCollectionNameFromId = (id: number) => {
-    return collections.filter(c => c.id === id)[0].name;
+    return collections.filter((c: ICollection) => c.id === id)[0].name;
   };
 
   return {
