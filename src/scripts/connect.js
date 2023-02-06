@@ -18,9 +18,9 @@ export const connect = {
       const tMessage = {
         "action": "get",
         "resource": `dataContext[${name}]`
-    }
-    const dataContext = await codapInterface.sendRequest(tMessage);
-    return dataContext.values;
+      }
+      const dataContext = await codapInterface.sendRequest(tMessage);
+      return dataContext.values;
     },
 
     getDataSetCollections: async function (name) {
@@ -62,15 +62,23 @@ export const connect = {
 
     getItems: async function(dSName) {
       const itemCount = await this.getItemCount(dSName);
+      console.log("dSName", dSName);
+      console.log("itemCount", itemCount);
+
+      const dataContext = await this.getDataSet(dSName);
+      console.log("dataContext", dataContext);
       let items = [];
 
       for (let i = 0; i < itemCount; i ++) {
+        console.log("i", i);
         const tMessage = {
           "action": "get",
           "resource": `dataContext[${dSName}].item[${i}]`,
         }
         const item = await codapInterface.sendRequest(tMessage);
-        items.push(item.values.values);
+        if (item.values) {
+          items.push(item.values.values);
+        }
       }
 
       return items;
