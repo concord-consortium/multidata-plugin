@@ -62,15 +62,10 @@ export const connect = {
 
     getItems: async function(dSName) {
       const itemCount = await this.getItemCount(dSName);
-      console.log("dSName", dSName);
-      console.log("itemCount", itemCount);
-
       const dataContext = await this.getDataSet(dSName);
-      console.log("dataContext", dataContext);
       let items = [];
 
       for (let i = 0; i < itemCount; i ++) {
-        console.log("i", i);
         const tMessage = {
           "action": "get",
           "resource": `dataContext[${dSName}].item[${i}]`,
