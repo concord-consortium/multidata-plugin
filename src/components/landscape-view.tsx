@@ -104,7 +104,7 @@ export const LandscapeView = (props: IProps) => {
       const relevantCases = childrenCollection.cases.filter((child) => child.parent === caseObj.id);
       const filteredCollection = {...childrenCollection, cases: relevantCases};
       return (
-        <table className={`sub-table ${getClassName(caseObj.children[0])} ${!anyChildHasChildren ? "scrollable" : ""}`}>
+        <table className={`sub-table ${getClassName(caseObj.children[0])} ${!anyChildHasChildren ? "scrollable" : "landscape"}`}>
           <tbody>
             {anyChildHasChildren ?
               renderNestedTable(filteredCollection) :
@@ -121,7 +121,7 @@ export const LandscapeView = (props: IProps) => {
   const renderTable = () => {
     const parentColl = collections.filter((coll: ICollection) => !coll.parent);
     return (
-      <table className={`main-table ${collectionClasses[0].className}`}>
+      <table className={`main-table landscape ${collectionClasses[0].className}`}>
         <tbody>
           {renderNestedTable(parentColl[0])}
         </tbody>
