@@ -59,12 +59,25 @@ function App() {
     setDisplayMode( e.target.value);
   };
 
+  const mapHeadersFromValues = (values: IValues) => {
+    return (
+      <>
+        {(Object.keys(values)).map((key, i) => {
+          if (typeof values[key] === "string" || typeof values[key] === "number") {
+              return (<th key={`${key + `${i}`}`}>{key}</th>);
+            }
+          }
+        )}
+      </>
+    );
+  };
+
   const mapCellsFromValues = (values: IValues) => {
     return (
       <>
         {(Object.values(values)).map((val, i) => {
           if (typeof val === "string" || typeof val === "number") {
-              return (<td key={i}>{val}</td>);
+              return (<td key={`${val + `${i}`}`}>{val}</td>);
             }
           }
         )}
@@ -82,11 +95,11 @@ function App() {
             <th colSpan={items.length}>{collections[0].title}</th>
           </tr>
           <tr>
-            {collection.attrs.map((attr: any, i: number) => <th key={i}>{attr.title}</th>)}
+            {collection.attrs.map((attr: any, i: number) => <th key={`${attr.title + `${i}`}`}>{attr.title}</th>)}
           </tr>
           {items.length && items.map((item, i) => {
             return (
-              <tr key={i}>{mapCellsFromValues(item)}</tr>
+              <tr key={`${item + i}`}>{mapCellsFromValues(item)}</tr>
             );
           })}
         </tbody>
@@ -114,16 +127,19 @@ function App() {
           collections={collections}
           selectedDataSet={selectedDataSet}
           getClassName={getClassName}
+          mapHeadersFromValues={mapHeadersFromValues}
+          mapCellsFromValues={mapCellsFromValues}
         />
       }
       { displayMode === "landscape" &&
         <LandscapeView
-          paddingStyle={paddingStyle}
           showHeaders={showHeaders}
           collectionClasses={collectionClasses}
           collections={collections}
           selectedDataSet={selectedDataSet}
           getClassName={getClassName}
+          mapHeadersFromValues={mapHeadersFromValues}
+          mapCellsFromValues={mapCellsFromValues}
         />
       }
     </div>

@@ -13,37 +13,14 @@ interface IProps {
   collectionClasses: Array<ICollectionClass>,
   getClassName: (caseObj: IProcessedCaseObj) => void,
   selectedDataSet: IDataSet,
-  collections: Array<ICollection>
+  collections: Array<ICollection>,
+  mapCellsFromValues: (values: IValues) => void,
+  mapHeadersFromValues: (values: IValues) => void
 }
 
 export const PortraitView = (props: IProps) => {
-  const {paddingStyle, showHeaders, collectionClasses, getClassName, selectedDataSet, collections} = props;
-
-  const mapHeadersFromValues = (values: IValues) => {
-    return (
-      <>
-        {(Object.keys(values)).map((key, i) => {
-          if (typeof values[key] === "string" || typeof values[key] === "number") {
-              return (<th key={i}>{key}</th>);
-            }
-          }
-        )}
-      </>
-    );
-  };
-
-  const mapCellsFromValues = (values: IValues) => {
-    return (
-      <>
-        {(Object.values(values)).map((val, i) => {
-          if (typeof val === "string" || typeof val === "number") {
-              return (<td key={i}>{val}</td>);
-            }
-          }
-        )}
-      </>
-    );
-  };
+  const {paddingStyle, mapCellsFromValues, mapHeadersFromValues, showHeaders, collectionClasses,
+    getClassName, selectedDataSet, collections} = props;
 
   const renderNestedTable = (parentColl: ICollection) => {
     return parentColl.cases.map((caseObj, index) => renderRowFromCaseObj(caseObj, index));
@@ -73,7 +50,9 @@ export const PortraitView = (props: IProps) => {
                     if (i === 0 && !child.children.length) {
                       return (
                         <>
-                          <tr key={i} className={`${getClassName(child)}`}>{mapHeadersFromValues(child.values)}</tr>
+                          <tr key={`${child.collection.name + i}`} className={`${getClassName(child)}`}>
+                            {mapHeadersFromValues(child.values)}
+                          </tr>
                           {renderRowFromCaseObj(child, i)}
                         </>
                       );

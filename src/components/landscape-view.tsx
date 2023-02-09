@@ -8,47 +8,21 @@ interface ICollectionClass {
 }
 
 interface IProps {
-  paddingStyle: Record<string, string>,
   showHeaders: boolean,
   collectionClasses: Array<ICollectionClass>,
   getClassName: (caseObj: IProcessedCaseObj) => void,
   selectedDataSet: IDataSet,
-  collections: Array<ICollection>
+  collections: Array<ICollection>,
+  mapCellsFromValues: (values: IValues) => void,
+  mapHeadersFromValues: (values: IValues) => void
 }
 
 export const LandscapeView = (props: IProps) => {
-  const {paddingStyle, showHeaders, collectionClasses, getClassName, selectedDataSet, collections} = props;
-
-  const mapHeadersFromValues = (values: IValues, colSpan?: boolean) => {
-    const span = colSpan ? Object.keys(values).length : undefined;
-    return (
-      <>
-        {(Object.keys(values)).map((key, i) => {
-          if (typeof values[key] === "string" || typeof values[key] === "number") {
-              return (<th colSpan={span} key={i}>{key}</th>);
-            }
-          }
-        )}
-      </>
-    );
-  };
-
-  const mapCellsFromValues = (values: IValues, colSpan?: boolean) => {
-    const span = colSpan ? Object.values(values).length : undefined;
-    return (
-      <>
-        {(Object.values(values)).map((val, i) => {
-          if (typeof val === "string" || typeof val === "number") {
-              return (<td colSpan={span} key={i}>{val}</td>);
-            }
-          }
-        )}
-      </>
-    );
-  };
+  const {mapCellsFromValues, mapHeadersFromValues, showHeaders, collectionClasses,
+    getClassName, selectedDataSet, collections} = props;
 
   const renderNestedTable = (parentColl: ICollection) => {
-    const firstRowValues = parentColl.cases.map((caseObj) => {return caseObj.values});
+    const firstRowValues = parentColl.cases.map(caseObj => caseObj.values);
     let valueCount = 0;
     firstRowValues.forEach((values) => {
       const valuesLength = Object.entries(values).length;
@@ -103,8 +77,9 @@ export const LandscapeView = (props: IProps) => {
       const childrenCollection = collections.filter((coll) => coll.name === caseObj.children[0].collection.name)[0];
       const relevantCases = childrenCollection.cases.filter((child) => child.parent === caseObj.id);
       const filteredCollection = {...childrenCollection, cases: relevantCases};
+      const className = getClassName(caseObj.children[0]);
       return (
-        <table className={`sub-table ${getClassName(caseObj.children[0])} ${!anyChildHasChildren ? "scrollable" : "landscape"}`}>
+        <table className={`sub-table ${className} ${!anyChildHasChildren ? "scrollable" : "landscape"}`}>
           <tbody>
             {anyChildHasChildren ?
               renderNestedTable(filteredCollection) :
