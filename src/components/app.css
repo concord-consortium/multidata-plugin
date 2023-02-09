@@ -2,7 +2,12 @@
 
 .main-table, .sub-table {
   margin: 0 auto;  border-collapse: collapse;
+  table-layout: fixed;
   /* border: 1px solid black; */
+}
+
+.scrollable {
+  table-layout: auto;
 }
 
 .sub-table {
@@ -35,7 +40,7 @@ td {
   height: 100%
 }
 
-.controls {
+.menu {
   display: flex;
   flex-direction: row;
   gap: 25px;
@@ -47,7 +52,7 @@ td {
   height: inherit;
 }
 
-.data-sets, .set-padding, .set-headers {
+.data-sets, .set-padding, .display-mode, .set-headers {
   display: flex;
   flex-direction: row;
   margin: 5px;
