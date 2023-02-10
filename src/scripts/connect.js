@@ -1,10 +1,6 @@
 import { codapInterface } from "./codapInterface";
 
 export const connect = {
-    state: {
-      selectedDataSet: null
-    },
-
     initialize: async function () {
         await codapInterface.init(this.iFrameDescriptor, null);
     },
@@ -22,9 +18,9 @@ export const connect = {
       const tMessage = {
         "action": "get",
         "resource": `dataContext[${name}]`
-    }
-    const dataContext = await codapInterface.sendRequest(tMessage);
-    return dataContext.values;
+      }
+      const dataContext = await codapInterface.sendRequest(tMessage);
+      return dataContext.values;
     },
 
     getDataSetCollections: async function (name) {
@@ -66,6 +62,7 @@ export const connect = {
 
     getItems: async function(dSName) {
       const itemCount = await this.getItemCount(dSName);
+      const dataContext = await this.getDataSet(dSName);
       let items = [];
 
       for (let i = 0; i < itemCount; i ++) {
@@ -74,7 +71,9 @@ export const connect = {
           "resource": `dataContext[${dSName}].item[${i}]`,
         }
         const item = await codapInterface.sendRequest(tMessage);
-        items.push(item.values.values);
+        if (item.values) {
+          items.push(item.values.values);
+        }
       }
 
       return items;

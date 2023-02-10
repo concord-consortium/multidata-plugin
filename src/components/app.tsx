@@ -36,9 +36,10 @@ function App() {
 
   const getClassName = (caseObj: IProcessedCaseObj) => {
     const {collection} = caseObj;
-    const className = collectionClasses.filter((classObj) => {
+    const filteredClassNames = collectionClasses.filter((classObj) => {
       return classObj.collectionName === collection.name;
-    })[0].className || "";
+    });
+    const className = filteredClassNames.length ? filteredClassNames[0].className : "";
     return className;
   };
 

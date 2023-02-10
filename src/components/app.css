@@ -86,6 +86,14 @@ select, input {
   background-color: #BEE0CA;
 }
 
+.sub-table.collection-3, .collection-3>tbody>tr>th, .collection-3>tbody>tr>td {
+  border: 1px solid #93c47d;
+}
+
 .collection-4>th, th.collection-4 {
   background-color: #E7C3A4;
+}
+
+.sub-table.collection-4, .collection-4>tbody>tr>th, .collection-4>tbody>tr>td {
+  border: 1px solid #f6b26b;
 }
