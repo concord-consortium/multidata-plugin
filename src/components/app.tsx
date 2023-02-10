@@ -57,9 +57,9 @@ function App() {
   const mapHeadersFromValues = (values: IValues) => {
     return (
       <>
-        {(Object.keys(values)).map((key, i) => {
+        {(Object.keys(values)).map((key) => {
           if (typeof values[key] === "string" || typeof values[key] === "number") {
-              return (<th key={`${key + `${i}`}`}>{key}</th>);
+              return (<th key={key}>{key}</th>);
             }
           }
         )}
@@ -70,9 +70,9 @@ function App() {
   const mapCellsFromValues = (values: IValues) => {
     return (
       <>
-        {(Object.values(values)).map((val, i) => {
+        {(Object.values(values)).map((val) => {
           if (typeof val === "string" || typeof val === "number") {
-              return (<td key={`${val + `${i}`}`}>{val}</td>);
+              return (<td key={val}>{val}</td>);
             }
           }
         )}
@@ -89,9 +89,9 @@ function App() {
             <th colSpan={items.length}>{collections[0].title}</th>
           </tr>
           <tr>
-            {collection.attrs.map((attr: any, i: number) => <th key={`${attr.title + `${i}`}`}>{attr.title}</th>)}
+            {collection.attrs.map((attr: any) => <th key={attr.title}>{attr.title}</th>)}
           </tr>
-          {items.length && items.map((item, i) => {
+          {items.length && items.map((item) => {
             return (
               <tr key={`${item.id}`}>{mapCellsFromValues(item)}</tr>
             );

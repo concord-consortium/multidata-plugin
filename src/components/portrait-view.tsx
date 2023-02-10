@@ -51,7 +51,7 @@ export const PortraitView = (props: IProps) => {
                     if (i === 0 && !child.children.length) {
                       return (
                         <>
-                          <tr key={`${child.collection.name + i}`} className={`${getClassName(child)}`}>
+                          <tr key={child.collection.name} className={`${getClassName(child)}`}>
                             {mapHeadersFromValues(child.values)}
                           </tr>
                           {renderRowFromCaseObj(child, i)}

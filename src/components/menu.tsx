@@ -22,8 +22,8 @@ export const Menu = (props: IProps) => {
         <span>Select a Dataset:</span>
         <select onChange={handleSelectDataSet}>
           <option></option>
-          {dataSets?.length && dataSets.map((set, i) => {
-            return (<option key={`${set.title + i}`}>{set.title}</option>);
+          {dataSets?.length && dataSets.map((set) => {
+            return (<option key={set.title}>{set.title}</option>);
           })}
         </select>
       </div>

@@ -24,7 +24,7 @@ export const LandscapeView = (props: ITableProps) => {
         </tr>
         <tr>{firstRowValues.map(values => mapCellsFromValues(values))}</tr>
         <tr>
-          {parentColl.cases.map((caseObj, i) => {
+          {parentColl.cases.map((caseObj) => {
             return (
               <td
                 width={`calc(100%/${parentColl.cases.length})`}
