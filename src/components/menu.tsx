@@ -1,15 +1,15 @@
 import React from "react";
 import { ICollection, IDataSet } from "../types";
-import "./app.css";
+import "./menu.css";
 
 interface IProps {
-  handleSelectDataSet: (e: any) => void,
+  handleSelectDataSet: (e: React.ChangeEvent<HTMLSelectElement>) => void,
   collections: Array<ICollection>,
   dataSets: Array<IDataSet>,
-  handleSelectDisplayMode: (e: any) => void,
-  togglePadding: (e: any) => void,
+  handleSelectDisplayMode: (e: React.ChangeEvent<HTMLSelectElement>) => void,
+  togglePadding: () => void,
   showHeaders: boolean,
-  toggleShowHeaders: (e: any) => void
+  toggleShowHeaders: () => void
 }
 
 export const Menu = (props: IProps) => {

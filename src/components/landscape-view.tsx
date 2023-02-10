@@ -1,23 +1,8 @@
 import React from "react";
-import { ICollection, IDataSet, IProcessedCaseObj, IValues } from "../types";
-import "./app.css";
+import { ICollection, IProcessedCaseObj, ITableProps } from "../types";
+import "./landscape-view.css";
 
-interface ICollectionClass {
-    collectionName: string;
-    className: string;
-}
-
-interface IProps {
-  showHeaders: boolean,
-  collectionClasses: Array<ICollectionClass>,
-  getClassName: (caseObj: IProcessedCaseObj) => void,
-  selectedDataSet: IDataSet,
-  collections: Array<ICollection>,
-  mapCellsFromValues: (values: IValues) => void,
-  mapHeadersFromValues: (values: IValues) => void
-}
-
-export const LandscapeView = (props: IProps) => {
+export const LandscapeView = (props: ITableProps) => {
   const {mapCellsFromValues, mapHeadersFromValues, showHeaders, collectionClasses,
     getClassName, selectedDataSet, collections} = props;
 
@@ -43,7 +28,7 @@ export const LandscapeView = (props: IProps) => {
             return (
               <td
                 width={`calc(100%/${parentColl.cases.length})`}
-                key={`${caseObj.collection.name + i}`}
+                key={`${caseObj.id}`}
                 style={{verticalAlign: "top"}}
                 colSpan={Object.values(caseObj.values).length}>
                 <div style={{width: `100%`, overflow: "scroll"}}>
@@ -63,13 +48,13 @@ export const LandscapeView = (props: IProps) => {
     if (!children.length) {
       return (
         <>
-        {showHeaders && isFirstIndex &&
-          <tr className={`${getClassName(caseObj)}`}>
-            <th colSpan={Object.keys(values).length}>{caseObj.collection.name}</th>
-          </tr>
-        }
-        {isFirstIndex && <tr className={`${getClassName(caseObj)}`}>{mapHeadersFromValues(values)}</tr>}
-        <tr>{mapCellsFromValues(values)}</tr>
+          {showHeaders && isFirstIndex &&
+            <tr className={`${getClassName(caseObj)}`}>
+              <th colSpan={Object.keys(values).length}>{caseObj.collection.name}</th>
+            </tr>
+          }
+          {isFirstIndex && <tr className={`${getClassName(caseObj)}`}>{mapHeadersFromValues(values)}</tr>}
+          <tr>{mapCellsFromValues(values)}</tr>
         </>
       );
     } else {

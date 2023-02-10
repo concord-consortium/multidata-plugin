@@ -1,21 +1,9 @@
 import React from "react";
-import { ICollection, IDataSet, IProcessedCaseObj, IValues } from "../types";
-import "./app.css";
+import { ICollection, IProcessedCaseObj, ITableProps } from "../types";
+import "./portrait-view.css";
 
-interface ICollectionClass {
-    collectionName: string;
-    className: string;
-}
-
-interface IProps {
-  paddingStyle: Record<string, string>,
-  showHeaders: boolean,
-  collectionClasses: Array<ICollectionClass>,
-  getClassName: (caseObj: IProcessedCaseObj) => void,
-  selectedDataSet: IDataSet,
-  collections: Array<ICollection>,
-  mapCellsFromValues: (values: IValues) => void,
-  mapHeadersFromValues: (values: IValues) => void
+interface IProps extends ITableProps {
+  paddingStyle: Record<string, string>
 }
 
 export const PortraitView = (props: IProps) => {
@@ -23,7 +11,20 @@ export const PortraitView = (props: IProps) => {
     getClassName, selectedDataSet, collections} = props;
 
   const renderNestedTable = (parentColl: ICollection) => {
-    return parentColl.cases.map((caseObj, index) => renderRowFromCaseObj(caseObj, index));
+    const firstRowValues = parentColl.cases.map(caseObj => caseObj.values);
+    let valueCount = 0;
+    firstRowValues.forEach((values) => {
+      const valuesLength = Object.entries(values).length;
+      valueCount += valuesLength;
+    });
+    return (
+      <>
+        <tr className={`${collectionClasses[0].className}`}>
+          <th colSpan={valueCount}>{parentColl.name}</th>
+        </tr>
+        {parentColl.cases.map((caseObj, index) => renderRowFromCaseObj(caseObj, index))}
+      </>
+    );
   };
 
   const renderRowFromCaseObj = (caseObj: IProcessedCaseObj, index?: null|number) => {
@@ -74,9 +75,6 @@ export const PortraitView = (props: IProps) => {
     return (
       <table className={`main-table ${collectionClasses[0].className}`}>
         <tbody>
-          <tr className={`${collectionClasses[0].className}`}>
-            <th colSpan={collections.length}>{collections[0].title}</th>
-          </tr>
           {renderNestedTable(parentColl[0])}
         </tbody>
       </table>

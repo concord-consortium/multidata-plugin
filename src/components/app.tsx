@@ -1,15 +1,10 @@
 import React, { useEffect, useState } from "react";
-import "./app.css";
 import { useCodapState } from "../hooks/useCodapState";
-import { ICollection, IProcessedCaseObj, IValues } from "../types";
+import { ICollection, IProcessedCaseObj, IValues, ICollectionClass } from "../types";
 import { PortraitView } from "./portrait-view";
 import { Menu } from "./menu";
 import { LandscapeView } from "./landscape-view";
-
-interface ICollectionClass {
-    collectionName: string;
-    className: string;
-}
+import "./app.css";
 
 function App() {
   const {selectedDataSet, dataSets, collections, items, handleSelectDataSet} = useCodapState();
@@ -55,8 +50,8 @@ function App() {
     setShowHeaders(!showHeaders);
   };
 
-  const handleSelectDisplayMode = (e: any) => {
-    setDisplayMode( e.target.value);
+  const handleSelectDisplayMode = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    setDisplayMode(e.target.value);
   };
 
   const mapHeadersFromValues = (values: IValues) => {
@@ -87,7 +82,6 @@ function App() {
 
   const renderSingleTable = () => {
     const collection = collections[0];
-
     return (
       <table className={`main-table ${collectionClasses[0].className}`}>
         <tbody>
@@ -99,12 +93,29 @@ function App() {
           </tr>
           {items.length && items.map((item, i) => {
             return (
-              <tr key={`${item + i}`}>{mapCellsFromValues(item)}</tr>
+              <tr key={`${item.id}`}>{mapCellsFromValues(item)}</tr>
             );
           })}
         </tbody>
       </table>
     );
+  };
+
+  const renderTable = () => {
+    const isNoHierarchy = collections.length === 1;
+    const classesExist = collectionClasses.length > 0;
+    const landscapeProps = {showHeaders, collectionClasses, collections, selectedDataSet,
+      getClassName, mapHeadersFromValues, mapCellsFromValues};
+    const portraitProps = {...landscapeProps, paddingStyle};
+    if (isNoHierarchy && classesExist) {
+      return renderSingleTable();
+    } else {
+      return (
+        displayMode === "portrait" ?
+        <PortraitView {...portraitProps} /> :
+        <LandscapeView {...landscapeProps} />
+      );
+    }
   };
 
   return (
@@ -118,30 +129,7 @@ function App() {
         toggleShowHeaders={toggleShowHeaders}
         showHeaders={showHeaders}
       />
-      { collections.length === 1 && renderSingleTable() }
-      { displayMode === "portrait" &&
-        <PortraitView
-          paddingStyle={paddingStyle}
-          showHeaders={showHeaders}
-          collectionClasses={collectionClasses}
-          collections={collections}
-          selectedDataSet={selectedDataSet}
-          getClassName={getClassName}
-          mapHeadersFromValues={mapHeadersFromValues}
-          mapCellsFromValues={mapCellsFromValues}
-        />
-      }
-      { displayMode === "landscape" &&
-        <LandscapeView
-          showHeaders={showHeaders}
-          collectionClasses={collectionClasses}
-          collections={collections}
-          selectedDataSet={selectedDataSet}
-          getClassName={getClassName}
-          mapHeadersFromValues={mapHeadersFromValues}
-          mapCellsFromValues={mapCellsFromValues}
-        />
-      }
+      {renderTable()}
     </div>
   );
 }
