@@ -1,6 +1,11 @@
-interface IDataSet {}
+export interface IDataSet {
+  guid: number,
+  id: number,
+  name: string,
+  title: string
+}
 
-interface ICollection {
+export interface ICollection {
   areParentChildLinksConfigured: boolean,
   attrs: Array<any>,
   caseName: string,
@@ -17,11 +22,9 @@ interface ICollection {
   type: string
 }
 
-type ICollections = Array<ICollection>
+export type ICollections = Array<ICollection>;
 
-interface IItem {}
-
-interface ICaseObjCommon {
+export interface ICaseObjCommon {
   collection: {
     name: string,
     id: number
@@ -31,17 +34,17 @@ interface ICaseObjCommon {
   values: IValues
 }
 
-type IValues = Record<string, any>;
+export type IValues = Record<string, any>;
 
-interface ICaseObj extends ICaseObjCommon {
+export interface ICaseObj extends ICaseObjCommon {
   children: Array<number>
 }
 
-interface IProcessedCaseObj extends ICaseObjCommon {
+export interface IProcessedCaseObj extends ICaseObjCommon {
   children: Array<IProcessedCaseObj>
 }
 
-interface ICollectionClass {
+export interface ICollectionClass {
   collectionName: string;
   className: string;
 }
