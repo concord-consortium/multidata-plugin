@@ -3,7 +3,6 @@ import { ICollection, IProcessedCaseObj, ITableProps } from "../types";
 import css from "./landscape-view.scss";
 
 export const LandscapeView = (props: ITableProps) => {
-  console.log("css", css);
   const {mapCellsFromValues, mapHeadersFromValues, showHeaders, collectionClasses,
     getClassName, selectedDataSet, collections, getValueLength} = props;
 
