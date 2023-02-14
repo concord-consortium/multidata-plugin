@@ -1,6 +1,6 @@
 import React from "react";
 import { ICollection, IProcessedCaseObj, ITableProps } from "../types";
-import "./portrait-view.css";
+import css from "./portrait-view.scss";
 
 interface IProps extends ITableProps {
   paddingStyle: Record<string, string>
@@ -8,18 +8,18 @@ interface IProps extends ITableProps {
 
 export const PortraitView = (props: IProps) => {
   const {paddingStyle, mapCellsFromValues, mapHeadersFromValues, showHeaders, collectionClasses,
-    getClassName, selectedDataSet, collections} = props;
+    getClassName, selectedDataSet, collections, getValueLength} = props;
 
   const renderNestedTable = (parentColl: ICollection) => {
     const firstRowValues = parentColl.cases.map(caseObj => caseObj.values);
-    let valueCount = 0;
-    firstRowValues.forEach((values) => {
-      const valuesLength = Object.entries(values).length;
-      valueCount += valuesLength;
-    });
+    const valueCount = getValueLength(firstRowValues);
+    const {className} = collectionClasses[0];
     return (
       <>
-        <tr className={`${collectionClasses[0].className}`}>
+        <tr className={css.mainHeader}>
+          <th colSpan={valueCount}>{selectedDataSet.name}</th>
+        </tr>
+        <tr className={css[className]}>
           <th colSpan={valueCount}>{parentColl.name}</th>
         </tr>
         {parentColl.cases.map((caseObj, index) => renderRowFromCaseObj(caseObj, index))}
@@ -37,7 +37,7 @@ export const PortraitView = (props: IProps) => {
       return (
         <>
           {index === 0 ?
-            <tr className={`${getClassName(caseObj)}`}>
+            <tr className={`${css[getClassName(caseObj)]}`}>
               {mapHeadersFromValues(values)}
               <th>{showHeaders ? children[0].collection.name : ""}</th>
             </tr> : ""
@@ -45,13 +45,13 @@ export const PortraitView = (props: IProps) => {
           <tr>
             {mapCellsFromValues(values)}
             <td style={paddingStyle}>
-              <table style={paddingStyle} className={`sub-table ${getClassName(children[0])}`}>
+              <table style={paddingStyle} className={`${css.subTable} ${css[getClassName(children[0])]}`}>
                 <tbody>
                   {caseObj.children.map((child, i) => {
                     if (i === 0 && !child.children.length) {
                       return (
                         <>
-                          <tr key={child.collection.name} className={`${getClassName(child)}`}>
+                          <tr key={child.collection.name} className={`${css[getClassName(child)]}`}>
                             {mapHeadersFromValues(child.values)}
                           </tr>
                           {renderRowFromCaseObj(child, i)}
@@ -72,8 +72,9 @@ export const PortraitView = (props: IProps) => {
 
   const renderTable = () => {
     const parentColl = collections.filter((coll: ICollection) => !coll.parent);
+    const {className} = collectionClasses[0];
     return (
-      <table className={`main-table ${collectionClasses[0].className}`}>
+      <table className={`${css.mainTable} ${css[className]}`}>
         <tbody>
           {renderNestedTable(parentColl[0])}
         </tbody>
@@ -83,7 +84,7 @@ export const PortraitView = (props: IProps) => {
 
   return (
     <div>
-      {selectedDataSet && collections.length && collectionClasses.length && renderTable()}
+      {collections.length && collectionClasses.length && renderTable()}
     </div>
   );
 };

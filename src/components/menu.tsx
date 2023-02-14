@@ -1,6 +1,6 @@
 import React from "react";
 import { ICollection, IDataSet } from "../types";
-import "./menu.css";
+import css from "./menu.scss";
 
 interface IProps {
   handleSelectDataSet: (e: React.ChangeEvent<HTMLSelectElement>) => void,
@@ -9,16 +9,23 @@ interface IProps {
   handleSelectDisplayMode: (e: React.ChangeEvent<HTMLSelectElement>) => void,
   togglePadding: () => void,
   showHeaders: boolean,
-  toggleShowHeaders: () => void
+  toggleShowHeaders: () => void,
+  displayMode: string
 }
+
+const portrait = "Portrait";
+const landscape = "Landscape";
+const none = "";
 
 export const Menu = (props: IProps) => {
   const {handleSelectDataSet, collections, dataSets, handleSelectDisplayMode, togglePadding,
-    showHeaders, toggleShowHeaders} = props;
+    showHeaders, toggleShowHeaders, displayMode} = props;
+
+  const displayModes = [none, portrait, landscape];
 
   return (
-    <div className="menu">
-      <div className="data-sets">
+    <div className={css.menu}>
+      <div className={css.option}>
         <span>Select a Dataset:</span>
         <select onChange={handleSelectDataSet}>
           <option></option>
@@ -29,20 +36,24 @@ export const Menu = (props: IProps) => {
       </div>
       {/* Only allow shift in display mode if we are viewing a hierarhical data structure*/}
       {collections.length > 1 &&
-        <div className="display-mode">
+        <div className={css.option}>
           <span>Display mode:</span>
           <select onChange={handleSelectDisplayMode}>
-            <option value="none"></option>
-            <option value="portrait">Portrait</option>
-            <option value="landscape">Landscape</option>
+            {displayModes.map((mode) => {
+              return (
+                <option key={mode} disabled={!mode.length} selected={displayMode === mode} value={mode}>
+                  {mode.length ? mode : "--select--"}
+                </option>
+              );
+            })}
           </select>
         </div>
       }
-      <div className="set-padding">
+      <div className={css.option}>
         <span>Padding?</span>
         <input type="checkbox" onChange={togglePadding}/>
       </div>
-      <div className="set-headers">
+      <div className={css.option}>
         <span>Show all case headers?</span>
         <input type="checkbox" checked={showHeaders} onChange={toggleShowHeaders}/>
       </div>

@@ -1,25 +1,23 @@
 import React from "react";
 import { ICollection, IProcessedCaseObj, ITableProps } from "../types";
-import "./landscape-view.css";
+import css from "./landscape-view.scss";
 
 export const LandscapeView = (props: ITableProps) => {
+  console.log("css", css);
   const {mapCellsFromValues, mapHeadersFromValues, showHeaders, collectionClasses,
-    getClassName, selectedDataSet, collections} = props;
+    getClassName, selectedDataSet, collections, getValueLength} = props;
 
   const renderNestedTable = (parentColl: ICollection) => {
     const firstRowValues = parentColl.cases.map(caseObj => caseObj.values);
-    let valueCount = 0;
-    firstRowValues.forEach((values) => {
-      const valuesLength = Object.entries(values).length;
-      valueCount += valuesLength;
-    });
+    const valueCount = getValueLength(firstRowValues);
+    const className = getClassName(parentColl.cases[0]);
     return (
       <>
         {showHeaders &&
-        <tr className={`${getClassName(parentColl.cases[0])}`}>
+        <tr className={css[className]}>
           <th colSpan={valueCount}>{parentColl.name}</th>
         </tr> }
-        <tr className={`${getClassName(parentColl.cases[0])}`}>
+        <tr className={css[className]}>
           {firstRowValues.map(values => mapHeadersFromValues(values))}
         </tr>
         <tr>{firstRowValues.map(values => mapCellsFromValues(values))}</tr>
@@ -46,14 +44,15 @@ export const LandscapeView = (props: ITableProps) => {
     const {children, values} = caseObj;
     const isFirstIndex = index === 0;
     if (!children.length) {
+      const className = getClassName(caseObj);
       return (
         <>
           {showHeaders && isFirstIndex &&
-            <tr className={`${getClassName(caseObj)}`}>
+            <tr className={css[className]}>
               <th colSpan={Object.keys(values).length}>{caseObj.collection.name}</th>
             </tr>
           }
-          {isFirstIndex && <tr className={`${getClassName(caseObj)}`}>{mapHeadersFromValues(values)}</tr>}
+          {isFirstIndex && <tr className={css[className]}>{mapHeadersFromValues(values)}</tr>}
           <tr>{mapCellsFromValues(values)}</tr>
         </>
       );
@@ -64,7 +63,7 @@ export const LandscapeView = (props: ITableProps) => {
       const filteredCollection = {...childrenCollection, cases: relevantCases};
       const className = getClassName(caseObj.children[0]);
       return (
-        <table className={`sub-table ${className} ${!anyChildHasChildren ? "scrollable" : "landscape"}`}>
+        <table className={`${css.subTable} ${css[className]} ${!anyChildHasChildren ? css.scrollable : css.landscape}`}>
           <tbody>
             {anyChildHasChildren ?
               renderNestedTable(filteredCollection) :
@@ -80,9 +79,15 @@ export const LandscapeView = (props: ITableProps) => {
 
   const renderTable = () => {
     const parentColl = collections.filter((coll: ICollection) => !coll.parent);
+    const firstRowValues = parentColl[0].cases.map(caseObj => caseObj.values);
+    const {className} = collectionClasses[0];
+
     return (
-      <table className={`main-table landscape ${collectionClasses[0].className}`}>
+      <table className={`${css.mainTable} ${css.landscape} ${css[className]}`}>
         <tbody>
+        <tr className={css.mainHeader}>
+          <th colSpan={getValueLength(firstRowValues)}>{selectedDataSet.name}</th>
+        </tr>
           {renderNestedTable(parentColl[0])}
         </tbody>
       </table>
@@ -91,7 +96,7 @@ export const LandscapeView = (props: ITableProps) => {
 
   return (
     <div>
-      {selectedDataSet && collections.length && collectionClasses.length && renderTable()}
+      {collections.length && collectionClasses.length && renderTable()}
     </div>
   );
 };

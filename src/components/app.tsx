@@ -4,12 +4,16 @@ import { ICollection, IProcessedCaseObj, IValues, ICollectionClass } from "../ty
 import { PortraitView } from "./portrait-view";
 import { Menu } from "./menu";
 import { LandscapeView } from "./landscape-view";
-import "./app.css";
+import { FlatTable } from "./flat-table";
+
+const portrait = "Portrait";
+const landscape = "Landscape";
+const none = "";
 
 function App() {
   const {selectedDataSet, dataSets, collections, items, handleSelectDataSet} = useCodapState();
   const [collectionClasses, setCollectionClasses] = useState<Array<ICollectionClass>>([]);
-  const [displayMode, setDisplayMode] = useState<string>("");
+  const [displayMode, setDisplayMode] = useState<string>(none);
   const [padding, setPadding] = useState<boolean>(false);
   const [paddingStyle, setPaddingStyle] = useState<Record<string, string>>({padding: "0px"});
   const [showHeaders, setShowHeaders] = useState<boolean>(false);
@@ -19,7 +23,7 @@ function App() {
       const classes = collections.map((coll: ICollection, idx: number) => {
         return {
           collectionName: coll.name,
-          className: `collection-${idx}`
+          className: `collection${idx}`
         };
       });
       setCollectionClasses(classes);
@@ -27,6 +31,12 @@ function App() {
       setCollectionClasses([]);
     }
   }, [collections]);
+
+  useEffect(() => {
+    if (!selectedDataSet) {
+      setDisplayMode("");
+    }
+  }, [selectedDataSet]);
 
   useEffect(() => {
     const style =  padding ? {padding: "7px"} : {padding: "0px"};
@@ -80,40 +90,31 @@ function App() {
     );
   };
 
-  const renderSingleTable = () => {
-    const collection = collections[0];
-    return (
-      <table className={`main-table ${collectionClasses[0].className}`}>
-        <tbody>
-          <tr className={`${collectionClasses[0].className}`}>
-            <th colSpan={items.length}>{collections[0].title}</th>
-          </tr>
-          <tr>
-            {collection.attrs.map((attr: any) => <th key={attr.title}>{attr.title}</th>)}
-          </tr>
-          {items.length && items.map((item) => {
-            return (
-              <tr key={`${item.id}`}>{mapCellsFromValues(item)}</tr>
-            );
-          })}
-        </tbody>
-      </table>
-    );
+  const getValueLength = (firstRow: Array<IValues>) => {
+    let valueCount = 0;
+    firstRow.forEach((values: IValues) => {
+      const valuesLength = Object.entries(values).length;
+      valueCount += valuesLength;
+    });
+    return valueCount;
   };
 
   const renderTable = () => {
     const isNoHierarchy = collections.length === 1;
     const classesExist = collectionClasses.length > 0;
     const landscapeProps = {showHeaders, collectionClasses, collections, selectedDataSet,
-      getClassName, mapHeadersFromValues, mapCellsFromValues};
+      getClassName, mapHeadersFromValues, mapCellsFromValues, getValueLength};
     const portraitProps = {...landscapeProps, paddingStyle};
+    const flatProps = {...landscapeProps, items};
     if (isNoHierarchy && classesExist) {
-      return renderSingleTable();
+      return <FlatTable {...flatProps}/>;
     } else {
       return (
-        displayMode === "portrait" ?
-        <PortraitView {...portraitProps} /> :
-        <LandscapeView {...landscapeProps} />
+        displayMode === portrait ?
+          <PortraitView {...portraitProps} /> :
+        displayMode === landscape ?
+          <LandscapeView {...landscapeProps} /> :
+          <div/>
       );
     }
   };
@@ -128,8 +129,9 @@ function App() {
         togglePadding={togglePadding}
         toggleShowHeaders={toggleShowHeaders}
         showHeaders={showHeaders}
+        displayMode={displayMode}
       />
-      {renderTable()}
+      {selectedDataSet && renderTable()}
     </div>
   );
 }

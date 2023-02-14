@@ -1,6 +1,7 @@
 'use strict';
 
 const path = require('path');
+const autoprefixer = require('autoprefixer');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const { CleanWebpackPlugin } = require('clean-webpack-plugin');
@@ -52,20 +53,26 @@ module.exports = (env, argv) => {
         {
           test: /\.(sa|sc|le|c)ss$/i,
           use: [
-            devMode ? 'style-loader' : MiniCssExtractPlugin.loader,
+            'style-loader',
             {
               loader: 'css-loader',
               options: {
-                esModule: false,
                 modules: {
-                  // required for :import from scss files
-                  // cf. https://github.com/webpack-contrib/css-loader#separating-interoperable-css-only-and-css-module-features
-                  mode: 'icss',
+                  localIdentName: `[name]-[local]`
+                },
+                sourceMap: true,
+                importLoaders: 1
+              }
+            },
+            {
+              loader: 'postcss-loader',
+              options: {
+                postcssOptions: {
+                  plugins: [autoprefixer()]
                 }
               }
             },
-            'postcss-loader',
-            'sass-loader',
+            'sass-loader'
           ]
         },
         {
