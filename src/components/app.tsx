@@ -67,9 +67,9 @@ function App() {
   const mapHeadersFromValues = (values: IValues) => {
     return (
       <>
-        {(Object.keys(values)).map((key) => {
+        {(Object.keys(values)).map((key, index) => {
           if (typeof values[key] === "string" || typeof values[key] === "number") {
-              return (<th key={key}>{key}</th>);
+              return (<th key={`${key}-${index}`}>{key}</th>);
             }
           }
         )}
@@ -80,9 +80,9 @@ function App() {
   const mapCellsFromValues = (values: IValues) => {
     return (
       <>
-        {(Object.values(values)).map((val) => {
+        {(Object.values(values)).map((val, index) => {
           if (typeof val === "string" || typeof val === "number") {
-              return (<td key={val}>{val}</td>);
+              return (<td key={`${val}-${index}}`}>{val}</td>);
             }
           }
         )}

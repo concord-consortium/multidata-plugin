@@ -38,10 +38,10 @@ export const Menu = (props: IProps) => {
       {collections.length > 1 &&
         <div className={css.option}>
           <span>Display mode:</span>
-          <select onChange={handleSelectDisplayMode}>
+          <select value={displayMode} onChange={handleSelectDisplayMode}>
             {displayModes.map((mode) => {
               return (
-                <option key={mode} disabled={!mode.length} selected={displayMode === mode} value={mode}>
+                <option key={mode} disabled={!mode.length} value={mode}>
                   {mode.length ? mode : "--select--"}
                 </option>
               );

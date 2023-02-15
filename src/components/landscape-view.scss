@@ -53,41 +53,49 @@ table {
   }
 }
 
+.collection1 {
+  border: 1px solid #f1c232;
+  td {
+    border: 1px solid #f1c232;
+  }
+  th {
+    background-color: #F7EABA;
+  }
+}
+
+.collection2 {
+  border: 1px solid #8e7cc3;
+  td {
+    border: 1px solid #8e7cc3;
+  }
+  th {
+    background-color: #CCBEE0;
+  }
+}
+
+.collection3 {
+  border: 1px solid #93c47d;
+  td {
+    border: 1px solid #93c47d;
+  }
+  th {
+    background-color: #BEE0CA;
+  }
+}
+
+.collection4 {
+  border: 1px solid #f6b26b;
+  td {
+    border: 1px solid #f6b26b;
+  }
+  th {
+    background-color: #E7C3A4;
+  }
+}
+
 .collection0, .collection1, .collection2, .collection3, .collection4 {
   th {
     border-right: none;
     border-left: none;
   }
-}
-
-.collection1>th, th.collection1 {
-  background-color: #F7EABA;
-}
-
-.subTable.collection1, .collection1>tbody>tr>td {
-  border: 1px solid #f1c232;
-}
-
-.collection2>th, th.collection2 {
-  background-color: #CCBEE0;
-}
-
-.subTable.collection2,  .collection2>tbody>tr>td {
-  border: 1px solid #8e7cc3;
-}
-
-.collection3>th, th.collection3 {
-  background-color: #BEE0CA;
-}
-
-.subTable.collection3, .collection3>tbody>tr>td {
-  border: 1px solid #93c47d;
-}
-
-.collection4>th, th.collection4 {
-  background-color: #E7C3A4;
-}
-
-.subTable.collection4, .collection4>tbody>tr>td {
-  border: 1px solid #f6b26b;
 }
