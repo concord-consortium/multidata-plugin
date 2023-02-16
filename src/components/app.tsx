@@ -1,16 +1,19 @@
 import React, { useEffect, useState } from "react";
-import "./app.css";
 import { useCodapState } from "../hooks/useCodapState";
-import { ICollection, IProcessedCaseObj, IValues } from "../types";
+import { ICollection, IProcessedCaseObj, IValues, ICollectionClass } from "../types";
+import { PortraitView } from "./portrait-view";
+import { Menu } from "./menu";
+import { LandscapeView } from "./landscape-view";
+import { FlatTable } from "./flat-table";
 
-interface ICollectionClass {
-    collectionName: string;
-    className: string;
-}
+const portrait = "Portrait";
+const landscape = "Landscape";
+const none = "";
 
 function App() {
-  const {dataSets, selectedDataSet, collections, items, handleSelectDataSet} = useCodapState();
+  const {selectedDataSet, dataSets, collections, items, handleSelectDataSet} = useCodapState();
   const [collectionClasses, setCollectionClasses] = useState<Array<ICollectionClass>>([]);
+  const [displayMode, setDisplayMode] = useState<string>(none);
   const [padding, setPadding] = useState<boolean>(false);
   const [paddingStyle, setPaddingStyle] = useState<Record<string, string>>({padding: "0px"});
   const [showHeaders, setShowHeaders] = useState<boolean>(false);
@@ -20,7 +23,7 @@ function App() {
       const classes = collections.map((coll: ICollection, idx: number) => {
         return {
           collectionName: coll.name,
-          className: `collection-${idx}`
+          className: `collection${idx}`
         };
       });
       setCollectionClasses(classes);
@@ -28,6 +31,12 @@ function App() {
       setCollectionClasses([]);
     }
   }, [collections]);
+
+  useEffect(() => {
+    if (!selectedDataSet) {
+      setDisplayMode("");
+    }
+  }, [selectedDataSet]);
 
   useEffect(() => {
     const style =  padding ? {padding: "7px"} : {padding: "0px"};
@@ -51,12 +60,16 @@ function App() {
     setShowHeaders(!showHeaders);
   };
 
+  const handleSelectDisplayMode = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    setDisplayMode(e.target.value);
+  };
+
   const mapHeadersFromValues = (values: IValues) => {
     return (
       <>
-        {(Object.keys(values)).map((key, i) => {
+        {(Object.keys(values)).map((key, index) => {
           if (typeof values[key] === "string" || typeof values[key] === "number") {
-              return (<th key={i}>{key}</th>);
+              return (<th key={`${key}-${index}`}>{key}</th>);
             }
           }
         )}
@@ -67,9 +80,9 @@ function App() {
   const mapCellsFromValues = (values: IValues) => {
     return (
       <>
-        {(Object.values(values)).map((val, i) => {
+        {(Object.values(values)).map((val, index) => {
           if (typeof val === "string" || typeof val === "number") {
-              return (<td key={i}>{val}</td>);
+              return (<td key={`${val}-${index}}`}>{val}</td>);
             }
           }
         )}
@@ -77,102 +90,48 @@ function App() {
     );
   };
 
-  const renderSingleTable = () => {
-    const collection = collections[0];
-    return (
-      <>
-        <tr>
-          {collection.attrs.map((attr: any, i: number) => <th key={i}>{attr.title}</th>)}
-        </tr>
-        {items.length && items.map((item, i) => {
-          return (
-            <tr key={i}>{mapCellsFromValues(item)}</tr>
-          );
-        })}
-      </>
-    );
+  const getValueLength = (firstRow: Array<IValues>) => {
+    let valueCount = 0;
+    firstRow.forEach((values: IValues) => {
+      const valuesLength = Object.entries(values).length;
+      valueCount += valuesLength;
+    });
+    return valueCount;
   };
 
-  const renderNestedTable = (parentColl: ICollection) => {
-    return parentColl.cases.map((caseObj, index) => renderRowFromCaseObj(caseObj, index));
-  };
-
-  const renderRowFromCaseObj = (caseObj: IProcessedCaseObj, index?: null|number) => {
-    const {children, values} = caseObj;
-    if (!children.length) {
-      return (
-          <tr>{mapCellsFromValues(values)}</tr>
-      );
+  const renderTable = () => {
+    const isNoHierarchy = collections.length === 1;
+    const classesExist = collectionClasses.length > 0;
+    const landscapeProps = {showHeaders, collectionClasses, collections, selectedDataSet,
+      getClassName, mapHeadersFromValues, mapCellsFromValues, getValueLength};
+    const portraitProps = {...landscapeProps, paddingStyle};
+    const flatProps = {...landscapeProps, items};
+    if (isNoHierarchy && classesExist) {
+      return <FlatTable {...flatProps}/>;
     } else {
       return (
-        <>
-          {index === 0 ?
-            <tr className={`${getClassName(caseObj)}`}>
-              {mapHeadersFromValues(values)}
-              <th>{showHeaders ? children[0].collection.name : ""}</th>
-            </tr> : ""
-          }
-          <tr>
-            {mapCellsFromValues(values)}
-            <td style={paddingStyle}>
-              <table style={paddingStyle} className={`sub-table ${getClassName(children[0])}`}>
-                <tbody>
-                  {caseObj.children.map((child, i) => {
-                    if (i === 0 && !child.children.length) {
-                      return (
-                        <>
-                          <tr key={i} className={`${getClassName(child)}`}>{mapHeadersFromValues(child.values)}</tr>
-                          {renderRowFromCaseObj(child, i)}
-                        </>
-                      );
-                    } else {
-                      return (renderRowFromCaseObj(child, i));
-                    }
-                  })}
-                </tbody>
-              </table>
-            </td>
-          </tr>
-        </>
+        displayMode === portrait ?
+          <PortraitView {...portraitProps} /> :
+        displayMode === landscape ?
+          <LandscapeView {...landscapeProps} /> :
+          <div/>
       );
     }
   };
 
-  const renderTable = () => {
-    const isSingleCollection = collections.length === 1;
-    const parentColl = collections.filter((coll: ICollection) => !coll.parent);
-    return (
-      <table className={`main-table ${collectionClasses[0].className}`}>
-        <tbody>
-          <tr className={`${collectionClasses[0].className}`}>
-            <th colSpan={isSingleCollection ? items.length : collections.length}>{collections[0].title}</th>
-          </tr>
-          {isSingleCollection ? renderSingleTable() : renderNestedTable(parentColl[0])}
-        </tbody>
-      </table>
-    );
-  };
-
   return (
     <div>
-      <div className="controls">
-        <div className="data-sets">
-          <span>Select a Dataset:</span>
-          <select onChange={handleSelectDataSet}>
-            <option></option>
-            {dataSets?.length && dataSets.map((set, i) => {return (<option key={i}>{set.title}</option>);})}
-          </select>
-        </div>
-        <div className="set-padding">
-          <span>Padding?</span>
-          <input type="checkbox" onChange={togglePadding}/>
-        </div>
-        <div className="set-headers">
-          <span>Show all case headers?</span>
-          <input type="checkbox" checked={showHeaders} onChange={toggleShowHeaders}/>
-        </div>
-      </div>
-      {selectedDataSet && collections.length && collectionClasses.length && renderTable()}
+      <Menu
+        dataSets={dataSets}
+        collections={collections}
+        handleSelectDataSet={handleSelectDataSet}
+        handleSelectDisplayMode={handleSelectDisplayMode}
+        togglePadding={togglePadding}
+        toggleShowHeaders={toggleShowHeaders}
+        showHeaders={showHeaders}
+        displayMode={displayMode}
+      />
+      {selectedDataSet && renderTable()}
     </div>
   );
 }

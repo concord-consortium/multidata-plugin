@@ -48,3 +48,14 @@ export interface ICollectionClass {
   collectionName: string;
   className: string;
 }
+
+export interface ITableProps {
+  showHeaders: boolean,
+  collectionClasses: Array<ICollectionClass>,
+  getClassName: (caseObj: IProcessedCaseObj) => string,
+  selectedDataSet: IDataSet,
+  collections: Array<ICollection>,
+  mapCellsFromValues: (values: IValues) => void,
+  mapHeadersFromValues: (values: IValues) => void,
+  getValueLength: (firstRow: Array<IValues>) => number
+}
