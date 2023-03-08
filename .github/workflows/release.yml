@@ -1,20 +1,79 @@
-name: Release
+name: Manage versioning & releases
+
 on:
+  push:
   workflow_dispatch:
     inputs:
       version:
         description: The git tag for the version to use for index-demo.html
         required: true
+      git-ref:
+        description: git ref to publish a release for
+        # TODO: should have some way of looking up the default git branch name
+        # instead of hardcoding "master"
+        default: ""
+        required: false
+      release-type:
+        description: Type of release to publish
+        type: choice
+        required: true
+        default: pre-release
+        options:
+          - pre-release
+          - release
+      notes:
+        description: Description to include in release notes
+      environment:
+        description: Deployment environment to deploy to
+        type: environment
+        required: false
+
 env:
   BUCKET: models-resources
   PREFIX: multidata-plugin
   SRC_FILE: index-top.html
   DEST_FILE: index-demo.html
+
 jobs:
-  release:
+  manage-versioning-and-releases:
+    # Always run this step regardless if the 'build' runs,  succeeds, or fails
+    # See https://docs.github.com/actions/using-workflows/workflow-syntax-for-github-actions#example-not-requiring-successful-dependent-jobs
+    if: ${{ always() && !cancelled() }}
     runs-on: ubuntu-latest
+    name: Publish version & release
     steps:
-      - run: >
+      - name: Checkout git repository
+        uses: actions/checkout@v3
+      - name: Get release notes template content
+        id: release_notes_template
+        # See: https://github.com/github/docs/issues/21529#issue-1418590935
+        run: |-
+          echo 'RELEASE_NOTES_TEMPLATE<<EOF' >> $GITHUB_OUTPUT
+          cat ./.github/workflows/release_notes_template.md.j2 >> $GITHUB_OUTPUT
+          echo 'EOF' >> $GITHUB_OUTPUT
+      - name: Create & publish a new project release
+        uses: concord-consortium/manage-releases@v0.1.0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          # ID number of Pivotal Tracker project that contains stories for the software project
+          # being managed
+          pt-project-id: 2441249
+          # API token for interacting with Pivotal Tracker
+          pt-api-token: ${{ secrets.PT_API_TOKEN }}
+          pt-story-version-label-prefix: ${{ github.event.repository.name }}
+          # Whether or not to publish a new version and release when this workflow runs
+          publish-release: ${{ github.event_name == 'workflow_dispatch' }}
+          # Jinja2 Markdown template to use for generating release notes
+          release-notes-template: "${{ steps.release_notes_template.outputs.RELEASE_NOTES_TEMPLATE }}"
+          release-type: ${{ github.event.inputs.release-type }}
+          notes: ${{ github.event.inputs.notes }}
+          extra-data: |-
+            {
+              "github": ${{ toJSON(github) }}
+            }
+      - name: Deploy newly created release to production
+        run: >
           aws s3 cp
           s3://${{ env.BUCKET }}/${{ env.PREFIX }}/version/${{ github.event.inputs.version }}/${{ env.SRC_FILE }}
           s3://${{ env.BUCKET }}/${{ env.PREFIX }}/${{ env.DEST_FILE }}
