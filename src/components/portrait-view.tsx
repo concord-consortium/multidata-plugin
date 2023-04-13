@@ -1,6 +1,7 @@
 import React from "react";
 import { ICollection, IProcessedCaseObj, ITableProps } from "../types";
-import css from "./portrait-view.scss";
+
+import css from "./tables.scss";
 
 interface IProps extends ITableProps {
   paddingStyle: Record<string, string>
@@ -42,7 +43,7 @@ export const PortraitView = (props: IProps) => {
               <th>{showHeaders ? children[0].collection.name : ""}</th>
             </tr> : ""
           }
-          <tr>
+          <tr className={`${css[getClassName(caseObj)]}`}>
             {mapCellsFromValues(values)}
             <td style={paddingStyle}>
               <table style={paddingStyle} className={`${css.subTable} ${css[getClassName(children[0])]}`}>
@@ -74,7 +75,7 @@ export const PortraitView = (props: IProps) => {
     const parentColl = collections.filter((coll: ICollection) => !coll.parent);
     const {className} = collectionClasses[0];
     return (
-      <table className={`${css.mainTable} ${css[className]}`}>
+      <table className={`${css.mainTable} ${css.portraitTable} ${css[className]}`}>
         <tbody>
           {renderNestedTable(parentColl[0])}
         </tbody>
