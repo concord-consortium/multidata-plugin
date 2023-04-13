@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from "react";
-import { useCodapState } from "../hooks/useCodapState";
+import React, { useCallback, useEffect, useState } from "react";
+import { InteractiveState, useCodapState } from "../hooks/useCodapState";
 import { ICollection, IProcessedCaseObj, IValues, ICollectionClass } from "../types";
 import { PortraitView } from "./portrait-view";
 import { Menu } from "./menu";
@@ -11,12 +11,18 @@ const landscape = "Landscape";
 const none = "";
 
 function App() {
-  const {selectedDataSet, dataSets, collections, items, handleSelectDataSet} = useCodapState();
+  const {selectedDataSet, dataSets, collections, items, handleSelectDataSet: _handleSelectDataSet,
+         interactiveState, updateInteractiveState: _updateInteractiveState} = useCodapState();
   const [collectionClasses, setCollectionClasses] = useState<Array<ICollectionClass>>([]);
   const [displayMode, setDisplayMode] = useState<string>(none);
-  const [padding, setPadding] = useState<boolean>(false);
   const [paddingStyle, setPaddingStyle] = useState<Record<string, string>>({padding: "0px"});
-  const [showHeaders, setShowHeaders] = useState<boolean>(false);
+
+  // select the saved dataset on startup
+  useEffect(() => {
+    if (interactiveState?.dataSetName && !selectedDataSet) {
+      _handleSelectDataSet(interactiveState.dataSetName);
+    }
+  }, [interactiveState, selectedDataSet, _handleSelectDataSet]);
 
   useEffect(() => {
     if (collections.length) {
@@ -39,9 +45,9 @@ function App() {
   }, [selectedDataSet]);
 
   useEffect(() => {
-    const style =  padding ? {padding: "7px"} : {padding: "0px"};
+    const style =  interactiveState.padding ? {padding: "7px"} : {padding: "0px"};
     setPaddingStyle(style);
-  }, [padding]);
+  }, [interactiveState.padding]);
 
   const getClassName = (caseObj: IProcessedCaseObj) => {
     const {collection} = caseObj;
@@ -52,17 +58,30 @@ function App() {
     return className;
   };
 
-  const togglePadding = () => {
-    setPadding(!padding);
-  };
+  const updateInteractiveState = useCallback((update: Partial<InteractiveState>) => {
+    const newState = {...interactiveState, ...update};
+    if (JSON.stringify(newState) !== JSON.stringify(interactiveState)) {
+      _updateInteractiveState(newState);
+    }
+  }, [interactiveState, _updateInteractiveState]);
 
-  const toggleShowHeaders = () => {
-    setShowHeaders(!showHeaders);
-  };
+  const togglePadding = useCallback(() => {
+    updateInteractiveState({padding: !interactiveState.padding});
+  }, [interactiveState, updateInteractiveState]);
+
+  const toggleShowHeaders = useCallback(() => {
+    updateInteractiveState({showHeaders: !interactiveState.showHeaders});
+  }, [interactiveState, updateInteractiveState]);
 
   const handleSelectDisplayMode = (e: React.ChangeEvent<HTMLSelectElement>) => {
     setDisplayMode(e.target.value);
   };
+
+  const handleSelectDataSet = useCallback((e: React.ChangeEvent<HTMLSelectElement>) => {
+    const dataSetName = e.target.value;
+    _handleSelectDataSet(dataSetName);
+    updateInteractiveState({dataSetName});
+  }, [_handleSelectDataSet, updateInteractiveState]);
 
   const mapHeadersFromValues = (values: IValues) => {
     return (
@@ -102,7 +121,7 @@ function App() {
   const renderTable = () => {
     const isNoHierarchy = collections.length === 1;
     const classesExist = collectionClasses.length > 0;
-    const landscapeProps = {showHeaders, collectionClasses, collections, selectedDataSet,
+    const landscapeProps = {showHeaders: interactiveState.showHeaders, collectionClasses, collections, selectedDataSet,
       getClassName, mapHeadersFromValues, mapCellsFromValues, getValueLength};
     const portraitProps = {...landscapeProps, paddingStyle};
     const flatProps = {...landscapeProps, items};
@@ -124,11 +143,12 @@ function App() {
       <Menu
         dataSets={dataSets}
         collections={collections}
+        selectedDataSet={selectedDataSet}
         handleSelectDataSet={handleSelectDataSet}
         handleSelectDisplayMode={handleSelectDisplayMode}
         togglePadding={togglePadding}
         toggleShowHeaders={toggleShowHeaders}
-        showHeaders={showHeaders}
+        showHeaders={interactiveState.showHeaders}
         displayMode={displayMode}
       />
       {selectedDataSet && renderTable()}

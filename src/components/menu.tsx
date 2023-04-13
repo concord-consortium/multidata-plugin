@@ -3,6 +3,7 @@ import { ICollection, IDataSet } from "../types";
 import css from "./menu.scss";
 
 interface IProps {
+  selectedDataSet: any,
   handleSelectDataSet: (e: React.ChangeEvent<HTMLSelectElement>) => void,
   collections: Array<ICollection>,
   dataSets: Array<IDataSet>,
@@ -19,7 +20,7 @@ const none = "";
 
 export const Menu = (props: IProps) => {
   const {handleSelectDataSet, collections, dataSets, handleSelectDisplayMode, togglePadding,
-    showHeaders, toggleShowHeaders, displayMode} = props;
+    showHeaders, toggleShowHeaders, displayMode, selectedDataSet} = props;
 
   const displayModes = [none, portrait, landscape];
 
@@ -27,7 +28,7 @@ export const Menu = (props: IProps) => {
     <div className={css.menu}>
       <div className={css.option}>
         <span>Select a Dataset:</span>
-        <select onChange={handleSelectDataSet}>
+        <select value={selectedDataSet?.name} onChange={handleSelectDataSet}>
           <option></option>
           {dataSets?.length && dataSets.map((set) => {
             return (<option key={set.title}>{set.title}</option>);
