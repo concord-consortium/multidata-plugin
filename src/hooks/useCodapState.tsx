@@ -8,6 +8,7 @@ export interface InteractiveState {
   dataSetName: string|null;
   padding: boolean;
   showHeaders: boolean;
+  displayMode: string;
 }
 
 export const useCodapState = () => {
@@ -22,7 +23,8 @@ export const useCodapState = () => {
     view: null,
     dataSetName: null,
     padding: false,
-    showHeaders: false
+    showHeaders: false,
+    displayMode: ""
   });
 
   const handleDocumentChangeNotice = useCallback(() => getDataSets(), []);
