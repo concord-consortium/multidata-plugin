@@ -4,12 +4,15 @@ import { connect } from "../scripts/connect";
 import { ICollections, ICollection, IDataSet } from "../types";
 
 export interface InteractiveState {
+  view: "nested-table" | "hierarchy" | null
   dataSetName: string|null;
   padding: boolean;
   showHeaders: boolean;
+  displayMode: string;
 }
 
 export const useCodapState = () => {
+  const [connected, setConnected] = useState(false);
   const [dataSets, setDataSets] = useState<IDataSet[]>([]);
   const [selectedDataSet, setSelectedDataSet] = useState<any>(null);
   const [selectedDataSetName, setSelectedDataSetName] = useState<string>("");
@@ -17,9 +20,11 @@ export const useCodapState = () => {
   const [items, setItems] = useState<any[]>([]);
   const [numUpdates, setNumUpdates] = useState<number>(0);
   const [interactiveState, setInteractiveState] = useState<InteractiveState>({
+    view: null,
     dataSetName: null,
     padding: false,
-    showHeaders: false
+    showHeaders: false,
+    displayMode: ""
   });
 
   const handleDocumentChangeNotice = useCallback(() => getDataSets(), []);
@@ -55,6 +60,8 @@ export const useCodapState = () => {
       if (Object.keys(newState || {}).length > 0) {
         setInteractiveState(newState);
       }
+
+      setConnected(true);
     };
 
     init();
@@ -162,6 +169,7 @@ export const useCodapState = () => {
     getCollectionNameFromId,
     updateInteractiveState,
     interactiveState,
-    items
+    items,
+    connected
   };
 };
