@@ -3,13 +3,29 @@ import { codapInterface } from "../scripts/codapInterface";
 import { connect } from "../scripts/connect";
 import { ICollections, ICollection, IDataSet } from "../types";
 
+export interface InteractiveState {
+  view: "nested-table" | "hierarchy" | null
+  dataSetName: string|null;
+  padding: boolean;
+  showHeaders: boolean;
+  displayMode: string;
+}
+
 export const useCodapState = () => {
+  const [connected, setConnected] = useState(false);
   const [dataSets, setDataSets] = useState<IDataSet[]>([]);
   const [selectedDataSet, setSelectedDataSet] = useState<any>(null);
   const [selectedDataSetName, setSelectedDataSetName] = useState<string>("");
   const [collections, setCollections] = useState<ICollections>([]);
   const [items, setItems] = useState<any[]>([]);
   const [numUpdates, setNumUpdates] = useState<number>(0);
+  const [interactiveState, setInteractiveState] = useState<InteractiveState>({
+    view: null,
+    dataSetName: null,
+    padding: false,
+    showHeaders: false,
+    displayMode: ""
+  });
 
   const handleDocumentChangeNotice = useCallback(() => getDataSets(), []);
 
@@ -32,12 +48,20 @@ export const useCodapState = () => {
       //  receive notifications about doc changes, especially number of datasets
       const tResource = `documentChangeNotice`;
       codapInterface.on("notify", tResource, undefined, handleDocumentChangeNotice);
-  };
+    };
 
     const init = async () => {
-      await connect.initialize();
+      const newState = await connect.initialize();
       await setUpDocumentNotifications();
-      getDataSets();
+      await getDataSets();
+
+      // plugins in new documents return an empty object for the interactive state
+      // so ignore the new state and keep the default starting state in that case
+      if (Object.keys(newState || {}).length > 0) {
+        setInteractiveState(newState);
+      }
+
+      setConnected(true);
     };
 
     init();
@@ -116,8 +140,8 @@ export const useCodapState = () => {
     }
   }, [collections, selectedDataSet]);
 
-  const handleSelectDataSet = (e: any) => {
-    const selected = dataSets.filter((d) => d.title === e.target.value);
+  const handleSelectDataSet = (name: string) => {
+    const selected = dataSets.filter((d) => d.title === name);
     return selected.length ? handleSetDataSet(selected[0].name) : handleSetDataSet(null);
   };
 
@@ -130,6 +154,12 @@ export const useCodapState = () => {
     return collections.filter((c: ICollection) => c.id === id)[0].name;
   };
 
+  const updateInteractiveState = useCallback((update: InteractiveState) => {
+    const newState = {...interactiveState, ...update};
+    codapInterface.updateInteractiveState(newState);
+    setInteractiveState(newState);
+  }, [interactiveState, setInteractiveState]);
+
   return {
     dataSets,
     selectedDataSet,
@@ -137,6 +167,9 @@ export const useCodapState = () => {
     handleSelectDataSet,
     handleRefreshDataSet,
     getCollectionNameFromId,
-    items
+    updateInteractiveState,
+    interactiveState,
+    items,
+    connected
   };
 };

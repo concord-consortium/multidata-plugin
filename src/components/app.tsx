@@ -1,139 +1,87 @@
-import React, { useEffect, useState } from "react";
-import { useCodapState } from "../hooks/useCodapState";
-import { ICollection, IProcessedCaseObj, IValues, ICollectionClass } from "../types";
-import { PortraitView } from "./portrait-view";
-import { Menu } from "./menu";
-import { LandscapeView } from "./landscape-view";
-import { FlatTable } from "./flat-table";
+import React, { useCallback, useEffect } from "react";
+import { InteractiveState, useCodapState } from "../hooks/useCodapState";
+import {NestedTable} from "./nested-table";
+import {Hierarchy} from "./hierarchy";
 
-const portrait = "Portrait";
-const landscape = "Landscape";
-const none = "";
+import css from "./app.scss";
 
 function App() {
-  const {selectedDataSet, dataSets, collections, items, handleSelectDataSet} = useCodapState();
-  const [collectionClasses, setCollectionClasses] = useState<Array<ICollectionClass>>([]);
-  const [displayMode, setDisplayMode] = useState<string>(none);
-  const [padding, setPadding] = useState<boolean>(false);
-  const [paddingStyle, setPaddingStyle] = useState<Record<string, string>>({padding: "0px"});
-  const [showHeaders, setShowHeaders] = useState<boolean>(false);
+  const {connected, selectedDataSet, dataSets, collections, items, interactiveState,
+         updateInteractiveState: _updateInteractiveState,
+         handleSelectDataSet: _handleSelectDataSet
+        } = useCodapState();
 
-  useEffect(() => {
-    if (collections.length) {
-      const classes = collections.map((coll: ICollection, idx: number) => {
-        return {
-          collectionName: coll.name,
-          className: `collection${idx}`
-        };
-      });
-      setCollectionClasses(classes);
-    } else {
-      setCollectionClasses([]);
+  const updateInteractiveState = useCallback((update: Partial<InteractiveState>) => {
+    const newState = {...interactiveState, ...update};
+    if (JSON.stringify(newState) !== JSON.stringify(interactiveState)) {
+      _updateInteractiveState(newState);
     }
-  }, [collections]);
+  }, [interactiveState, _updateInteractiveState]);
 
-  useEffect(() => {
-    if (!selectedDataSet) {
-      setDisplayMode("");
-    }
-  }, [selectedDataSet]);
+  const handleSetView = useCallback((view: InteractiveState["view"]) => {
+    updateInteractiveState({view});
+  }, [updateInteractiveState]);
 
-  useEffect(() => {
-    const style =  padding ? {padding: "7px"} : {padding: "0px"};
-    setPaddingStyle(style);
-  }, [padding]);
+  const handleSelectDataSet = useCallback((e: React.ChangeEvent<HTMLSelectElement>) => {
+    const dataSetName = e.target.value;
+    _handleSelectDataSet(dataSetName);
+    updateInteractiveState({dataSetName});
+  }, [_handleSelectDataSet, updateInteractiveState]);
 
-  const getClassName = (caseObj: IProcessedCaseObj) => {
-    const {collection} = caseObj;
-    const filteredClassNames = collectionClasses.filter((classObj) => {
-      return classObj.collectionName === collection.name;
-    });
-    const className = filteredClassNames.length ? filteredClassNames[0].className : "";
-    return className;
-  };
-
-  const togglePadding = () => {
-    setPadding(!padding);
-  };
-
-  const toggleShowHeaders = () => {
-    setShowHeaders(!showHeaders);
-  };
-
-  const handleSelectDisplayMode = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    setDisplayMode(e.target.value);
-  };
-
-  const mapHeadersFromValues = (values: IValues) => {
+  const renderSelectView = () => {
     return (
-      <>
-        {(Object.keys(values)).map((key, index) => {
-          if (typeof values[key] === "string" || typeof values[key] === "number") {
-              return (<th key={`${key}-${index}`}>{key}</th>);
-            }
-          }
-        )}
-      </>
+      <div className={css.selectView}>
+        <p>Which MultiData view do you want to use?</p>
+
+        <div className={css.buttons}>
+          <button onClick={() => handleSetView("hierarchy")}>Hierarchy</button>
+          <button onClick={() => handleSetView("nested-table")}>Nested Table</button>
+        </div>
+      </div>
     );
   };
 
-  const mapCellsFromValues = (values: IValues) => {
-    return (
-      <>
-        {(Object.values(values)).map((val, index) => {
-          if (typeof val === "string" || typeof val === "number") {
-              return (<td key={`${val}-${index}}`}>{val}</td>);
-            }
-          }
-        )}
-      </>
-    );
-  };
+  // select the saved dataset on startup
+  useEffect(() => {
+    if (interactiveState?.dataSetName && !selectedDataSet) {
+      _handleSelectDataSet(interactiveState.dataSetName);
+    }
+  }, [interactiveState, selectedDataSet, _handleSelectDataSet]);
 
-  const getValueLength = (firstRow: Array<IValues>) => {
-    let valueCount = 0;
-    firstRow.forEach((values: IValues) => {
-      const valuesLength = Object.entries(values).length;
-      valueCount += valuesLength;
-    });
-    return valueCount;
-  };
+  if (!connected) {
+    return <div className={css.loading}>Loading...</div>;
+  }
 
-  const renderTable = () => {
-    const isNoHierarchy = collections.length === 1;
-    const classesExist = collectionClasses.length > 0;
-    const landscapeProps = {showHeaders, collectionClasses, collections, selectedDataSet,
-      getClassName, mapHeadersFromValues, mapCellsFromValues, getValueLength};
-    const portraitProps = {...landscapeProps, paddingStyle};
-    const flatProps = {...landscapeProps, items};
-    if (isNoHierarchy && classesExist) {
-      return <FlatTable {...flatProps}/>;
-    } else {
+  switch (interactiveState.view) {
+    case "nested-table":
       return (
-        displayMode === portrait ?
-          <PortraitView {...portraitProps} /> :
-        displayMode === landscape ?
-          <LandscapeView {...landscapeProps} /> :
-          <div/>
+        <NestedTable
+          selectedDataSet={selectedDataSet}
+          dataSets={dataSets}
+          collections={collections}
+          items={items}
+          interactiveState={interactiveState}
+          handleSelectDataSet={handleSelectDataSet}
+          updateInteractiveState={updateInteractiveState}
+        />
       );
-    }
-  };
 
-  return (
-    <div>
-      <Menu
-        dataSets={dataSets}
-        collections={collections}
-        handleSelectDataSet={handleSelectDataSet}
-        handleSelectDisplayMode={handleSelectDisplayMode}
-        togglePadding={togglePadding}
-        toggleShowHeaders={toggleShowHeaders}
-        showHeaders={showHeaders}
-        displayMode={displayMode}
-      />
-      {selectedDataSet && renderTable()}
-    </div>
-  );
+    case "hierarchy":
+      return (
+        <Hierarchy
+          selectedDataSet={selectedDataSet}
+          dataSets={dataSets}
+          collections={collections}
+          items={items}
+          interactiveState={interactiveState}
+          handleSelectDataSet={handleSelectDataSet}
+          updateInteractiveState={updateInteractiveState}
+        />
+      );
+
+    default:
+      return renderSelectView();
+  }
 }
 
 export default App;

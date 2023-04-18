@@ -2,7 +2,7 @@ import { codapInterface } from "./codapInterface";
 
 export const connect = {
     initialize: async function () {
-        await codapInterface.init(this.iFrameDescriptor, null);
+        return await codapInterface.init(this.iFrameDescriptor, null);
     },
 
     getListOfDatasets: async function () {
@@ -132,11 +132,8 @@ export const connect = {
     },
 
     iFrameDescriptor: {
-      version: 'foo',
-      name: 'test',
-      title: 'test',
-      dimensions: {
-          width: 333, height: 444,
-      },
-  },
+      version: '0.0.1',
+      name: 'multidata-plugin',
+      title: 'MultiData'
+    },
 }

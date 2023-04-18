@@ -19,7 +19,8 @@ export interface ICollection {
   name: string,
   parent: number,
   title: string,
-  type: string
+  type: string,
+  cid: string,
 }
 
 export type ICollections = Array<ICollection>;

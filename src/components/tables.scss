@@ -52,9 +52,9 @@ table {
   }
 
   &.landscapeTable {
-    &.collection0, .collection0 {
+    .collection0 {
       border: 1px solid #3c78d8;
-      td, th {
+      td {
         border: 1px solid #3c78d8;
       }
       th {
@@ -64,7 +64,7 @@ table {
 
     .collection1 {
       border: 1px solid #f1c232;
-      td, th {
+      td {
         border: 1px solid #f1c232;
       }
       th {
@@ -74,7 +74,7 @@ table {
 
     .collection2 {
       border: 1px solid #8e7cc3;
-      td, th {
+      td {
         border: 1px solid #8e7cc3;
       }
       th {
@@ -84,7 +84,7 @@ table {
 
     .collection3 {
       border: 1px solid #93c47d;
-      td, th {
+      td {
         border: 1px solid #93c47d;
       }
       th {
@@ -94,7 +94,7 @@ table {
 
     .collection4 {
       border: 1px solid #f6b26b;
-      td, th {
+      td {
         border: 1px solid #f6b26b;
       }
       th {
@@ -104,18 +104,18 @@ table {
 
     .collection0, .collection1, .collection2, .collection3, .collection4 {
       th {
-        //border-right: none;
+        border-right: none;
         border-left: none;
       }
     }
   }
 
   &.portraitTable {
-    &.collection0, .collection0, &.collection0>tbody>tr>td, .collection0>tbody>tr>td {
+    .collection0, .collection0>tbody>tr>td {
       border: 1px solid #3c78d8;
     }
 
-    &.collection0>th, .collection0>th, th.collection0 {
+    .collection0>th, th.collection0 {
       background-color: #CEE9FB;
       border: 1px solid #3c78d8;
     }
