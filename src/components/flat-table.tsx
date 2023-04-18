@@ -1,6 +1,7 @@
 import React from "react";
 import { ITableProps } from "../types";
-import css from "./flat-table.scss";
+
+import css from "./tables.scss";
 
 interface IFlatProps extends ITableProps {
   items: Array<any>
@@ -12,7 +13,7 @@ export const FlatTable = (props: IFlatProps) => {
   const {className} = collectionClasses[0];
 
   return (
-    <table className={`${css.mainTable} ${css[className]}}`}>
+    <table className={`${css.mainTable} ${css.flatTable} ${css[className]}}`}>
       <tbody>
         <tr className={css.mainHeader}>
           <th colSpan={items.length}>{selectedDataSet.title}</th>

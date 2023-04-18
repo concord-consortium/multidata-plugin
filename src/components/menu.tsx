@@ -3,14 +3,18 @@ import { ICollection, IDataSet } from "../types";
 import css from "./menu.scss";
 
 interface IProps {
+  selectedDataSet: any,
   handleSelectDataSet: (e: React.ChangeEvent<HTMLSelectElement>) => void,
   collections: Array<ICollection>,
   dataSets: Array<IDataSet>,
-  handleSelectDisplayMode: (e: React.ChangeEvent<HTMLSelectElement>) => void,
-  togglePadding: () => void,
-  showHeaders: boolean,
-  toggleShowHeaders: () => void,
-  displayMode: string
+
+  // these are optional and only used by the nested table view
+  handleSelectDisplayMode?: (e: React.ChangeEvent<HTMLSelectElement>) => void,
+  togglePadding?: () => void,
+  toggleShowHeaders?: () => void,
+  showHeaders?: boolean,
+  padding?: boolean;
+  displayMode?: string
 }
 
 const portrait = "Portrait";
@@ -19,7 +23,7 @@ const none = "";
 
 export const Menu = (props: IProps) => {
   const {handleSelectDataSet, collections, dataSets, handleSelectDisplayMode, togglePadding,
-    showHeaders, toggleShowHeaders, displayMode} = props;
+    showHeaders, padding, toggleShowHeaders, displayMode, selectedDataSet} = props;
 
   const displayModes = [none, portrait, landscape];
 
@@ -27,7 +31,7 @@ export const Menu = (props: IProps) => {
     <div className={css.menu}>
       <div className={css.option}>
         <span>Select a Dataset:</span>
-        <select onChange={handleSelectDataSet}>
+        <select value={selectedDataSet?.name} onChange={handleSelectDataSet}>
           <option></option>
           {dataSets?.length && dataSets.map((set) => {
             return (<option key={set.title}>{set.title}</option>);
@@ -35,7 +39,7 @@ export const Menu = (props: IProps) => {
         </select>
       </div>
       {/* Only allow shift in display mode if we are viewing a hierarhical data structure*/}
-      {collections.length > 1 &&
+      {collections.length > 1 && handleSelectDisplayMode &&
         <div className={css.option}>
           <span>Display mode:</span>
           <select value={displayMode} onChange={handleSelectDisplayMode}>
@@ -49,14 +53,18 @@ export const Menu = (props: IProps) => {
           </select>
         </div>
       }
-      <div className={css.option}>
-        <span>Padding?</span>
-        <input type="checkbox" onChange={togglePadding}/>
-      </div>
-      <div className={css.option}>
-        <span>Show all case headers?</span>
-        <input type="checkbox" checked={showHeaders} onChange={toggleShowHeaders}/>
-      </div>
+      {togglePadding && padding !== undefined &&
+        <div className={css.option}>
+          <span>Padding?</span>
+          <input type="checkbox" checked={padding} onChange={togglePadding}/>
+        </div>
+      }
+      {toggleShowHeaders && showHeaders !== undefined &&
+        <div className={css.option}>
+          <span>Show all case headers?</span>
+          <input type="checkbox" checked={showHeaders} onChange={toggleShowHeaders}/>
+        </div>
+      }
     </div>
   );
 };

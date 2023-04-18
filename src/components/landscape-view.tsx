@@ -1,6 +1,7 @@
 import React from "react";
 import { ICollection, IProcessedCaseObj, ITableProps } from "../types";
-import css from "./landscape-view.scss";
+
+import css from "./tables.scss";
 
 export const LandscapeView = (props: ITableProps) => {
   const {mapCellsFromValues, mapHeadersFromValues, showHeaders, collectionClasses,
@@ -19,8 +20,8 @@ export const LandscapeView = (props: ITableProps) => {
         <tr className={css[className]}>
           {firstRowValues.map(values => mapHeadersFromValues(values))}
         </tr>
-        <tr>{firstRowValues.map(values => mapCellsFromValues(values))}</tr>
-        <tr>
+        <tr className={css[className]}>{firstRowValues.map(values => mapCellsFromValues(values))}</tr>
+        <tr className={css[className]}>
           {parentColl.cases.map((caseObj) => {
             return (
               <td
@@ -82,7 +83,7 @@ export const LandscapeView = (props: ITableProps) => {
     const {className} = collectionClasses[0];
 
     return (
-      <table className={`${css.mainTable} ${css.landscape} ${css[className]}`}>
+      <table className={`${css.mainTable} ${css.landscapeTable} ${css.landscape} ${css[className]}`}>
         <tbody>
         <tr className={css.mainHeader}>
           <th colSpan={getValueLength(firstRowValues)}>{selectedDataSet.name}</th>

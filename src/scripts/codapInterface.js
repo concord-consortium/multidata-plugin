@@ -230,6 +230,15 @@ export const codapInterface = {
             return;
         }
         interactiveState = Object.assign(interactiveState, iInteractiveState);
+
+        // tell CODAP we are dirty
+        this.sendRequest([{
+            action: "notify",
+            resource: "interactiveFrame",
+            values: {
+                dirty: true
+            }
+        }]);
     },
 
     destroy: function () {
