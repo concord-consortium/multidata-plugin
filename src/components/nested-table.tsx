@@ -24,7 +24,6 @@ export const NestedTable = (props: IProps) => {
   const {selectedDataSet, dataSets, collections, items, interactiveState,
          handleSelectDataSet, updateInteractiveState} = props;
   const [collectionClasses, setCollectionClasses] = useState<Array<ICollectionClass>>([]);
-  const [displayMode, setDisplayMode] = useState<string>(none);
   const [paddingStyle, setPaddingStyle] = useState<Record<string, string>>({padding: "0px"});
 
   useEffect(() => {
@@ -42,10 +41,10 @@ export const NestedTable = (props: IProps) => {
   }, [collections]);
 
   useEffect(() => {
-    if (!selectedDataSet) {
-      setDisplayMode("");
+    if (!interactiveState.dataSetName) {
+      updateInteractiveState({displayMode: none});
     }
-  }, [selectedDataSet]);
+  }, [interactiveState.dataSetName, updateInteractiveState]);
 
   useEffect(() => {
     const style =  interactiveState.padding ? {padding: "7px"} : {padding: "0px"};
@@ -69,9 +68,9 @@ export const NestedTable = (props: IProps) => {
     updateInteractiveState({showHeaders: !interactiveState.showHeaders});
   }, [interactiveState, updateInteractiveState]);
 
-  const handleSelectDisplayMode = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    setDisplayMode(e.target.value);
-  };
+  const handleSelectDisplayMode = useCallback((e: React.ChangeEvent<HTMLSelectElement>) => {
+    updateInteractiveState({displayMode: e.target.value});
+  }, [updateInteractiveState]);
 
   const mapHeadersFromValues = (values: IValues) => {
     return (
@@ -119,9 +118,9 @@ export const NestedTable = (props: IProps) => {
       return <FlatTable {...flatProps}/>;
     } else {
       return (
-        displayMode === portrait ?
+        interactiveState.displayMode === portrait ?
           <PortraitView {...portraitProps} /> :
-        displayMode === landscape ?
+          interactiveState.displayMode === landscape ?
           <LandscapeView {...landscapeProps} /> :
           <div/>
       );
@@ -140,7 +139,7 @@ export const NestedTable = (props: IProps) => {
         toggleShowHeaders={toggleShowHeaders}
         showHeaders={interactiveState.showHeaders}
         padding={interactiveState.padding}
-        displayMode={displayMode}
+        displayMode={interactiveState.displayMode}
       />
       {selectedDataSet && renderTable()}
     </div>
