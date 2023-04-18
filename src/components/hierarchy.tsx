@@ -2,6 +2,13 @@ import React, { useEffect, useRef, useState } from "react";
 import { InteractiveState } from "../hooks/useCodapState";
 import { IDataSet, ICollections, ICollection } from "../types";
 import { Menu } from "./menu";
+import { DndContext, DragEndEvent, closestCenter, KeyboardSensor,
+  MouseSensor,
+  TouchSensor,
+  useSensor,
+  useSensors } from "@dnd-kit/core";
+import { SortableContext, verticalListSortingStrategy, useSortable, sortableKeyboardCoordinates} from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
 
 import css from "./hierarchy.scss";
 
@@ -61,9 +68,19 @@ const LevelArrow = ({levelBBox}: {levelBBox: IBoundingBox}) => {
 };
 
 const Attr = ({attr}: {attr: any}) => {
+  const {attributes, listeners, setNodeRef, transform, transition} = useSortable({id: attr.cid});
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition
+  };
+
+  // LUCY: the transform value is always undefined right now which is probably why the items don't visually re-order (maybe?)
+
   return (
-    <div className={css.attr}>
-      {attr.name}
+    <div ref={setNodeRef} style={style} {...attributes} {...listeners}>
+      <div className={css.attr}>
+        {attr.name}
+      </div>
     </div>
   );
 };
@@ -95,7 +112,9 @@ const Collection = (props: CollectionProps) => {
     <div className={css.collection} style={style}>
       <div className={css.level} ref={levelRef}>Level {index + 1}</div>
       <div className={css.attrs}>
-        {collection.attrs.map(attr => <Attr attr={attr} key={`attr-${index}-${attr.cid}`} />)}
+        <SortableContext items={collection.attrs} strategy={verticalListSortingStrategy}>
+          {collection.attrs.map(attr => <Attr attr={attr} key={`attr-${index}-${attr.cid}`} />)}
+        </SortableContext>
       </div>
       <AttrsArrow levelBBox={levelBBox} key={`attrs-arrow-${index}-${collection.cid}`} />
       {!isLast && <LevelArrow levelBBox={levelBBox} key={`level-arrow-${index}-${collection.cid}`}/>}
@@ -106,10 +125,33 @@ const Collection = (props: CollectionProps) => {
 export const Hierarchy = (props: IProps) => {
   const {selectedDataSet, dataSets, collections, handleSelectDataSet} = props;
 
+  const sensors = useSensors(
+    useSensor(MouseSensor, {
+      activationConstraint: {
+        distance: 8,
+      },
+    }),
+    useSensor(TouchSensor, {
+      activationConstraint: {
+        delay: 200,
+        tolerance: 6,
+      },
+    }),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    }),
+  );
+
+  const handleDragEnd = (e: DragEndEvent) => {
+    console.log("DRAG END", e);
+
+    // LUCY: this is where the logic to reorder items would go...
+  };
+
   const renderHeirarchy = () => {
     const numCollections = collections.length;
     return (
-      <>
+      <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
         <div className={css.hierarchy} style={{gap: CollectionGap}}>
           {collections.map((collection, index) => {
             return (
@@ -127,7 +169,7 @@ export const Hierarchy = (props: IProps) => {
             {JSON.stringify(selectedDataSet, null, 2)}
           </div>
         }
-      </>
+      </DndContext>
     );
   };
 
