@@ -3,11 +3,7 @@ import { ICollection, IProcessedCaseObj, ITableProps } from "../types";
 
 import css from "./tables.scss";
 
-interface IProps extends ITableProps {
-  paddingStyle: Record<string, string>
-}
-
-export const PortraitView = (props: IProps) => {
+export const PortraitView = (props: ITableProps) => {
   const {paddingStyle, mapCellsFromValues, mapHeadersFromValues, showHeaders, collectionClasses,
     getClassName, selectedDataSet, collections, getValueLength} = props;
 
