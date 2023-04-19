@@ -131,6 +131,18 @@ export const connect = {
       return singleCase.values;
     },
 
+    updateAttributePosition: async function(dSName, collName, attrName, newPosition) {
+      const message = {
+        "action": "update",
+        "resource": `dataContext[${dSName}].collection[${collName}].attribute[${attrName}].attributeLocation`,
+        "values": {
+          "collection": collName,
+          "position": newPosition
+        }
+      };
+      await codapInterface.sendRequest(message);
+    },
+
     iFrameDescriptor: {
       version: '0.0.1',
       name: 'multidata-plugin',

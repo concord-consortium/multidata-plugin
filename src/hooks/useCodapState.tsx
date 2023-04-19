@@ -154,6 +154,10 @@ export const useCodapState = () => {
     return collections.filter((c: ICollection) => c.id === id)[0].name;
   };
 
+  const handleUpdateAttributePosition = async (collName: string, attrName: string, position: number) => {
+    await connect.updateAttributePosition(selectedDataSet.name, collName, attrName, position);
+  }
+
   const updateInteractiveState = useCallback((update: InteractiveState) => {
     const newState = {...interactiveState, ...update};
     codapInterface.updateInteractiveState(newState);
@@ -170,6 +174,7 @@ export const useCodapState = () => {
     updateInteractiveState,
     interactiveState,
     items,
-    connected
+    connected,
+    handleUpdateAttributePosition
   };
 };
