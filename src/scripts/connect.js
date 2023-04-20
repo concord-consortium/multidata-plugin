@@ -134,7 +134,7 @@ export const connect = {
     updateAttributePosition: async function(dSName, collName, attrName, newPosition) {
       const message = {
         "action": "update",
-        "resource": `dataContext[${dSName}].collection[${collName}].attribute[${attrName}].attributeLocation`,
+        "resource": `dataContext[${dSName}].collection[${collName}].attributeLocation[${attrName}]`,
         "values": {
           "collection": collName,
           "position": newPosition

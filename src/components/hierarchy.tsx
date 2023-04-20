@@ -25,7 +25,8 @@ interface IProps {
   interactiveState: InteractiveState
   handleSelectDataSet: (e: React.ChangeEvent<HTMLSelectElement>) => void
   updateInteractiveState: (update: Partial<InteractiveState>) => void
-  handleUpdateAttributePosition: (collectionName: string, attrName: string, newPosition: number) => void
+  handleUpdateAttributePosition: (collection: ICollection, attrName: string,
+    newPosition: number, newAttrsOrder: Array<any>) => void
 }
 
 interface IBoundingBox {
@@ -69,7 +70,7 @@ const Attr = ({attr}: {attr: any}) => {
   const style = {
     transform: CSS.Transform.toString(transform),
     transition,
-    cursor: isDragging ? "grabbing" : "grab"
+    cursor: isDragging ? "grabbing" : "grab",
   };
 
   return (
@@ -85,7 +86,8 @@ interface CollectionProps {
   collection: ICollection
   index: number
   isLast: boolean;
-  handleUpdateAttributePosition: (collectionName: string, attrName: string, newPosition: number) => void;
+  handleUpdateAttributePosition: (collection: ICollection, attrName: string,
+    newPosition: number, newAttrsOrder: Array<any>) => void;
 }
 const Collection = (props: CollectionProps) => {
   const {collection, index, isLast, handleUpdateAttributePosition} = props;
@@ -109,8 +111,13 @@ const Collection = (props: CollectionProps) => {
     const {active, over} = e;
     if (active.id !== over?.id) {
       const activeAttr = collection.attrs.find((attr) => attr.cid === active.id);
+      const activeAttrIndex = collection.attrs.indexOf(activeAttr);
       const overIndex = collection.attrs.findIndex((attr) => attr.cid === over?.id);
-      handleUpdateAttributePosition(collection.name, activeAttr.name, overIndex);
+      const newAttrsOrder = arrayMove(collection.attrs, activeAttrIndex, overIndex);
+
+      // If the new index is greater than the active index, CODAP will for some reason place behind one.
+      const newIndex = overIndex > activeAttrIndex ? overIndex + 1 : overIndex;
+      handleUpdateAttributePosition(collection, activeAttr.name, newIndex, newAttrsOrder);
     }
   };
 
