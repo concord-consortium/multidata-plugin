@@ -114,18 +114,18 @@ export const useCodapState = () => {
 
   }, [selectedDataSetName]);
 
-  useEffect(() => {
-    const fetchCollections = async () => {
-      const colls = await connect.getDataSetCollections(selectedDataSet.name);
-      setCollections(colls);
-    };
+  const updateCollections = useCallback(async () => {
+    const colls = await connect.getDataSetCollections(selectedDataSet.name);
+    setCollections(colls);
+  }, [selectedDataSet]);
 
+  useEffect(() => {
     if (selectedDataSet) {
-      fetchCollections();
+      updateCollections();
     } else {
       setCollections([]);
     }
-  }, [selectedDataSet]);
+  }, [selectedDataSet, updateCollections]);
 
   useEffect(() => {
     const fetchItems = async () => {
@@ -158,13 +158,20 @@ export const useCodapState = () => {
     position: number, newAttrsOrder: Array<any>) => {
     // first update the local collection state to avoid asynchronous re-render on plugin side
     const collIndex = collections.indexOf(coll);
-    const newCollection = {...collections[collIndex]};
-    newCollection.attrs = newAttrsOrder;
+    const updatedCollection = {...collections[collIndex]};
+    updatedCollection.attrs = newAttrsOrder;
     const newCollections = [...collections];
-    newCollections[collIndex] = newCollection;
+    newCollections[collIndex] = updatedCollection;
     setCollections(newCollections);
 
     await connect.updateAttributePosition(selectedDataSet.name, coll.name, attrName, position);
+  };
+
+  const handleAddCollection = async () => {
+    const newCollectionName = `Collection ${collections.length + 1}`;
+    await connect.createNewCollection(selectedDataSet.name, newCollectionName);
+    // update collections because CODAP does not send dataContextChangeNotice
+    updateCollections();
   };
 
   const updateInteractiveState = useCallback((update: InteractiveState) => {
@@ -184,6 +191,7 @@ export const useCodapState = () => {
     interactiveState,
     items,
     connected,
-    handleUpdateAttributePosition
+    handleUpdateAttributePosition,
+    handleAddCollection
   };
 };
