@@ -28,7 +28,8 @@ interface IProps {
   updateInteractiveState: (update: Partial<InteractiveState>) => void
   handleUpdateAttributePosition: (collection: ICollection, attrName: string,
   newPosition: number, newAttrsOrder: Array<any>) => void,
-  handleAddCollection: () => void
+  handleAddCollection: () => void,
+  handleAddAttribute: (collection: ICollection) => void,
 }
 
 interface IBoundingBox {
@@ -67,17 +68,10 @@ const LevelArrow = ({levelBBox}: {levelBBox: IBoundingBox}) => {
   );
 };
 
-const AddCollection = ({levelBBox, handleAddCollection}:
-  {levelBBox: IBoundingBox, handleAddCollection: () => void}) => {
-  const {top, left, width} = levelBBox;
-  const style: React.CSSProperties = {left: left + width, top, position: "absolute"};
-
-  const handleClick = () => {
-    handleAddCollection();
-  };
-
+const AddAttribute = ({collection, handleAddAttribute}: {collection: ICollection,
+  handleAddAttribute: (coll: ICollection) => void}) => {
   return (
-    <div onClick={handleClick} style={style} className={css.addCollButton}>
+    <div onClick={() => handleAddAttribute(collection)} className={`${css.addButton} ${css.attribute}`}>
       <AddIcon />
     </div>
   );
@@ -100,6 +94,17 @@ const Attr = ({attr}: {attr: any}) => {
   );
 };
 
+const AddCollection = ({levelBBox, handleAddCollection}:
+  {levelBBox: IBoundingBox, handleAddCollection: () => void}) => {
+  const {top, left, width} = levelBBox;
+  const style: React.CSSProperties = {left: left + width, top, position: "absolute"};
+  return (
+    <div onClick={() => handleAddCollection()} style={style} className={`${css.addButton} ${css.collection}`}>
+      <AddIcon />
+    </div>
+  );
+};
+
 interface CollectionProps {
   collection: ICollection
   index: number
@@ -107,9 +112,10 @@ interface CollectionProps {
   handleUpdateAttributePosition: (collection: ICollection, attrName: string,
     newPosition: number, newAttrsOrder: Array<any>) => void;
   handleAddCollection: () => void;
+  handleAddAttribute: (collection: ICollection) => void;
 }
 const Collection = (props: CollectionProps) => {
-  const {collection, index, isLast, handleUpdateAttributePosition, handleAddCollection} = props;
+  const {collection, index, isLast, handleUpdateAttributePosition, handleAddCollection, handleAddAttribute} = props;
   const style: React.CSSProperties = {marginTop: index * CollectionOffset, gap: AttrsGap};
   const levelRef = useRef<HTMLDivElement>(null);
   const [levelBBox, setLevelBBox] = useState<IBoundingBox>({top: 0, left: 0, width: 0, height: 0});
@@ -150,6 +156,7 @@ const Collection = (props: CollectionProps) => {
           {collection.attrs.map(attr => <Attr attr={attr} key={`attr-${index}-${attr.cid}`} />)}
         </SortableContext>
       </div>}
+      {<AddAttribute collection={collection} handleAddAttribute={handleAddAttribute}/>}
       <AttrsArrow levelBBox={levelBBox} key={`attrs-arrow-${index}-${collection.cid}`} />
       {!isLast && <LevelArrow levelBBox={levelBBox} key={`level-arrow-${index}-${collection.cid}`}/>}
       {isLast && <AddCollection levelBBox={levelBBox} handleAddCollection={handleAddCollection}/>}
@@ -160,7 +167,7 @@ const Collection = (props: CollectionProps) => {
 
 export const Hierarchy = (props: IProps) => {
   const {selectedDataSet, dataSets, collections, handleSelectDataSet,
-    handleUpdateAttributePosition, handleAddCollection} = props;
+    handleUpdateAttributePosition, handleAddCollection, handleAddAttribute} = props;
 
   const renderHeirarchy = () => {
     const numCollections = collections.length;
@@ -176,6 +183,7 @@ export const Hierarchy = (props: IProps) => {
                 isLast={index >= numCollections - 1}
                 handleUpdateAttributePosition={handleUpdateAttributePosition}
                 handleAddCollection={handleAddCollection}
+                handleAddAttribute={handleAddAttribute}
               />
             );
           })}

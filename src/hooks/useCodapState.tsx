@@ -174,6 +174,12 @@ export const useCodapState = () => {
     updateCollections();
   };
 
+  const handleAddAttribute = async (collection: ICollection) => {
+    const newAttributeName = `newAttr${collection.attrs.length + 1}`;
+    await connect.createNewAttribute(selectedDataSet.name, collection.name, newAttributeName);
+    updateCollections();
+  };
+
   const updateInteractiveState = useCallback((update: InteractiveState) => {
     const newState = {...interactiveState, ...update};
     codapInterface.updateInteractiveState(newState);
@@ -192,6 +198,7 @@ export const useCodapState = () => {
     items,
     connected,
     handleUpdateAttributePosition,
-    handleAddCollection
+    handleAddCollection,
+    handleAddAttribute
   };
 };
