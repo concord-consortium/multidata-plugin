@@ -67,8 +67,13 @@ const LevelArrow = ({levelBBox}: {levelBBox: IBoundingBox}) => {
   );
 };
 
-const AddCollection = ({levelBBox, handleAddCollection, collections}:
-  {levelBBox: IBoundingBox, handleAddCollection: (newCollectionName: string) => void, collections: Array<ICollection>}) => {
+interface IAddCollectionProps {
+  levelBBox: IBoundingBox,
+  handleAddCollection: (newCollectionName: string) => void,
+  collections: Array<ICollection>
+}
+
+const AddCollection = ({levelBBox, handleAddCollection, collections}: IAddCollectionProps) => {
   const {top, left, width} = levelBBox;
   const style: React.CSSProperties = {left: left + width, top, position: "absolute"};
 
@@ -84,15 +89,15 @@ const AddCollection = ({levelBBox, handleAddCollection, collections}:
   const renderTitleBox = () => {
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
       setNewCollectionName(e.target.value);
-    }
+    };
 
     const handleNewNameClick = () => {
       const isNameDuplicate = collections.find(coll => coll.name === newCollectionName);
       if (!newCollectionName.length) {
-        setErrorMessage("Error: Collection name must be at least one character long.")
+        setErrorMessage("Error: Collection name must be at least one character long.");
         setShowError(true);
       } else if (isNameDuplicate) {
-        setErrorMessage("Error: A collection with that name already exists.")
+        setErrorMessage("Error: A collection with that name already exists.");
         setShowError(true);
       } else {
         handleAddCollection(newCollectionName);
@@ -191,7 +196,14 @@ const Collection = (props: CollectionProps) => {
       </div>}
       <AttrsArrow levelBBox={levelBBox} key={`attrs-arrow-${index}-${collection.cid}`} />
       {!isLast && <LevelArrow levelBBox={levelBBox} key={`level-arrow-${index}-${collection.cid}`}/>}
-      {isLast && <AddCollection levelBBox={levelBBox} handleAddCollection={handleAddCollection} collections={collections}/>}
+      {
+        isLast &&
+          <AddCollection
+            levelBBox={levelBBox}
+            handleAddCollection={handleAddCollection}
+            collections={collections}
+          />
+      }
     </div>
     </DndContext>
   );
