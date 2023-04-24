@@ -2,6 +2,9 @@ import React, { useEffect, useRef, useState } from "react";
 import { InteractiveState } from "../hooks/useCodapState";
 import { IDataSet, ICollections, ICollection } from "../types";
 import { Menu } from "./menu";
+import { DndContext, DragEndEvent, closestCenter } from "@dnd-kit/core";
+import { SortableContext, verticalListSortingStrategy, useSortable, arrayMove} from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
 
 import css from "./hierarchy.scss";
 
@@ -22,6 +25,8 @@ interface IProps {
   interactiveState: InteractiveState
   handleSelectDataSet: (e: React.ChangeEvent<HTMLSelectElement>) => void
   updateInteractiveState: (update: Partial<InteractiveState>) => void
+  handleUpdateAttributePosition: (collection: ICollection, attrName: string,
+    newPosition: number, newAttrsOrder: Array<any>) => void
 }
 
 interface IBoundingBox {
@@ -61,9 +66,18 @@ const LevelArrow = ({levelBBox}: {levelBBox: IBoundingBox}) => {
 };
 
 const Attr = ({attr}: {attr: any}) => {
+  const {attributes, listeners, setNodeRef, transform, transition, isDragging} = useSortable({id: attr.cid});
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    cursor: isDragging ? "grabbing" : "grab",
+  };
+
   return (
-    <div className={css.attr}>
-      {attr.name}
+    <div className={css.attrContainer} ref={setNodeRef} style={style} {...attributes} {...listeners}>
+      <div className={css.attr}>
+        {attr.name}
+      </div>
     </div>
   );
 };
@@ -72,9 +86,11 @@ interface CollectionProps {
   collection: ICollection
   index: number
   isLast: boolean;
+  handleUpdateAttributePosition: (collection: ICollection, attrName: string,
+    newPosition: number, newAttrsOrder: Array<any>) => void;
 }
 const Collection = (props: CollectionProps) => {
-  const {collection, index, isLast} = props;
+  const {collection, index, isLast, handleUpdateAttributePosition} = props;
   const style: React.CSSProperties = {marginTop: index * CollectionOffset, gap: AttrsGap};
   const levelRef = useRef<HTMLDivElement>(null);
   const [levelBBox, setLevelBBox] = useState<IBoundingBox>({top: 0, left: 0, width: 0, height: 0});
@@ -91,20 +107,38 @@ const Collection = (props: CollectionProps) => {
     }
   });
 
+  const handleDragEnd = (e: DragEndEvent) => {
+    const {active, over} = e;
+    if (active.id !== over?.id) {
+      const activeAttr = collection.attrs.find((attr) => attr.cid === active.id);
+      const activeAttrIndex = collection.attrs.indexOf(activeAttr);
+      const overIndex = collection.attrs.findIndex((attr) => attr.cid === over?.id);
+      const newAttrsOrder = arrayMove(collection.attrs, activeAttrIndex, overIndex);
+
+      // If the new index is greater than the active index, CODAP will for some reason place behind one.
+      const newIndex = overIndex > activeAttrIndex ? overIndex + 1 : overIndex;
+      handleUpdateAttributePosition(collection, activeAttr.name, newIndex, newAttrsOrder);
+    }
+  };
+
   return (
+    <DndContext collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
     <div className={css.collection} style={style}>
       <div className={css.level} ref={levelRef}>Level {index + 1}</div>
       <div className={css.attrs}>
-        {collection.attrs.map(attr => <Attr attr={attr} key={`attr-${index}-${attr.cid}`} />)}
+        <SortableContext items={collection.attrs.map((attr) => attr.cid)} strategy={verticalListSortingStrategy}>
+          {collection.attrs.map(attr => <Attr attr={attr} key={`attr-${index}-${attr.cid}`} />)}
+        </SortableContext>
       </div>
       <AttrsArrow levelBBox={levelBBox} key={`attrs-arrow-${index}-${collection.cid}`} />
       {!isLast && <LevelArrow levelBBox={levelBBox} key={`level-arrow-${index}-${collection.cid}`}/>}
     </div>
+    </DndContext>
   );
 };
 
 export const Hierarchy = (props: IProps) => {
-  const {selectedDataSet, dataSets, collections, handleSelectDataSet} = props;
+  const {selectedDataSet, dataSets, collections, handleSelectDataSet, handleUpdateAttributePosition} = props;
 
   const renderHeirarchy = () => {
     const numCollections = collections.length;
@@ -118,6 +152,7 @@ export const Hierarchy = (props: IProps) => {
                 key={`${index}-${collection.cid}`}
                 index={index}
                 isLast={index >= numCollections - 1}
+                handleUpdateAttributePosition={handleUpdateAttributePosition}
               />
             );
           })}
