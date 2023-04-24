@@ -167,8 +167,7 @@ export const useCodapState = () => {
     await connect.updateAttributePosition(selectedDataSet.name, coll.name, attrName, position);
   };
 
-  const handleAddCollection = async () => {
-    const newCollectionName = `Collection ${collections.length + 1}`;
+  const handleAddCollection = async (newCollectionName: string) => {
     await connect.createNewCollection(selectedDataSet.name, newCollectionName);
     // update collections because CODAP does not send dataContextChangeNotice
     updateCollections();

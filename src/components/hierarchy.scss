@@ -13,6 +13,16 @@
 
     color: #222222;
 
+    .createNewCollection {
+      margin-left: 5px;
+      .submitButton {
+        margin-left: 5px;
+      }
+      .error {
+        color: red;
+      }
+    }
+
     .addCollButton {
       margin-left: 5px;
       background-color: #bddfdf;
