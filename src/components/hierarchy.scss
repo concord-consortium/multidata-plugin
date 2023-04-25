@@ -12,6 +12,16 @@
     flex-direction: column;
     color: #222222;
 
+    .createNewCollection {
+      margin-left: 5px;
+      .submitButton {
+        margin-left: 5px;
+      }
+      .error {
+        color: red;
+      }
+    }
+
     .level {
       padding: 4px 12px 4px 13px;
       border: solid 1px #979797;
