@@ -202,6 +202,19 @@ export const useCodapState = () => {
     updateCollections();
   };
 
+  const handleRemoveAttribute = async (collection: ICollection, attrName: string) => {
+    const collIndex = collections.indexOf(collection);
+    const updatedCollection = {...collections[collIndex]};
+    const indexOfAttr = updatedCollection.attrs.findIndex((attr) => attr.name === attrName);
+    updatedCollection.attrs.splice(indexOfAttr, 1);
+    const newCollections = [...collections];
+    newCollections[collIndex] = updatedCollection;
+    console.log("updatedCollection", updatedCollection);
+    setCollections(newCollections);
+
+    // updateCollections();
+  }
+
   const updateInteractiveState = useCallback((update: InteractiveState) => {
     const newState = {...interactiveState, ...update};
     codapInterface.updateInteractiveState(newState);
@@ -221,6 +234,7 @@ export const useCodapState = () => {
     connected,
     handleUpdateAttributePosition,
     handleAddCollection,
-    handleAddAttribute
+    handleAddAttribute,
+    handleRemoveAttribute
   };
 };
