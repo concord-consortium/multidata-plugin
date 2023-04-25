@@ -181,7 +181,7 @@ export const useCodapState = () => {
     if (!attrNameAlreadyUsed) {
       newAttributeName = proposedName;
     } else {
-      const attrsWithSameName = collection.attrs.filter((attr) => attr.name.includes(proposedName));
+      const attrsWithSameName = collection.attrs.filter((attr) => attr.name.startsWith(proposedName));
       const indexes = attrsWithSameName.map((attr) => Number(attr.name.slice(proposedName.length)));
       const highestIndex = Math.max(...indexes);
       if (!highestIndex) {
