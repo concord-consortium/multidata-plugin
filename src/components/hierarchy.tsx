@@ -106,7 +106,7 @@ interface IAddCollectionProps {
   levelBBox: IBoundingBox,
   handleAddCollection: (newCollectionName: string) => void,
   collections: Array<ICollection>
-
+}
 
 const AddCollection = ({levelBBox, handleAddCollection, collections}: IAddCollectionProps) => {
   const {top, left, width} = levelBBox;
@@ -178,17 +178,6 @@ const Attr = ({attr}: {attr: any}) => {
   );
 };
 
-const AddCollection = ({levelBBox, handleAddCollection}:
-  {levelBBox: IBoundingBox, handleAddCollection: () => void}) => {
-  const {top, left, width} = levelBBox;
-  const style: React.CSSProperties = {left: left + width, top, position: "absolute"};
-  return (
-    <div onClick={() => handleAddCollection()} style={style} className={`${css.addButton} ${css.collection}`}>
-      <AddIcon />
-    </div>
-  );
-};
-
 interface CollectionProps {
   collection: ICollection
   index: number
@@ -201,7 +190,8 @@ interface CollectionProps {
 }
 
 const Collection = (props: CollectionProps) => {
-  const {collection, index, isLast, handleUpdateAttributePosition, handleAddCollection, collections} = props;
+  const {collection, index, isLast, handleUpdateAttributePosition, handleAddAttribute,
+    handleAddCollection, collections} = props;
   const style: React.CSSProperties = {marginTop: index * CollectionOffset, gap: AttrsGap};
   const levelRef = useRef<HTMLDivElement>(null);
   const [levelBBox, setLevelBBox] = useState<IBoundingBox>({top: 0, left: 0, width: 0, height: 0});
