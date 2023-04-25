@@ -150,7 +150,7 @@ const AddCollection = ({levelBBox, handleAddCollection, collections}: IAddCollec
 
   const renderAddButon = () => {
     return (
-      <div onClick={handleClick} style={style} className={css.addCollButton}><AddIcon /></div>
+      <div onClick={handleClick} style={style} className={`${css.addButton} ${css.collection}`}><AddIcon /></div>
     );
   };
 
