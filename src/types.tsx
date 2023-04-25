@@ -59,4 +59,5 @@ export interface ITableProps {
   mapCellsFromValues: (values: IValues) => void,
   mapHeadersFromValues: (values: IValues) => void,
   getValueLength: (firstRow: Array<IValues>) => number
+  paddingStyle: Record<string, string>
 }

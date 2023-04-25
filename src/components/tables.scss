@@ -52,7 +52,7 @@ table {
   }
 
   &.landscapeTable {
-    .collection0 {
+    &.collection0, .collection0 {
       border: 1px solid #3c78d8;
       td {
         border: 1px solid #3c78d8;
@@ -111,11 +111,11 @@ table {
   }
 
   &.portraitTable {
-    .collection0, .collection0>tbody>tr>td {
+    &.collection0, .collection0, &.collection0>tbody>tr>td {
       border: 1px solid #3c78d8;
     }
 
-    .collection0>th, th.collection0 {
+    &.collection0>th, .collection0>th, th.collection0 {
       background-color: #CEE9FB;
       border: 1px solid #3c78d8;
     }

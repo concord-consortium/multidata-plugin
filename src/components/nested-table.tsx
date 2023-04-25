@@ -110,18 +110,17 @@ export const NestedTable = (props: IProps) => {
   const renderTable = () => {
     const isNoHierarchy = collections.length === 1;
     const classesExist = collectionClasses.length > 0;
-    const landscapeProps = {showHeaders: interactiveState.showHeaders, collectionClasses, collections, selectedDataSet,
-      getClassName, mapHeadersFromValues, mapCellsFromValues, getValueLength};
-    const portraitProps = {...landscapeProps, paddingStyle};
-    const flatProps = {...landscapeProps, items};
+    const tableProps = {showHeaders: interactiveState.showHeaders, collectionClasses, collections, selectedDataSet,
+      getClassName, mapHeadersFromValues, mapCellsFromValues, getValueLength, paddingStyle};
+    const flatProps = {...tableProps, items};
     if (isNoHierarchy && classesExist) {
       return <FlatTable {...flatProps}/>;
     } else {
       return (
         interactiveState.displayMode === portrait ?
-          <PortraitView {...portraitProps} /> :
+          <PortraitView {...tableProps} /> :
           interactiveState.displayMode === landscape ?
-          <LandscapeView {...landscapeProps} /> :
+          <LandscapeView {...tableProps} /> :
           <div/>
       );
     }
