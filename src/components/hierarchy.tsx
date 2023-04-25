@@ -6,6 +6,7 @@ import { DndContext, DragEndEvent, closestCenter } from "@dnd-kit/core";
 import { SortableContext, verticalListSortingStrategy, useSortable, arrayMove} from "@dnd-kit/sortable";
 import AddIcon from "../assets/add-icon.svg";
 import { CSS } from "@dnd-kit/utilities";
+import { useWindowResized } from "../hooks/useWindowResized";
 
 import css from "./hierarchy.scss";
 
@@ -212,6 +213,10 @@ const Collection = (props: CollectionProps) => {
 export const Hierarchy = (props: IProps) => {
   const {selectedDataSet, dataSets, collections, handleSelectDataSet,
     handleUpdateAttributePosition, handleAddCollection} = props;
+
+  // this will ensure that the component re-renders if the plugin window resizes - it keeps a local state variable
+  // of the last resize time
+  useWindowResized();
 
   const renderHeirarchy = () => {
     const numCollections = collections.length;
