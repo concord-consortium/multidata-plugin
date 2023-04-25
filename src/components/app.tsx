@@ -8,7 +8,8 @@ import css from "./app.scss";
 function App() {
   const {connected, selectedDataSet, dataSets, collections, items, interactiveState,
          updateInteractiveState: _updateInteractiveState,
-         handleSelectDataSet: _handleSelectDataSet, handleUpdateAttributePosition
+         handleSelectDataSet: _handleSelectDataSet, handleUpdateAttributePosition,
+         handleAddCollection
         } = useCodapState();
 
   const updateInteractiveState = useCallback((update: Partial<InteractiveState>) => {
@@ -77,6 +78,7 @@ function App() {
           handleSelectDataSet={handleSelectDataSet}
           handleUpdateAttributePosition={handleUpdateAttributePosition}
           updateInteractiveState={updateInteractiveState}
+          handleAddCollection={handleAddCollection}
         />
       );
 

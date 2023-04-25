@@ -62,7 +62,6 @@ export const connect = {
 
     getItems: async function(dSName) {
       const itemCount = await this.getItemCount(dSName);
-      const dataContext = await this.getDataSet(dSName);
       let items = [];
 
       for (let i = 0; i < itemCount; i ++) {
@@ -141,6 +140,21 @@ export const connect = {
         }
       };
       await codapInterface.sendRequest(message);
+    },
+
+    createNewCollection: async function(dSName, collName) {
+      const message = {
+        "action": "create",
+        "resource": `dataContext[${dSName}].collection`,
+        "values": {
+          "name": collName,
+          "attributes": [{
+            "name": "newAttr",
+          }]
+        }
+      };
+      const newCollection = await codapInterface.sendRequest(message);
+      return newCollection.values;
     },
 
     iFrameDescriptor: {

@@ -4,6 +4,7 @@ import { IDataSet, ICollections, ICollection } from "../types";
 import { Menu } from "./menu";
 import { DndContext, DragEndEvent, closestCenter } from "@dnd-kit/core";
 import { SortableContext, verticalListSortingStrategy, useSortable, arrayMove} from "@dnd-kit/sortable";
+import AddIcon from "../assets/add-icon.svg";
 import { CSS } from "@dnd-kit/utilities";
 
 import css from "./hierarchy.scss";
@@ -26,7 +27,8 @@ interface IProps {
   handleSelectDataSet: (e: React.ChangeEvent<HTMLSelectElement>) => void
   updateInteractiveState: (update: Partial<InteractiveState>) => void
   handleUpdateAttributePosition: (collection: ICollection, attrName: string,
-    newPosition: number, newAttrsOrder: Array<any>) => void
+  newPosition: number, newAttrsOrder: Array<any>) => void,
+  handleAddCollection: (newCollectionName: string) => void
 }
 
 interface IBoundingBox {
@@ -65,6 +67,65 @@ const LevelArrow = ({levelBBox}: {levelBBox: IBoundingBox}) => {
   );
 };
 
+interface IAddCollectionProps {
+  levelBBox: IBoundingBox,
+  handleAddCollection: (newCollectionName: string) => void,
+  collections: Array<ICollection>
+}
+
+const AddCollection = ({levelBBox, handleAddCollection, collections}: IAddCollectionProps) => {
+  const {top, left, width} = levelBBox;
+  const style: React.CSSProperties = {left: left + width, top, position: "absolute"};
+
+  const [showTitleBox, setShowTitleBox] = useState<boolean>(false);
+  const [newCollectionName, setNewCollectionName] = useState<string>("");
+  const [showError, setShowError] = useState<boolean>(false);
+  const [errorMessage, setErrorMessage] = useState<string>("");
+
+  const handleClick = () => {
+    setShowTitleBox(true);
+  };
+
+  const renderTitleBox = () => {
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+      setNewCollectionName(e.target.value);
+    };
+
+    const handleNewNameClick = () => {
+      const isNameDuplicate = collections.find(coll => coll.name === newCollectionName);
+      if (!newCollectionName.length) {
+        setErrorMessage("Error: Collection name must be at least one character long.");
+        setShowError(true);
+      } else if (isNameDuplicate) {
+        setErrorMessage("Error: A collection with that name already exists.");
+        setShowError(true);
+      } else {
+        handleAddCollection(newCollectionName);
+      }
+    };
+
+    return (
+      <div className={css.createNewCollection} style={style}>
+        <input type="textbox" defaultValue={``} onChange={handleChange}></input>
+        <button className={css.submitButton} onClick={handleNewNameClick}>Create</button>
+        {showError && <div className={css.error}>{errorMessage}</div>}
+      </div>
+    );
+  };
+
+  const renderAddButon = () => {
+    return (
+      <div onClick={handleClick} style={style} className={css.addCollButton}><AddIcon /></div>
+    );
+  };
+
+  return (
+    <div>
+      {showTitleBox ? renderTitleBox() : renderAddButon()}
+    </div>
+  );
+};
+
 const Attr = ({attr}: {attr: any}) => {
   const {attributes, listeners, setNodeRef, transform, transition, isDragging} = useSortable({id: attr.cid});
   const style = {
@@ -88,9 +149,11 @@ interface CollectionProps {
   isLast: boolean;
   handleUpdateAttributePosition: (collection: ICollection, attrName: string,
     newPosition: number, newAttrsOrder: Array<any>) => void;
+  handleAddCollection: (newCollectionName: string) => void;
+  collections: Array<ICollection>
 }
 const Collection = (props: CollectionProps) => {
-  const {collection, index, isLast, handleUpdateAttributePosition} = props;
+  const {collection, index, isLast, handleUpdateAttributePosition, handleAddCollection, collections} = props;
   const style: React.CSSProperties = {marginTop: index * CollectionOffset, gap: AttrsGap};
   const levelRef = useRef<HTMLDivElement>(null);
   const [levelBBox, setLevelBBox] = useState<IBoundingBox>({top: 0, left: 0, width: 0, height: 0});
@@ -125,20 +188,30 @@ const Collection = (props: CollectionProps) => {
     <DndContext collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
     <div className={css.collection} style={style}>
       <div className={css.level} ref={levelRef}>Level {index + 1}</div>
+      {collection.attrs?.length &&
       <div className={css.attrs}>
         <SortableContext items={collection.attrs.map((attr) => attr.cid)} strategy={verticalListSortingStrategy}>
           {collection.attrs.map(attr => <Attr attr={attr} key={`attr-${index}-${attr.cid}`} />)}
         </SortableContext>
-      </div>
+      </div>}
       <AttrsArrow levelBBox={levelBBox} key={`attrs-arrow-${index}-${collection.cid}`} />
       {!isLast && <LevelArrow levelBBox={levelBBox} key={`level-arrow-${index}-${collection.cid}`}/>}
+      {
+        isLast &&
+          <AddCollection
+            levelBBox={levelBBox}
+            handleAddCollection={handleAddCollection}
+            collections={collections}
+          />
+      }
     </div>
     </DndContext>
   );
 };
 
 export const Hierarchy = (props: IProps) => {
-  const {selectedDataSet, dataSets, collections, handleSelectDataSet, handleUpdateAttributePosition} = props;
+  const {selectedDataSet, dataSets, collections, handleSelectDataSet,
+    handleUpdateAttributePosition, handleAddCollection} = props;
 
   const renderHeirarchy = () => {
     const numCollections = collections.length;
@@ -153,6 +226,8 @@ export const Hierarchy = (props: IProps) => {
                 index={index}
                 isLast={index >= numCollections - 1}
                 handleUpdateAttributePosition={handleUpdateAttributePosition}
+                handleAddCollection={handleAddCollection}
+                collections={collections}
               />
             );
           })}
