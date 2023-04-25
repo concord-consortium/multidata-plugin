@@ -29,7 +29,7 @@ interface IProps {
   handleUpdateAttributePosition: (collection: ICollection, attrName: string,
   newPosition: number, newAttrsOrder: Array<any>) => void,
   handleAddCollection: () => void,
-  handleAddAttribute: (collection: ICollection) => void,
+  handleAddAttribute: (collection: ICollection, newAttrName: string) => void,
 }
 
 interface IBoundingBox {
@@ -69,9 +69,34 @@ const LevelArrow = ({levelBBox}: {levelBBox: IBoundingBox}) => {
 };
 
 const AddAttribute = ({collection, handleAddAttribute}: {collection: ICollection,
-  handleAddAttribute: (coll: ICollection) => void}) => {
-  return (
-    <div onClick={() => handleAddAttribute(collection)} className={`${css.addButton} ${css.attribute}`}>
+  handleAddAttribute: (coll: ICollection, newAttrName: string) => void}) => {
+  const [showInput, setShowInput] = useState<boolean>(false);
+  const [newAttrName, setNewAttrName] = useState<string>("newAttr");
+
+  const handleAddButtonClick = () => {
+    setShowInput(true);
+  };
+
+  const renderInput = () => {
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+      setNewAttrName(e.target.value);
+    };
+
+    const handleNewAttrNameClick = () => {
+      handleAddAttribute(collection, newAttrName);
+      setShowInput(false);
+    };
+
+    return (
+      <div className={css.createNewAttr}>
+        <input type="textbox" defaultValue={"newAttr"} onChange={handleChange}></input>
+        <button onClick={handleNewAttrNameClick}>+</button>
+      </div>
+    );
+  };
+
+  return showInput ? renderInput() : (
+    <div onClick={handleAddButtonClick} className={`${css.addButton} ${css.attribute}`}>
       <AddIcon />
     </div>
   );
@@ -112,7 +137,7 @@ interface CollectionProps {
   handleUpdateAttributePosition: (collection: ICollection, attrName: string,
     newPosition: number, newAttrsOrder: Array<any>) => void;
   handleAddCollection: () => void;
-  handleAddAttribute: (collection: ICollection) => void;
+  handleAddAttribute: (collection: ICollection, newAttrName: string) => void;
 }
 const Collection = (props: CollectionProps) => {
   const {collection, index, isLast, handleUpdateAttributePosition, handleAddCollection, handleAddAttribute} = props;
