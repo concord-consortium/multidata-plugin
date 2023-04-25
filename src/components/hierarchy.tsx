@@ -30,6 +30,7 @@ interface IProps {
   handleUpdateAttributePosition: (collection: ICollection, attrName: string,
   newPosition: number, newAttrsOrder: Array<any>) => void,
   handleAddCollection: (newCollectionName: string) => void
+  handleAddAttribute: (collection: ICollection, newAttrName: string) => void,
 }
 
 interface IBoundingBox {
@@ -65,6 +66,40 @@ const LevelArrow = ({levelBBox}: {levelBBox: IBoundingBox}) => {
     <svg className={css.levelArrow} style={style} xmlns="http://www.w3.org/2000/svg" width={CollectionGap} height={CollectionOffset} viewBox={`0 0 ${CollectionGap} ${CollectionOffset}`}>
       <path d={path} stroke={StrokeColor} strokeWidth={StrokeWidth} fill="transparent" />
     </svg>
+  );
+};
+
+const AddAttribute = ({collection, handleAddAttribute}: {collection: ICollection,
+  handleAddAttribute: (coll: ICollection, newAttrName: string) => void}) => {
+  const [showInput, setShowInput] = useState<boolean>(false);
+  const [newAttrName, setNewAttrName] = useState<string>("newAttr");
+
+  const handleAddButtonClick = () => {
+    setShowInput(true);
+  };
+
+  const renderInput = () => {
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+      setNewAttrName(e.target.value);
+    };
+
+    const handleNewAttrNameClick = () => {
+      handleAddAttribute(collection, newAttrName);
+      setShowInput(false);
+    };
+
+    return (
+      <div className={css.createNewAttr}>
+        <input type="textbox" defaultValue={"newAttr"} onChange={handleChange}></input>
+        <button onClick={handleNewAttrNameClick}>+</button>
+      </div>
+    );
+  };
+
+  return showInput ? renderInput() : (
+    <div onClick={handleAddButtonClick} className={`${css.addButton} ${css.attribute}`}>
+      <AddIcon />
+    </div>
   );
 };
 
@@ -116,7 +151,7 @@ const AddCollection = ({levelBBox, handleAddCollection, collections}: IAddCollec
 
   const renderAddButon = () => {
     return (
-      <div onClick={handleClick} style={style} className={css.addCollButton}><AddIcon /></div>
+      <div onClick={handleClick} style={style} className={`${css.addButton} ${css.collection}`}><AddIcon /></div>
     );
   };
 
@@ -151,10 +186,13 @@ interface CollectionProps {
   handleUpdateAttributePosition: (collection: ICollection, attrName: string,
     newPosition: number, newAttrsOrder: Array<any>) => void;
   handleAddCollection: (newCollectionName: string) => void;
-  collections: Array<ICollection>
+  handleAddAttribute: (collection: ICollection, newAttrName: string) => void;
+  collections: Array<ICollection>;
 }
+
 const Collection = (props: CollectionProps) => {
-  const {collection, index, isLast, handleUpdateAttributePosition, handleAddCollection, collections} = props;
+  const {collection, index, isLast, handleUpdateAttributePosition, handleAddAttribute,
+    handleAddCollection, collections} = props;
   const style: React.CSSProperties = {marginTop: index * CollectionOffset, gap: AttrsGap};
   const levelRef = useRef<HTMLDivElement>(null);
   const [levelBBox, setLevelBBox] = useState<IBoundingBox>({top: 0, left: 0, width: 0, height: 0});
@@ -195,6 +233,7 @@ const Collection = (props: CollectionProps) => {
           {collection.attrs.map(attr => <Attr attr={attr} key={`attr-${index}-${attr.cid}`} />)}
         </SortableContext>
       </div>}
+      {<AddAttribute collection={collection} handleAddAttribute={handleAddAttribute}/>}
       <AttrsArrow levelBBox={levelBBox} key={`attrs-arrow-${index}-${collection.cid}`} />
       {!isLast && <LevelArrow levelBBox={levelBBox} key={`level-arrow-${index}-${collection.cid}`}/>}
       {
@@ -212,7 +251,7 @@ const Collection = (props: CollectionProps) => {
 
 export const Hierarchy = (props: IProps) => {
   const {selectedDataSet, dataSets, collections, handleSelectDataSet,
-    handleUpdateAttributePosition, handleAddCollection} = props;
+    handleUpdateAttributePosition, handleAddCollection, handleAddAttribute} = props;
 
   // this will ensure that the component re-renders if the plugin window resizes - it keeps a local state variable
   // of the last resize time
@@ -232,6 +271,7 @@ export const Hierarchy = (props: IProps) => {
                 isLast={index >= numCollections - 1}
                 handleUpdateAttributePosition={handleUpdateAttributePosition}
                 handleAddCollection={handleAddCollection}
+                handleAddAttribute={handleAddAttribute}
                 collections={collections}
               />
             );

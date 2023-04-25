@@ -10,7 +10,6 @@
   .collection {
     display: flex;
     flex-direction: column;
-
     color: #222222;
 
     .createNewCollection {
@@ -20,26 +19,6 @@
       }
       .error {
         color: red;
-      }
-    }
-
-    .addCollButton {
-      margin-left: 5px;
-      background-color: #bddfdf;
-      border-radius: 20px;
-      width: 25px;
-      height: 25px;
-      &:hover {
-        cursor: pointer;
-        background-color: #979797;
-      }
-      &:active {
-        background-color: #979797;
-      }
-      svg {
-        path{
-          fill: white
-        }
       }
     }
 
@@ -59,7 +38,51 @@
         border: solid 1px #979797;
         background-color: #e6e6e6;
         text-align: center;
-        max-width: 120px;
+        max-width: 65px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+    }
+  }
+
+  .createNewAttr {
+    display: flex;
+    flex-direction: column;
+    box-sizing: border-box;
+    align-items: center;
+    input {
+      width: 65px;
+      box-sizing: border-box;
+    }
+    button {
+      width: 25px;
+      align-self: center;
+      margin-top: 5px;
+    }
+  }
+
+  .addButton {
+    background-color: #bddfdf;
+    border-radius: 20px;
+    width: 25px;
+    height: 25px;
+    &.collection {
+      margin-left: 5px;
+    }
+    &.attribute {
+      align-self: center;
+      margin-top: -5px;
+    }
+    &:hover {
+      cursor: pointer;
+      background-color: #979797;
+    }
+    &:active {
+      background-color: #979797;
+    }
+    svg {
+      path{
+        fill: white
       }
     }
   }

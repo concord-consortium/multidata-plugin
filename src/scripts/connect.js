@@ -153,8 +153,18 @@ export const connect = {
           }]
         }
       };
-      const newCollection = await codapInterface.sendRequest(message);
-      return newCollection.values;
+      await codapInterface.sendRequest(message);
+    },
+
+    createNewAttribute: async function(dSName, collName, attrName) {
+      const message = {
+        "action": "create",
+        "resource": `dataContext[${dSName}].collection[${collName}].attribute`,
+        "values": {
+          "name": attrName,
+        }
+      };
+      await codapInterface.sendRequest(message);
     },
 
     iFrameDescriptor: {

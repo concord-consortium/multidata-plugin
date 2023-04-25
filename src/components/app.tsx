@@ -9,7 +9,7 @@ function App() {
   const {connected, selectedDataSet, dataSets, collections, items, interactiveState,
          updateInteractiveState: _updateInteractiveState,
          handleSelectDataSet: _handleSelectDataSet, handleUpdateAttributePosition,
-         handleAddCollection
+         handleAddCollection, handleAddAttribute
         } = useCodapState();
 
   const updateInteractiveState = useCallback((update: Partial<InteractiveState>) => {
@@ -86,6 +86,7 @@ function App() {
           handleUpdateAttributePosition={handleUpdateAttributePosition}
           updateInteractiveState={updateInteractiveState}
           handleAddCollection={handleAddCollection}
+          handleAddAttribute={handleAddAttribute}
         />
       );
 

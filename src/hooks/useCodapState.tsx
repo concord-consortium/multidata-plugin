@@ -173,6 +173,35 @@ export const useCodapState = () => {
     updateCollections();
   };
 
+  const handleAddAttribute = async (collection: ICollection, attrName: string) => {
+    const proposedName = attrName.length ? attrName : "newAttr";
+    let newAttributeName;
+    const attrNameAlreadyUsed = collection.attrs.find((attr) => attr.name === proposedName);
+    if (!attrNameAlreadyUsed) {
+      newAttributeName = proposedName;
+    } else {
+      const attrsWithSameName = collection.attrs.filter((attr) => attr.name.startsWith(proposedName));
+      const indexes = attrsWithSameName.map((attr) => Number(attr.name.slice(proposedName.length)));
+      const highestIndex = Math.max(...indexes);
+      if (!highestIndex) {
+        newAttributeName = proposedName + 1;
+      } else {
+        for (let i = 1; i <= highestIndex; i++) {
+          const nameWithIndex = proposedName + i;
+          const isNameWithIndexUsed = attrsWithSameName.find((attr) => attr.name === nameWithIndex);
+          if (!isNameWithIndexUsed) {
+            newAttributeName = nameWithIndex;
+            break;
+          } else if (i === highestIndex) {
+            newAttributeName = proposedName + (highestIndex + 1);
+          }
+        }
+      }
+    }
+    await connect.createNewAttribute(selectedDataSet.name, collection.name, newAttributeName);
+    updateCollections();
+  };
+
   const updateInteractiveState = useCallback((update: InteractiveState) => {
     const newState = {...interactiveState, ...update};
     codapInterface.updateInteractiveState(newState);
@@ -191,6 +220,7 @@ export const useCodapState = () => {
     items,
     connected,
     handleUpdateAttributePosition,
-    handleAddCollection
+    handleAddCollection,
+    handleAddAttribute
   };
 };
