@@ -49,6 +49,13 @@ function App() {
     }
   }, [interactiveState, selectedDataSet, _handleSelectDataSet]);
 
+  // unselect the dataset if it is deleted
+  useEffect(() => {
+    if (selectedDataSet && !dataSets.find(ds => ds.id === selectedDataSet.id)) {
+      _handleSelectDataSet("");
+    }
+  }, [interactiveState, dataSets, selectedDataSet, _handleSelectDataSet]);
+
   if (!connected) {
     return <div className={css.loading}>Loading...</div>;
   }
