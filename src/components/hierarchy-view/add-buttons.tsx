@@ -62,7 +62,7 @@ export const AddAttribute = ({collection, handleAddAttribute}: IProps) => {
     return (
       <div ref={ref} className={css.createNewAttr}>
         <input type="textbox" defaultValue={"newAttr"} onChange={handleChange}></input>
-        <button onClick={handleNewAttrNameClick}>Create Attribute</button>
+        <button onClick={handleNewAttrNameClick}>Add Attribute</button>
       </div>
     );
   };
