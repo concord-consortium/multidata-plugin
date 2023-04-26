@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { IBoundingBox, ICollection } from "../../types";
 import AddIcon from "../../assets/add-icon.svg";
 
@@ -12,25 +12,57 @@ interface IProps {
 export const AddAttribute = ({collection, handleAddAttribute}: IProps) => {
   const [showInput, setShowInput] = useState<boolean>(false);
   const [newAttrName, setNewAttrName] = useState<string>("newAttr");
+  const ref = useRef<HTMLDivElement>(null);
 
   const handleAddButtonClick = () => {
     setShowInput(true);
   };
 
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setNewAttrName(e.target.value);
+  };
+
+  const handleNewAttrNameClick = () => {
+    handleAddAttribute(collection, newAttrName);
+    setShowInput(false);
+  };
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (ref.current && !ref.current.contains(event?.target as Node)) {
+        setShowInput(false);
+      }
+    };
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        setShowInput(false);
+      } else if (event.key === "Enter") {
+        handleAddAttribute(collection, newAttrName);
+        setShowInput(false);
+      }
+    };
+
+    if (showInput) {
+      document.addEventListener("mousedown", handleClickOutside);
+      document.addEventListener("keydown", handleKeyDown);
+    } else {
+      document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener("keydown", handleKeyDown);
+    }
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener("keydown", handleKeyDown);
+    };
+
+  }, [showInput, ref, collection, handleAddAttribute, newAttrName]);
+
   const renderInput = () => {
-    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-      setNewAttrName(e.target.value);
-    };
-
-    const handleNewAttrNameClick = () => {
-      handleAddAttribute(collection, newAttrName);
-      setShowInput(false);
-    };
-
     return (
-      <div className={css.createNewAttr}>
+      <div ref={ref} className={css.createNewAttr}>
         <input type="textbox" defaultValue={"newAttr"} onChange={handleChange}></input>
-        <button onClick={handleNewAttrNameClick}>+</button>
+        <button onClick={handleNewAttrNameClick}>Create Attribute</button>
       </div>
     );
   };
