@@ -1,6 +1,7 @@
 import React from "react";
 import { InteractiveState } from "../../hooks/useCodapState";
 import { useWindowResized } from "../../hooks/useWindowResized";
+import { useDragging } from "../../hooks/useDragging";
 import { DndContext, DragOverlay, DropAnimation, closestCorners,
   defaultDropAnimation } from "@dnd-kit/core";
 import { IDataSet, ICollections, ICollection } from "../../types";
@@ -8,7 +9,6 @@ import { Collection } from "./collection";
 import { Menu } from "../menu";
 
 import css from "./hierarchy.scss";
-import { useDragging } from "../../hooks/useDragging";
 
 const CollectionGap = 23;
 
