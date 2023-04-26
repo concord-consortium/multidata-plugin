@@ -1,0 +1,41 @@
+.addButton {
+  background-color: #bddfdf;
+  border-radius: 20px;
+  width: 25px;
+  height: 25px;
+  &.collection {
+    margin-left: 5px;
+  }
+  &.attribute {
+    align-self: center;
+    margin-top: -5px;
+  }
+  &:hover {
+    cursor: pointer;
+    background-color: #979797;
+  }
+  &:active {
+    background-color: #979797;
+  }
+  svg {
+    path{
+      fill: white
+    }
+  }
+}
+
+.createNewAttr {
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+  align-items: center;
+  input {
+    width: 65px;
+    box-sizing: border-box;
+  }
+  button {
+    width: 25px;
+    align-self: center;
+    margin-top: 5px;
+  }
+}

@@ -167,6 +167,14 @@ export const connect = {
       await codapInterface.sendRequest(message);
     },
 
+    removeAttribute: async function (dSName, collName, attrName) {
+      const message = {
+        "action": "delete",
+        "resource": `dataContext[${dSName}].collection[${collName}].attribute[${attrName}]`,
+      };
+      await codapInterface.sendRequest(message);
+    },
+
     iFrameDescriptor: {
       version: '0.0.1',
       name: 'multidata-plugin',

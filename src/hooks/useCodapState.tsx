@@ -154,16 +154,7 @@ export const useCodapState = () => {
     return collections.find((c: ICollection) => c.id === id)?.name;
   };
 
-  const handleUpdateAttributePosition = async (coll: ICollection, attrName: string,
-    position: number, newAttrsOrder: Array<any>) => {
-    // first update the local collection state to avoid asynchronous re-render on plugin side
-    const collIndex = collections.indexOf(coll);
-    const updatedCollection = {...collections[collIndex]};
-    updatedCollection.attrs = newAttrsOrder;
-    const newCollections = [...collections];
-    newCollections[collIndex] = updatedCollection;
-    setCollections(newCollections);
-
+  const handleUpdateAttributePosition = async (coll: ICollection, attrName: string, position: number) => {
     await connect.updateAttributePosition(selectedDataSet.name, coll.name, attrName, position);
   };
 
@@ -212,6 +203,7 @@ export const useCodapState = () => {
     dataSets,
     selectedDataSet,
     collections,
+    handleSetCollections: setCollections,
     handleSelectDataSet,
     handleRefreshDataSet,
     getCollectionNameFromId,
@@ -221,6 +213,6 @@ export const useCodapState = () => {
     connected,
     handleUpdateAttributePosition,
     handleAddCollection,
-    handleAddAttribute
+    handleAddAttribute,
   };
 };

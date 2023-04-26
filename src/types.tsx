@@ -19,8 +19,7 @@ export interface ICollection {
   name: string,
   parent: number,
   title: string,
-  type: string,
-  cid: string,
+  type: string
 }
 
 export type ICollections = Array<ICollection>;
@@ -60,4 +59,11 @@ export interface ITableProps {
   mapHeadersFromValues: (values: IValues) => void,
   getValueLength: (firstRow: Array<IValues>) => number
   paddingStyle: Record<string, string>
+}
+
+export interface IBoundingBox {
+  top: number;
+  left: number;
+  width: number;
+  height: number;
 }
