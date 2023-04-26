@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect } from "react";
 import { InteractiveState, useCodapState } from "../hooks/useCodapState";
 import {NestedTable} from "./nested-table";
-import {Hierarchy} from "./hierarchy";
+import {Hierarchy} from "./hierarchy-view/hierarchy";
 
 import css from "./app.scss";
 
@@ -9,7 +9,7 @@ function App() {
   const {connected, selectedDataSet, dataSets, collections, items, interactiveState,
          updateInteractiveState: _updateInteractiveState,
          handleSelectDataSet: _handleSelectDataSet, handleUpdateAttributePosition,
-         handleAddCollection, handleAddAttribute, handleRemoveAttribute
+         handleAddCollection, handleAddAttribute, handleSetCollections
         } = useCodapState();
 
   const updateInteractiveState = useCallback((update: Partial<InteractiveState>) => {
@@ -87,7 +87,7 @@ function App() {
           updateInteractiveState={updateInteractiveState}
           handleAddCollection={handleAddCollection}
           handleAddAttribute={handleAddAttribute}
-          handleRemoveAttribute={handleRemoveAttribute}
+          handleSetCollections={handleSetCollections}
         />
       );
 

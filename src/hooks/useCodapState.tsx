@@ -154,16 +154,7 @@ export const useCodapState = () => {
     return collections.find((c: ICollection) => c.id === id)?.name;
   };
 
-  const handleUpdateAttributePosition = async (coll: ICollection, attrName: string,
-    position: number, newAttrsOrder: Array<any>) => {
-    // first update the local collection state to avoid asynchronous re-render on plugin side
-    const collIndex = collections.indexOf(coll);
-    const updatedCollection = {...collections[collIndex]};
-    updatedCollection.attrs = newAttrsOrder;
-    const newCollections = [...collections];
-    newCollections[collIndex] = updatedCollection;
-    setCollections(newCollections);
-
+  const handleUpdateAttributePosition = async (coll: ICollection, attrName: string, position: number) => {
     await connect.updateAttributePosition(selectedDataSet.name, coll.name, attrName, position);
   };
 
@@ -202,19 +193,6 @@ export const useCodapState = () => {
     updateCollections();
   };
 
-  const handleRemoveAttribute = async (collection: ICollection, attrName: string) => {
-    const collIndex = collections.indexOf(collection);
-    const updatedCollection = {...collections[collIndex]};
-    const indexOfAttr = updatedCollection.attrs.findIndex((attr) => attr.name === attrName);
-    updatedCollection.attrs.splice(indexOfAttr, 1);
-    const newCollections = [...collections];
-    newCollections[collIndex] = updatedCollection;
-    console.log("updatedCollection", updatedCollection);
-    setCollections(newCollections);
-
-    // updateCollections();
-  }
-
   const updateInteractiveState = useCallback((update: InteractiveState) => {
     const newState = {...interactiveState, ...update};
     codapInterface.updateInteractiveState(newState);
@@ -225,6 +203,7 @@ export const useCodapState = () => {
     dataSets,
     selectedDataSet,
     collections,
+    handleSetCollections: setCollections,
     handleSelectDataSet,
     handleRefreshDataSet,
     getCollectionNameFromId,
@@ -235,6 +214,5 @@ export const useCodapState = () => {
     handleUpdateAttributePosition,
     handleAddCollection,
     handleAddAttribute,
-    handleRemoveAttribute
   };
 };
