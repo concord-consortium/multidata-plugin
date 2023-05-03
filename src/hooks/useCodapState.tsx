@@ -167,11 +167,13 @@ export const useCodapState = () => {
   const handleAddAttribute = async (collection: ICollection, attrName: string) => {
     const proposedName = attrName.length ? attrName : "newAttr";
     let newAttributeName;
-    const attrNameAlreadyUsed = collection.attrs.find((attr) => attr.name === proposedName);
+    const allAttributes: Array<any> = [];
+    collections.map((coll) => coll.attrs.map((attr) => allAttributes.push(attr)));
+    const attrNameAlreadyUsed = allAttributes.find((attr) => attr.name === proposedName);
     if (!attrNameAlreadyUsed) {
       newAttributeName = proposedName;
     } else {
-      const attrsWithSameName = collection.attrs.filter((attr) => attr.name.startsWith(proposedName));
+      const attrsWithSameName = allAttributes.filter((attr) => attr.name.startsWith(proposedName));
       const indexes = attrsWithSameName.map((attr) => Number(attr.name.slice(proposedName.length)));
       const highestIndex = Math.max(...indexes);
       if (!highestIndex) {
