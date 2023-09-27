@@ -18,11 +18,12 @@ interface IProps {
   interactiveState: InteractiveState
   handleSelectDataSet: (e: React.ChangeEvent<HTMLSelectElement>) => void
   updateInteractiveState: (update: Partial<InteractiveState>) => void
+  handleShowComponent: () => void
 }
 
 export const NestedTable = (props: IProps) => {
   const {selectedDataSet, dataSets, collections, items, interactiveState,
-         handleSelectDataSet, updateInteractiveState} = props;
+         handleSelectDataSet, updateInteractiveState, handleShowComponent} = props;
   const [collectionClasses, setCollectionClasses] = useState<Array<ICollectionClass>>([]);
   const [paddingStyle, setPaddingStyle] = useState<Record<string, string>>({padding: "0px"});
 
@@ -111,7 +112,7 @@ export const NestedTable = (props: IProps) => {
     const isNoHierarchy = collections.length === 1;
     const classesExist = collectionClasses.length > 0;
     const tableProps = {showHeaders: interactiveState.showHeaders, collectionClasses, collections, selectedDataSet,
-      getClassName, mapHeadersFromValues, mapCellsFromValues, getValueLength, paddingStyle};
+      getClassName, mapHeadersFromValues, mapCellsFromValues, getValueLength, paddingStyle, handleShowComponent};
     const flatProps = {...tableProps, items};
     if (isNoHierarchy && classesExist) {
       return <FlatTable {...flatProps}/>;

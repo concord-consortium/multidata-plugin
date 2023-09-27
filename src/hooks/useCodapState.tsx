@@ -201,7 +201,12 @@ export const useCodapState = () => {
     setInteractiveState(newState);
   }, [interactiveState, setInteractiveState]);
 
+  const handleSelectSelf = async () => {
+    connect.selectSelf();
+  };
+
   return {
+    handleSelectSelf,
     dataSets,
     selectedDataSet,
     collections,

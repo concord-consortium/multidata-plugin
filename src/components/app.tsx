@@ -9,7 +9,7 @@ function App() {
   const {connected, selectedDataSet, dataSets, collections, items, interactiveState,
          updateInteractiveState: _updateInteractiveState,
          handleSelectDataSet: _handleSelectDataSet, handleUpdateAttributePosition,
-         handleAddCollection, handleAddAttribute, handleSetCollections
+         handleAddCollection, handleAddAttribute, handleSetCollections, handleSelectSelf
         } = useCodapState();
 
   const updateInteractiveState = useCallback((update: Partial<InteractiveState>) => {
@@ -29,9 +29,13 @@ function App() {
     updateInteractiveState({dataSetName});
   }, [_handleSelectDataSet, updateInteractiveState]);
 
+  const handleShowComponent = () => {
+    handleSelectSelf();
+  };
+
   const renderSelectView = () => {
     return (
-      <div className={css.selectView}>
+      <div className={css.selectView} onClick={handleShowComponent}>
         <p>Which MultiData view do you want to use?</p>
 
         <div className={css.buttons}>
@@ -71,6 +75,7 @@ function App() {
           interactiveState={interactiveState}
           handleSelectDataSet={handleSelectDataSet}
           updateInteractiveState={updateInteractiveState}
+          handleShowComponent={handleShowComponent}
         />
       );
 
@@ -88,6 +93,7 @@ function App() {
           handleAddCollection={handleAddCollection}
           handleAddAttribute={handleAddAttribute}
           handleSetCollections={handleSetCollections}
+          handleShowComponent={handleShowComponent}
         />
       );
 

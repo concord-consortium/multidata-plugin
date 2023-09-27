@@ -5,7 +5,7 @@ import css from "./tables.scss";
 
 export const LandscapeView = (props: ITableProps) => {
   const {mapCellsFromValues, mapHeadersFromValues, showHeaders, collectionClasses,
-    getClassName, selectedDataSet, collections, getValueLength, paddingStyle} = props;
+    getClassName, selectedDataSet, collections, getValueLength, paddingStyle, handleShowComponent} = props;
 
   const renderNestedTable = (parentColl: ICollection) => {
     const firstRowValues = parentColl.cases.map(caseObj => caseObj.values);
@@ -95,7 +95,7 @@ export const LandscapeView = (props: ITableProps) => {
   };
 
   return (
-    <div>
+    <div onClick={handleShowComponent}>
       {collections.length && collectionClasses.length && renderTable()}
     </div>
   );
