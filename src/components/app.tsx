@@ -98,7 +98,11 @@ function App() {
       );
 
     default:
-      return renderSelectView();
+      return (
+        <div onClick={handleShowComponent}>
+          {renderSelectView()}
+        </div>
+      );
   }
 }
 

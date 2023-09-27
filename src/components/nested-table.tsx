@@ -6,6 +6,8 @@ import { Menu } from "./menu";
 import { LandscapeView } from "./landscape-view";
 import { FlatTable } from "./flat-table";
 
+import css from "./nested-table.scss";
+
 const portrait = "Portrait";
 const landscape = "Landscape";
 const none = "";
@@ -112,7 +114,7 @@ export const NestedTable = (props: IProps) => {
     const isNoHierarchy = collections.length === 1;
     const classesExist = collectionClasses.length > 0;
     const tableProps = {showHeaders: interactiveState.showHeaders, collectionClasses, collections, selectedDataSet,
-      getClassName, mapHeadersFromValues, mapCellsFromValues, getValueLength, paddingStyle, handleShowComponent};
+      getClassName, mapHeadersFromValues, mapCellsFromValues, getValueLength, paddingStyle};
     const flatProps = {...tableProps, items};
     if (isNoHierarchy && classesExist) {
       return <FlatTable {...flatProps}/>;
@@ -128,7 +130,7 @@ export const NestedTable = (props: IProps) => {
   };
 
   return (
-    <div>
+    <div className={css.nestedTableWrapper} onClick={handleShowComponent}>
       <Menu
         dataSets={dataSets}
         collections={collections}

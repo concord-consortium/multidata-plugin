@@ -8,13 +8,12 @@ interface IFlatProps extends ITableProps {
 }
 
 export const FlatTable = (props: IFlatProps) => {
-  const {selectedDataSet, collections, collectionClasses, items, mapCellsFromValues, showHeaders,
-          handleShowComponent} = props;
+  const {selectedDataSet, collections, collectionClasses, items, mapCellsFromValues, showHeaders} = props;
   const collection = collections[0];
   const {className} = collectionClasses[0];
 
   return (
-    <table className={`${css.mainTable} ${css.flatTable} ${css[className]}}`} onClick={handleShowComponent}>
+    <table className={`${css.mainTable} ${css.flatTable} ${css[className]}}`}>
       <tbody>
         <tr className={css.mainHeader}>
           <th colSpan={items.length}>{selectedDataSet.title}</th>

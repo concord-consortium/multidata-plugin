@@ -5,7 +5,7 @@ import css from "./tables.scss";
 
 export const PortraitView = (props: ITableProps) => {
   const {paddingStyle, mapCellsFromValues, mapHeadersFromValues, showHeaders, collectionClasses,
-    getClassName, selectedDataSet, collections, getValueLength, handleShowComponent} = props;
+    getClassName, selectedDataSet, collections, getValueLength} = props;
 
   const renderNestedTable = (parentColl: ICollection) => {
     const firstRowValues = parentColl.cases.map(caseObj => caseObj.values);
@@ -80,7 +80,7 @@ export const PortraitView = (props: ITableProps) => {
   };
 
   return (
-    <div onClick={handleShowComponent}>
+    <div>
       {collections.length && collectionClasses.length && renderTable()}
     </div>
   );

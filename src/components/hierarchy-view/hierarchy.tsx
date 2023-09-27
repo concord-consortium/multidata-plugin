@@ -45,7 +45,7 @@ export const Hierarchy = (props: IProps) => {
     };
 
     return (
-      <div onClick={handleShowComponent}>
+      <div className={css.hierarchyWrapper} onClick={handleShowComponent}>
         <div className={css.hierarchy} style={{gap: CollectionGap}}>
         <DndContext
           collisionDetection={closestCorners}

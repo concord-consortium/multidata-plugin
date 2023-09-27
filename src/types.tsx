@@ -59,7 +59,6 @@ export interface ITableProps {
   mapHeadersFromValues: (values: IValues) => void,
   getValueLength: (firstRow: Array<IValues>) => number
   paddingStyle: Record<string, string>
-  handleShowComponent: () => void
 }
 
 export interface IBoundingBox {
