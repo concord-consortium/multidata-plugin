@@ -35,7 +35,7 @@ function App() {
 
   const renderSelectView = () => {
     return (
-      <div className={css.selectView} onClick={handleShowComponent}>
+      <div className={css.selectView}>
         <p>Which MultiData view do you want to use?</p>
 
         <div className={css.buttons}>
