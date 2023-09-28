@@ -175,6 +175,28 @@ export const connect = {
       await codapInterface.sendRequest(message);
     },
 
+
+  // Selects this component. In CODAP this will bring this component to the front.
+    selectSelf: async function () {
+      let myCODAPId = null;
+      const selectComponent = async function (id) {
+        return await codapInterface.sendRequest({
+            action: "notify",
+            resource:  `component[${id}]`,
+            values: {request: "select"}
+        });
+      }
+      if (myCODAPId == null) {
+           const r1 = await codapInterface.sendRequest({action: 'get', resource: 'interactiveFrame'});
+          if (r1.success) {
+              myCODAPId = r1.values.id;
+          }
+      }
+      if (myCODAPId != null) {
+          return await selectComponent(myCODAPId);
+      }
+    },
+
     iFrameDescriptor: {
       version: '0.0.1',
       name: 'multidata-plugin',

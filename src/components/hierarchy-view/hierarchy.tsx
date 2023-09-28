@@ -24,11 +24,12 @@ interface IProps {
   handleAddCollection: (newCollectionName: string) => void
   handleAddAttribute: (collection: ICollection, newAttrName: string) => void,
   handleSetCollections: (collections: Array<ICollection>) => void
+  handleShowComponent: () => void
 }
 
 export const Hierarchy = (props: IProps) => {
   const {selectedDataSet, dataSets, collections, handleSelectDataSet, handleSetCollections,
-    handleUpdateAttributePosition, handleAddCollection, handleAddAttribute} = props;
+    handleUpdateAttributePosition, handleAddCollection, handleAddAttribute, handleShowComponent} = props;
 
   const {activeAttr, handleDragStart, handleDragOver, handleDragEnd} = useDragging({collections,
     handleSetCollections, handleUpdateAttributePosition});
@@ -44,7 +45,7 @@ export const Hierarchy = (props: IProps) => {
     };
 
     return (
-      <>
+      <div className={css.hierarchyWrapper} onClick={handleShowComponent}>
         <div className={css.hierarchy} style={{gap: CollectionGap}}>
         <DndContext
           collisionDetection={closestCorners}
@@ -76,7 +77,7 @@ export const Hierarchy = (props: IProps) => {
             {JSON.stringify(selectedDataSet, null, 2)}
           </div>
         }
-      </>
+      </div>
     );
   };
 
