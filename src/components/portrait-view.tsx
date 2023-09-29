@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { ICollection, IProcessedCaseObj, ITableProps } from "../types";
 
 import css from "./tables.scss";
@@ -6,6 +6,57 @@ import css from "./tables.scss";
 export const PortraitView = (props: ITableProps) => {
   const {paddingStyle, mapCellsFromValues, mapHeadersFromValues, showHeaders, collectionClasses,
     getClassName, selectedDataSet, collections, getValueLength} = props;
+    const [isVisible, setIsVisible] = useState(false);
+
+  useEffect(() => {
+    const thresh = [];
+    for (let i = 0; i <= 100; i++) {
+      thresh.push(i / 100);
+    }
+
+    const handleIntersection = (entries: IntersectionObserverEntry[]) => {
+      entries.forEach((entry) => {
+        setIsVisible(entry.isIntersecting);
+        const target = entry.target;
+        const entryRect = target.getBoundingClientRect();
+        const top = entryRect.top;
+        const height = entryRect.height;
+        // const width = entryRect.width;
+        const firstChild = target.firstElementChild as HTMLElement | null;
+        // const firstChildWidth = firstChild?.getBoundingClientRect().width;
+        let halfPos;
+        if (firstChild) {
+          if (entry.intersectionRatio >= 0.85 || entry.intersectionRatio <= 0.15) {
+            firstChild.style.position = "relative";
+            firstChild.style.top = "50%";
+            firstChild.style.borderWidth = "1px";
+          } else {
+            firstChild.style.position = "fixed";
+            if (top > 0) {
+              halfPos = top + (window.innerHeight - top) / 2;
+            } else {
+              halfPos = (top + height) / 2;
+            }
+            firstChild.style.top = `${halfPos}px`;
+            firstChild.style.height = `${(entry.intersectionRect.height - halfPos - 4.5)}px`;
+            if (firstChild.style.position === "relative") {firstChild.style.borderWidth = "1";}
+              else {firstChild.style.borderWidth = "0";}
+          }
+        }
+      });
+    };
+
+    const observer = new IntersectionObserver(handleIntersection, { threshold: thresh });
+    document.querySelectorAll(".parent-row").forEach((cell) => {
+      observer.observe(cell);
+    });
+    return () => {
+      // Clean up the observer when the component unmounts
+      document.querySelectorAll(".parent-row").forEach((cell) => {
+        observer.unobserve(cell);
+      });
+    };
+  }, [isVisible]);
 
   const renderNestedTable = (parentColl: ICollection) => {
     const firstRowValues = parentColl.cases.map(caseObj => caseObj.values);
@@ -39,7 +90,7 @@ export const PortraitView = (props: ITableProps) => {
               <th>{showHeaders ? children[0].collection.name : ""}</th>
             </tr> : ""
           }
-          <tr className={`${css[getClassName(caseObj)]}`}>
+          <tr className={`${css[getClassName(caseObj)]} parent-row`}>
             {mapCellsFromValues(values)}
             <td style={paddingStyle}>
               <table style={paddingStyle} className={`${css.subTable} ${css[getClassName(children[0])]}`}>
