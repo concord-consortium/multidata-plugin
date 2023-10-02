@@ -71,7 +71,25 @@ export const useDraggableTable = (options: IUseDraggableTableOptions) => {
   };
 
   const handleDragStart = (e: React.DragEvent<HTMLTableCellElement>) => {
-    setDragId(getItemId(e));
+    const itemId = getItemId(e);
+    setDragId(itemId);
+
+    const drag = getCollectionAndAttribute(itemId);
+    if (drag?.attr) {
+      const attId = drag.attr.id;
+
+      e.dataTransfer.effectAllowed = "copy";
+      // IE only allows text or URL for the argument type and throws an error for other types
+      try {
+        e.dataTransfer.setData("text", attId);
+        e.dataTransfer.setData("text/html", attId);
+        e.dataTransfer.setData(`application/x-codap-attr-${attId}`, attId);
+      } catch (ex) {
+        // to make linter happy with empty block
+      }
+      // CODAP sometimes seems to expect an SC.Array object with a `contains` method, so this avoids a potential error
+      (e.dataTransfer as any).contains = () => false;
+    }
   };
 
   const handleDragEnter = (e: React.DragEvent<HTMLTableCellElement>) => {
