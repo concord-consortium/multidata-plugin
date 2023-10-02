@@ -1,7 +1,7 @@
 import React from "react";
 import { useDraggableTableContext } from "../hooks/useDraggableTable";
 
-const border = "3px solid #FBF719";
+const border = "5px solid #FBF719";
 const borderLeft = border;
 const borderRight = border;
 
