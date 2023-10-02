@@ -1,5 +1,6 @@
 import React from "react";
 import { ICollection, IProcessedCaseObj, ITableProps } from "../types";
+import { DraggagleTableHeader } from "./draggable-table-header";
 
 import css from "./tables.scss";
 
@@ -17,30 +18,35 @@ export const PortraitView = (props: ITableProps) => {
           <th colSpan={valueCount}>{selectedDataSet.name}</th>
         </tr>
         <tr className={css[className]}>
-          <th colSpan={valueCount}>{parentColl.name}</th>
+          <DraggagleTableHeader
+            collectionId={parentColl.id}
+            attrTitle={parentColl.name}
+          >
+            {parentColl.name}
+          </DraggagleTableHeader>
         </tr>
-        {parentColl.cases.map((caseObj, index) => renderRowFromCaseObj(caseObj, index))}
+        {parentColl.cases.map((caseObj, index) => renderRowFromCaseObj(caseObj.collection.id, caseObj, index))}
       </>
     );
   };
 
-  const renderRowFromCaseObj = (caseObj: IProcessedCaseObj, index?: null|number) => {
+  const renderRowFromCaseObj = (collectionId: number, caseObj: IProcessedCaseObj, index?: null|number) => {
     const {children, values} = caseObj;
     if (!children.length) {
       return (
-          <tr>{mapCellsFromValues(values)}</tr>
+          <tr>{mapCellsFromValues(`row-${index}`, values)}</tr>
       );
     } else {
       return (
         <>
           {index === 0 ?
             <tr className={`${css[getClassName(caseObj)]}`}>
-              {mapHeadersFromValues(values)}
+              {mapHeadersFromValues(collectionId, `first-row-${index}`, values)}
               <th>{showHeaders ? children[0].collection.name : ""}</th>
             </tr> : ""
           }
           <tr className={`${css[getClassName(caseObj)]}`}>
-            {mapCellsFromValues(values)}
+            {mapCellsFromValues(`parent-row-${index}`, values)}
             <td style={paddingStyle}>
               <table style={paddingStyle} className={`${css.subTable} ${css[getClassName(children[0])]}`}>
                 <tbody>
@@ -49,13 +55,13 @@ export const PortraitView = (props: ITableProps) => {
                       return (
                         <>
                           <tr key={child.collection.name} className={`${css[getClassName(child)]}`}>
-                            {mapHeadersFromValues(child.values)}
+                            {mapHeadersFromValues(child.collection.id, `child-row-${index}-${i}`, child.values)}
                           </tr>
-                          {renderRowFromCaseObj(child, i)}
+                          {renderRowFromCaseObj(child.collection.id, child, i)}
                         </>
                       );
                     } else {
-                      return (renderRowFromCaseObj(child, i));
+                      return (renderRowFromCaseObj(child.collection.id, child, i));
                     }
                   })}
                 </tbody>

@@ -1,5 +1,6 @@
 import React from "react";
 import { ICollection, IProcessedCaseObj, ITableProps } from "../types";
+import { DraggagleTableHeader } from "./draggable-table-header";
 
 import css from "./tables.scss";
 
@@ -18,9 +19,9 @@ export const LandscapeView = (props: ITableProps) => {
           <th colSpan={valueCount}>{parentColl.name}</th>
         </tr> }
         <tr className={css[className]}>
-          {firstRowValues.map(values => mapHeadersFromValues(values))}
+          {firstRowValues.map(values => mapHeadersFromValues(parentColl.id, "first-row", values))}
         </tr>
-        <tr className={css[className]}>{firstRowValues.map(values => mapCellsFromValues(values))}</tr>
+        <tr className={css[className]}>{firstRowValues.map(values => mapCellsFromValues("first-row", values))}</tr>
         <tr className={css[className]}>
           {parentColl.cases.map((caseObj) => {
             return (
@@ -30,7 +31,7 @@ export const LandscapeView = (props: ITableProps) => {
                 style={{...paddingStyle, verticalAlign: "top"}}
                 colSpan={Object.values(caseObj.values).length}>
                 <div style={{width: `100%`, overflow: "scroll"}}>
-                  {renderColFromCaseObj(caseObj)}
+                  {renderColFromCaseObj(parentColl, caseObj)}
                 </div>
               </td>
             );
@@ -40,7 +41,7 @@ export const LandscapeView = (props: ITableProps) => {
     );
   };
 
-  const renderColFromCaseObj = (caseObj: IProcessedCaseObj, index?: number) => {
+  const renderColFromCaseObj = (collection: ICollection, caseObj: IProcessedCaseObj, index?: number) => {
     const {children, values} = caseObj;
     const isFirstIndex = index === 0;
     if (!children.length) {
@@ -52,8 +53,12 @@ export const LandscapeView = (props: ITableProps) => {
               <th colSpan={Object.keys(values).length}>{caseObj.collection.name}</th>
             </tr>
           }
-          {isFirstIndex && <tr className={css[className]}>{mapHeadersFromValues(values)}</tr>}
-          <tr>{mapCellsFromValues(values)}</tr>
+          {isFirstIndex &&
+            <tr className={css[className]}>
+              {mapHeadersFromValues(collection.id, `first-row-${index}`, values)}
+            </tr>
+          }
+          <tr>{mapCellsFromValues(`row-${index}`, values)}</tr>
         </>
       );
     } else {
@@ -68,7 +73,7 @@ export const LandscapeView = (props: ITableProps) => {
             {anyChildHasChildren ?
               renderNestedTable(filteredCollection) :
               caseObj.children.map((child: IProcessedCaseObj, i: number) => {
-                  return renderColFromCaseObj(child, i);
+                  return renderColFromCaseObj(collection, child, i);
               })
             }
           </tbody>
@@ -86,7 +91,12 @@ export const LandscapeView = (props: ITableProps) => {
       <table className={`${css.mainTable} ${css.landscapeTable} ${css.landscape} ${css[className]}`}>
         <tbody>
         <tr className={css.mainHeader}>
-          <th colSpan={getValueLength(firstRowValues)}>{selectedDataSet.name}</th>
+          <DraggagleTableHeader
+            collectionId={parentColl[0].id}
+            attrTitle={selectedDataSet.name}
+            colSpan={getValueLength(firstRowValues)}>
+            {selectedDataSet.name}
+          </DraggagleTableHeader>
         </tr>
           {renderNestedTable(parentColl[0])}
         </tbody>

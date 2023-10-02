@@ -1,5 +1,6 @@
 import React from "react";
 import { ITableProps } from "../types";
+import { DraggagleTableHeader } from "./draggable-table-header";
 
 import css from "./tables.scss";
 
@@ -23,11 +24,18 @@ export const FlatTable = (props: IFlatProps) => {
           <th colSpan={items.length}>{collections[0].title}</th>
         </tr>}
         <tr>
-          {collection.attrs.map((attr: any) => <th key={attr.title}>{attr.title}</th>)}
+          {collection.attrs.map((attr: any) =>
+            <DraggagleTableHeader
+              key={attr.title}
+              collectionId={collection.id}
+              attrTitle={attr.title}
+            >
+              {attr.title}
+            </DraggagleTableHeader>)}
         </tr>
-        {items.length && items.map((item) => {
+        {items.map((item, index) => {
           return (
-            <tr key={`${item.id}`}>{mapCellsFromValues(item)}</tr>
+            <tr key={`${index}-${item.id}`}>{mapCellsFromValues(`row-${index}`, item)}</tr>
           );
         })}
       </tbody>
