@@ -156,6 +156,91 @@ export const connect = {
       await codapInterface.sendRequest(message);
     },
 
+    ensureUniqueCollectionName: async function (dSName, collectionName, index) {
+      index = index || 0;
+      const uniqueName = `${collectionName}${index ? index : ""}`;
+      const getCollection = {
+        "action": "get",
+        "resource": `dataContext[${dSName}].collection[${uniqueName}]`
+      };
+      const getCollectionResult = await codapInterface.sendRequest(getCollection);
+      if (getCollectionResult.success) {
+        // guard against run away loops
+        if (index >= 100) {
+          return undefined;
+        }
+        return connect.ensureUniqueCollectionName(dSName, collectionName, index + 1);
+      } else {
+        return uniqueName;
+      }
+    },
+
+    createCollectionFromAttribute: async function(dSName, oldCollectionName, attr, parent) {
+      // check if a collection for the attribute already exists
+      const getCollection = {
+        "action": "get",
+        "resource": `dataContext[${dSName}].collection[${attr.name}]`
+      };
+      const getCollectionResult = await codapInterface.sendRequest(getCollection);
+
+      // since you can't "re-parent" collections we need to create a temp top level collection, move the attribute,
+      // and then check if CODAP deleted the old collection as it became empty and if so rename the new collection
+      const moveCollection = getCollectionResult.success;
+      const newCollectionName = moveCollection ? await connect.ensureUniqueCollectionName(dSName, attr.name) : attr.name;
+      if (newCollectionName === undefined) {
+        return;
+      }
+
+      const createCollectionRequest = {
+        "action": "create",
+        "resource": `dataContext[${dSName}].collection`,
+        "values": {
+          "name": newCollectionName,
+          "title": newCollectionName,
+          "parent": parent,
+        }
+      };
+      const createCollectionResult = await codapInterface.sendRequest(createCollectionRequest);
+      if (!createCollectionResult.success) {
+        return;
+      }
+
+      const moveAttributeRequest = {
+        "action": "update",
+        "resource": `dataContext[${dSName}].collection[${oldCollectionName}].attributeLocation[${attr.name}]`,
+        "values": {
+          "collection": newCollectionName,
+          "position": 0
+        }
+      }
+      const moveResult = await codapInterface.sendRequest(moveAttributeRequest);
+      if (!moveResult.success) {
+        return;
+      }
+
+      if (moveCollection) {
+        // check if the old collection has been
+        const getAttributeListRequest = {
+          "action": "get",
+          "resource": `dataContext[${dSName}].collection[${oldCollectionName}].attributeList`
+        };
+        const getAttributeListResult = await codapInterface.sendRequest(getAttributeListRequest);
+
+        // CODAP deleted the old collection after we moved the attribute so rename the new collection
+        if (!getAttributeListResult.success) {
+          const updateCollectionNameRequest = {
+            "action": "update",
+            "resource": `dataContext[${dSName}].collection[${newCollectionName}]`,
+            "values": {
+              "name": attr.name,
+              "title": attr.name,
+            }
+          };
+          const updateCollectionNameResult = await codapInterface.sendRequest(updateCollectionNameRequest);
+        }
+      }
+    },
+
     createNewAttribute: async function(dSName, collName, attrName) {
       const message = {
         "action": "create",

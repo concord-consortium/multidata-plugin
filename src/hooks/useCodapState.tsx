@@ -164,6 +164,12 @@ export const useCodapState = () => {
     updateCollections();
   };
 
+  const handleCreateCollectionFromAttribute = async (collection: ICollection, attr: any, parent: number|string) => {
+    await connect.createCollectionFromAttribute(selectedDataSet.name, collection.name, attr, parent);
+    // update collections because CODAP does not send dataContextChangeNotice
+    updateCollections();
+  };
+
   const handleAddAttribute = async (collection: ICollection, attrName: string) => {
     const proposedName = attrName.length ? attrName : "newAttr";
     let newAttributeName;
@@ -240,5 +246,6 @@ export const useCodapState = () => {
     updateTitle,
     selectCases,
     listenForSelectionChanges,
+    handleCreateCollectionFromAttribute,
   };
 };

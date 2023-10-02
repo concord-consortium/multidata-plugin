@@ -9,9 +9,11 @@ type DraggableTableContextType = {
   handleDragOver: (e: React.DragEvent<HTMLTableCellElement>) => void
   handleDragEnter: (e: React.DragEvent<HTMLTableCellElement>) => void
   handleDragLeave: (e: React.DragEvent<HTMLTableCellElement>) => void
+  handleDragEnd: (e: React.DragEvent<HTMLTableCellElement>) => void
   handleOnDrop: (e: React.DragEvent<HTMLTableCellElement>) => void
   dragOverId: string | undefined
   dragSide: Side | undefined
+  dragging: boolean
 };
 
 export const DraggableTableContext = createContext<DraggableTableContextType>({
@@ -19,9 +21,11 @@ export const DraggableTableContext = createContext<DraggableTableContextType>({
     handleDragOver: () => undefined,
     handleDragEnter: () => undefined,
     handleDragLeave: () => undefined,
+    handleDragEnd: () => undefined,
     handleOnDrop: () => undefined,
     dragOverId: undefined,
     dragSide: undefined,
+    dragging: false,
   }
 );
 
@@ -29,14 +33,17 @@ interface IUseDraggableTableOptions {
   collections: Array<ICollection>,
   handleSetCollections: (collections: Array<ICollection>) => void,
   handleUpdateAttributePosition: (collection: ICollection, attrName: string, newPosition: number) => void,
+  handleCreateCollectionFromAttribute: (collection: ICollection, attr: any, parent: number|string) => Promise<void>
 }
 
 export const useDraggableTable = (options: IUseDraggableTableOptions) => {
-  const {collections, handleSetCollections, handleUpdateAttributePosition} = options;
+  const {collections, handleSetCollections, handleUpdateAttributePosition,
+         handleCreateCollectionFromAttribute} = options;
   const [dragId, setDragId] = useState<string|undefined>(undefined);
   const [dragOverId, setDragOverId] = useState<string|undefined>(undefined);
   const [dragSide, setDragSide] = useState<Side|undefined>("left");
   const dragOverRectRef = useRef<DOMRect|undefined>(undefined);
+  const [dragging, setDragging] = useState(false);
 
   const getItemId = (e: React.DragEvent<HTMLTableCellElement>) => (e.target as HTMLElement)?.dataset?.id;
 
@@ -73,6 +80,12 @@ export const useDraggableTable = (options: IUseDraggableTableOptions) => {
   const handleDragStart = (e: React.DragEvent<HTMLTableCellElement>) => {
     const itemId = getItemId(e);
     setDragId(itemId);
+
+    // wait until the next render to set the flag so the drag end handler isn't called when the table
+    // re-renders and the drop to create parent collection column is displayed
+    setTimeout(() => {
+      setDragging(true);
+    }, 1);
 
     const drag = getCollectionAndAttribute(itemId);
     if (drag?.attr) {
@@ -121,7 +134,14 @@ export const useDraggableTable = (options: IUseDraggableTableOptions) => {
       const source = getCollectionAndAttribute(dragId);
       const target = getCollectionAndAttribute(targetId);
 
-      if (source && target && (source.collection !== target.collection || source.attr !== target.attr)) {
+      if (targetId.startsWith("parent:")) {
+        // handle drag to create parent
+        const parts = targetId.split(":");
+        const collectionId = parts[1] === "root" ? "root" : parseInt(parts[1], 10);
+        if ((collectionId === "root" || !isNaN(collectionId)) && source) {
+          handleCreateCollectionFromAttribute(source.collection, source.attr, collectionId);
+        }
+      } else if (source && target && (source.collection !== target.collection || source.attr !== target.attr)) {
         const sourceIndex = source.collection.attrs.indexOf(source.attr);
         const targetIndex = target.attr ? target.collection.attrs.indexOf(target.attr) : target.collection.attrs.length;
         const newIndex = dragSide === "left" ? targetIndex : targetIndex + 1;
@@ -142,17 +162,25 @@ export const useDraggableTable = (options: IUseDraggableTableOptions) => {
       }
     }
 
+    setDragging(false);
     setDragOverId(undefined);
-  }, [dragSide, collections, dragId, getCollectionAndAttribute, handleSetCollections, handleUpdateAttributePosition]);
+  }, [
+    dragSide, collections, dragId, getCollectionAndAttribute, handleSetCollections, handleUpdateAttributePosition,
+    handleCreateCollectionFromAttribute
+  ]);
+
+  const handleDragEnd = (e: React.DragEvent<HTMLTableCellElement>) => setDragging(false);
 
   return {
     handleDragStart,
     handleDragOver,
     handleDragEnter,
     handleDragLeave,
+    handleDragEnd,
     handleOnDrop,
     dragOverId,
-    dragSide
+    dragSide,
+    dragging,
   };
 };
 

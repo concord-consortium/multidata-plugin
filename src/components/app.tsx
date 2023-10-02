@@ -12,7 +12,8 @@ function App() {
          updateInteractiveState: _updateInteractiveState,
          handleSelectDataSet: _handleSelectDataSet, handleUpdateAttributePosition,
          handleAddCollection, handleAddAttribute, handleSetCollections, handleSelectSelf,
-         updateTitle, selectCases, listenForSelectionChanges
+         updateTitle, selectCases, listenForSelectionChanges,
+         handleCreateCollectionFromAttribute
         } = useCodapState();
 
   const updateInteractiveState = useCallback((update: Partial<InteractiveState>) => {
@@ -98,6 +99,7 @@ function App() {
           handleShowComponent={handleShowComponent}
           handleUpdateAttributePosition={handleUpdateAttributePosition}
           handleSetCollections={handleSetCollections}
+          handleCreateCollectionFromAttribute={handleCreateCollectionFromAttribute}
         />
       );
 
