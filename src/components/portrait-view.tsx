@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { ICollection, IProcessedCaseObj, ITableProps } from "../types";
 
 import css from "./tables.scss";
@@ -6,10 +6,14 @@ import css from "./tables.scss";
 export const PortraitView = (props: ITableProps) => {
   const {paddingStyle, mapCellsFromValues, mapHeadersFromValues, showHeaders, collectionClasses,
     getClassName, selectedDataSet, collections, getValueLength} = props;
-  const thresh: number[] = [];
-  for (let i = 0; i <= 100; i++) {
-    thresh.push(i / 100);
-  }
+  const thresh = useMemo(() => {
+    const t: number[] = [];
+    for (let i = 0; i <= 100; i++) {
+      t.push(i / 100);
+    }
+    return t;
+  },[]);
+
   const [scrolling, setScrolling] = useState(false);
   const [scrollTop, setScrollTop] = useState(0);
 
@@ -28,18 +32,20 @@ export const PortraitView = (props: ITableProps) => {
       entries.forEach((entry) => {
         const target = entry.target;
         const entryRect = target.getBoundingClientRect();
+        const entryHeight = entryRect.height;
         const visibleRect = entry.intersectionRect;
         const firstChild = target.firstElementChild as HTMLElement | null;
 
         if (firstChild) {
+        const firstChildTop = parseInt(firstChild?.style.top, 10);
           firstChild.style.position = "relative";
+          firstChild.style.verticalAlign = "top";
           if (entry.isIntersecting) {
-            if (visibleRect.top === 0 ) { //we're in the bottom part of the visible rect
-              firstChild.style.top = `${((visibleRect.height - 32)/2) - entryRect.top}px`;
-              firstChild.style.verticalAlign = "top";
+            if (visibleRect.top === 0) { //we're in the bottom part of the visible rect
+              firstChild.style.top =  firstChildTop >= entryHeight - 16
+                                        ? `${firstChildTop}px` : `${((visibleRect.height)/2) - entryRect.top}px`;
             } else { //we're in the top part of the visible rect
               firstChild.style.top = `${visibleRect.height/2}px`;
-              firstChild.style.verticalAlign = "top";
               if (entryRect.height > window.innerHeight) {
                 firstChild.style.maxHeight = `${visibleRect.height}px`;
               }
