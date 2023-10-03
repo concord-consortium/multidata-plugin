@@ -59,7 +59,13 @@ export const useDraggableTable = (options: IUseDraggableTableOptions) => {
   const updateDragSide = (e: React.DragEvent<HTMLTableCellElement>) => {
     let side: Side|undefined = undefined;
     if (dragOverRectRef.current) {
-      side = e.clientX < dragOverRectRef.current.left + dragOverRectRef.current.width/2 ? "left" : "right";
+      const target = getCollectionAndAttribute(getItemId(e));
+      if (target?.attr) {
+        side = e.clientX < dragOverRectRef.current.left + dragOverRectRef.current.width/2 ? "left" : "right";
+      } else {
+        // no attribute means this is a case header with no attribute so always show insert to the left
+        side = "left";
+      }
     }
     setDragSide(side);
   };
