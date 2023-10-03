@@ -1,6 +1,5 @@
 import React from "react";
 import { ICollection, IProcessedCaseObj, ITableProps } from "../types";
-import { DraggagleTableHeader } from "./draggable-table-header";
 
 import css from "./tables.scss";
 
@@ -18,12 +17,7 @@ export const PortraitView = (props: ITableProps) => {
           <th colSpan={valueCount}>{selectedDataSet.name}</th>
         </tr>
         <tr className={css[className]}>
-          <DraggagleTableHeader
-            collectionId={parentColl.id}
-            attrTitle={parentColl.name}
-          >
-            {parentColl.name}
-          </DraggagleTableHeader>
+          <th colSpan={valueCount}>{parentColl.name}</th>
         </tr>
         {parentColl.cases.map((caseObj, index) => renderRowFromCaseObj(caseObj.collection.id, caseObj, index))}
       </>
