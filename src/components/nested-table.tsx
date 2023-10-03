@@ -6,6 +6,8 @@ import { Menu } from "./menu";
 import { LandscapeView } from "./landscape-view";
 import { FlatTable } from "./flat-table";
 
+import css from "./nested-table.scss";
+
 const portrait = "Portrait";
 const landscape = "Landscape";
 const none = "";
@@ -18,11 +20,12 @@ interface IProps {
   interactiveState: InteractiveState
   handleSelectDataSet: (e: React.ChangeEvent<HTMLSelectElement>) => void
   updateInteractiveState: (update: Partial<InteractiveState>) => void
+  handleShowComponent: () => void
 }
 
 export const NestedTable = (props: IProps) => {
   const {selectedDataSet, dataSets, collections, items, interactiveState,
-         handleSelectDataSet, updateInteractiveState} = props;
+         handleSelectDataSet, updateInteractiveState, handleShowComponent} = props;
   const [collectionClasses, setCollectionClasses] = useState<Array<ICollectionClass>>([]);
   const [paddingStyle, setPaddingStyle] = useState<Record<string, string>>({padding: "0px"});
 
@@ -127,7 +130,7 @@ export const NestedTable = (props: IProps) => {
   };
 
   return (
-    <div>
+    <div className={css.nestedTableWrapper} onClick={handleShowComponent}>
       <Menu
         dataSets={dataSets}
         collections={collections}

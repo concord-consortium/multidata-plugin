@@ -9,7 +9,7 @@ function App() {
   const {connected, selectedDataSet, dataSets, collections, items, interactiveState,
          updateInteractiveState: _updateInteractiveState,
          handleSelectDataSet: _handleSelectDataSet, handleUpdateAttributePosition,
-         handleAddCollection, handleAddAttribute, handleSetCollections
+         handleAddCollection, handleAddAttribute, handleSetCollections, handleSelectSelf
         } = useCodapState();
 
   const updateInteractiveState = useCallback((update: Partial<InteractiveState>) => {
@@ -28,6 +28,10 @@ function App() {
     _handleSelectDataSet(dataSetName);
     updateInteractiveState({dataSetName});
   }, [_handleSelectDataSet, updateInteractiveState]);
+
+  const handleShowComponent = () => {
+    handleSelectSelf();
+  };
 
   const renderSelectView = () => {
     return (
@@ -71,6 +75,7 @@ function App() {
           interactiveState={interactiveState}
           handleSelectDataSet={handleSelectDataSet}
           updateInteractiveState={updateInteractiveState}
+          handleShowComponent={handleShowComponent}
         />
       );
 
@@ -88,11 +93,16 @@ function App() {
           handleAddCollection={handleAddCollection}
           handleAddAttribute={handleAddAttribute}
           handleSetCollections={handleSetCollections}
+          handleShowComponent={handleShowComponent}
         />
       );
 
     default:
-      return renderSelectView();
+      return (
+        <div onClick={handleShowComponent}>
+          {renderSelectView()}
+        </div>
+      );
   }
 }
 
