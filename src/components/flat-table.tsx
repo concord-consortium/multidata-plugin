@@ -1,5 +1,6 @@
 import React from "react";
-import { ITableProps } from "../types";
+import { ITableProps, IValues } from "../types";
+import { DraggagleTableHeader } from "./draggable-table-tags";
 
 import css from "./tables.scss";
 
@@ -12,6 +13,15 @@ export const FlatTable = (props: IFlatProps) => {
   const collection = collections[0];
   const {className} = collectionClasses[0];
 
+  const titles = collection.attrs.map(attr => attr.title);
+  const orderedItems = items.map(item => {
+    const orderedItem: IValues = {};
+    titles.forEach(title => {
+      orderedItem[title] = item[title];
+    });
+    return orderedItem;
+  });
+
   return (
     <table className={`${css.mainTable} ${css.flatTable} ${css[className]}}`}>
       <tbody>
@@ -23,11 +33,18 @@ export const FlatTable = (props: IFlatProps) => {
           <th colSpan={items.length}>{collections[0].title}</th>
         </tr>}
         <tr>
-          {collection.attrs.map((attr: any) => <th key={attr.title}>{attr.title}</th>)}
+          {collection.attrs.map((attr: any) =>
+            <DraggagleTableHeader
+              key={attr.title}
+              collectionId={collection.id}
+              attrTitle={attr.title}
+            >
+              {attr.title}
+            </DraggagleTableHeader>)}
         </tr>
-        {items.length && items.map((item) => {
+        {orderedItems.map((item, index) => {
           return (
-            <tr key={`${item.id}`}>{mapCellsFromValues(item)}</tr>
+            <tr key={`${index}-${item.id}`}>{mapCellsFromValues(collection.id, `row-${index}`, item)}</tr>
           );
         })}
       </tbody>
