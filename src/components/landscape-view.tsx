@@ -1,6 +1,6 @@
 import React from "react";
 import { ICollection, IProcessedCaseObj, ITableProps } from "../types";
-import { DraggagleTableHeader } from "./draggable-table-header";
+import { DraggagleTableHeader } from "./draggable-table-tags";
 
 import css from "./tables.scss";
 
@@ -21,7 +21,9 @@ export const LandscapeView = (props: ITableProps) => {
         <tr className={css[className]}>
           {firstRowValues.map(values => mapHeadersFromValues(parentColl.id, "first-row", values))}
         </tr>
-        <tr className={css[className]}>{firstRowValues.map(values => mapCellsFromValues("first-row", values))}</tr>
+        <tr className={css[className]}>
+          {firstRowValues.map(values => mapCellsFromValues(parentColl.id, "first-row", values))}
+        </tr>
         <tr className={css[className]}>
           {parentColl.cases.map((caseObj) => {
             return (
@@ -58,7 +60,7 @@ export const LandscapeView = (props: ITableProps) => {
               {mapHeadersFromValues(collection.id, `first-row-${index}`, values)}
             </tr>
           }
-          <tr>{mapCellsFromValues(`row-${index}`, values)}</tr>
+          <tr>{mapCellsFromValues(collection.id, `row-${index}`, values)}</tr>
         </>
       );
     } else {

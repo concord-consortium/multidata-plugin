@@ -6,7 +6,7 @@ import { Menu } from "./menu";
 import { LandscapeView } from "./landscape-view";
 import { FlatTable } from "./flat-table";
 import { DraggableTableContext, useDraggableTable } from "../hooks/useDraggableTable";
-import { DraggagleTableHeader } from "./draggable-table-header";
+import { DraggagleTableData, DraggagleTableHeader } from "./draggable-table-tags";
 
 import css from "./nested-table.scss";
 
@@ -105,10 +105,19 @@ export const NestedTable = (props: IProps) => {
     );
   };
 
-  const mapCellsFromValues = (rowKey: string, values: IValues) => {
-    return Object.values(values).map((val, index) => {
+  const mapCellsFromValues = (collectionId: number, rowKey: string, values: IValues) => {
+    return Object.keys(values).map((key, index) => {
+      const val = values[key];
       if (typeof val === "string" || typeof val === "number") {
-        return (<td key={`${rowKey}-${val}-${index}}`}>{val}</td>);
+        return (
+          <DraggagleTableData
+            collectionId={collectionId}
+            attrTitle={key}
+            key={`${rowKey}-${val}-${index}}`}
+          >
+            {val}
+          </DraggagleTableData>
+        );
       }
     });
   };

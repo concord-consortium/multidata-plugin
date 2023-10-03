@@ -28,7 +28,7 @@ export const PortraitView = (props: ITableProps) => {
     const {children, values} = caseObj;
     if (!children.length) {
       return (
-          <tr>{mapCellsFromValues(`row-${index}`, values)}</tr>
+          <tr>{mapCellsFromValues(collectionId, `row-${index}`, values)}</tr>
       );
     } else {
       return (
@@ -40,7 +40,7 @@ export const PortraitView = (props: ITableProps) => {
             </tr> : ""
           }
           <tr className={`${css[getClassName(caseObj)]}`}>
-            {mapCellsFromValues(`parent-row-${index}`, values)}
+            {mapCellsFromValues(collectionId, `parent-row-${index}`, values)}
             <td style={paddingStyle}>
               <table style={paddingStyle} className={`${css.subTable} ${css[getClassName(children[0])]}`}>
                 <tbody>
