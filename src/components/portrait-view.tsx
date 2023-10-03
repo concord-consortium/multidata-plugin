@@ -1,11 +1,11 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { ICollection, IProcessedCaseObj, ITableProps } from "../types";
 
 import css from "./tables.scss";
 
 export const PortraitView = (props: ITableProps) => {
   const {paddingStyle, mapCellsFromValues, mapHeadersFromValues, showHeaders, collectionClasses,
-    getClassName, selectedDataSet, collections, getValueLength} = props;
+            getClassName, selectedDataSet, collections, getValueLength} = props;
 
   const renderNestedTable = (parentColl: ICollection) => {
     const firstRowValues = parentColl.cases.map(caseObj => caseObj.values);
@@ -14,7 +14,7 @@ export const PortraitView = (props: ITableProps) => {
     return (
       <>
         <tr className={css.mainHeader}>
-          <th colSpan={valueCount}>{selectedDataSet.name}</th>
+          <th className={css.datasetNameHeader} colSpan={valueCount}>{selectedDataSet.name}</th>
         </tr>
         <tr className={css[className]}>
           <th colSpan={valueCount}>{parentColl.name}</th>
@@ -80,7 +80,7 @@ export const PortraitView = (props: ITableProps) => {
   };
 
   return (
-    <div>
+    <div className={css.portraitTableWrapper}>
       {collections.length && collectionClasses.length && renderTable()}
     </div>
   );
