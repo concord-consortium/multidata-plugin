@@ -22,8 +22,6 @@ export const FlatTable = (props: IFlatProps) => {
     return orderedItem;
   });
 
-  console.log("items", items);
-
   return (
     <table className={`${css.mainTable} ${css.flatTable} ${css[className]}}`}>
       <tbody>
