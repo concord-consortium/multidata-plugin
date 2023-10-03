@@ -6,46 +6,48 @@ import css from "./tables.scss";
 export const PortraitView = (props: ITableProps) => {
   const {paddingStyle, mapCellsFromValues, mapHeadersFromValues, showHeaders, collectionClasses,
     getClassName, selectedDataSet, collections, getValueLength} = props;
-    const [isVisible, setIsVisible] = useState(false);
+  const thresh: number[] = [];
+  for (let i = 0; i <= 100; i++) {
+    thresh.push(i / 100);
+  }
+  const [scrolling, setScrolling] = useState(false);
+  const [scrollTop, setScrollTop] = useState(0);
 
   useEffect(() => {
-    const thresh = [];
-    for (let i = 0; i <= 100; i++) {
-      thresh.push(i / 100);
-    }
+    const onScroll = (e: any) => {
+      setScrollTop(e.target.documentElement.scrollTop);
+      setScrolling(e.target.documentElement.scrollTop > scrollTop);
+    };
+    window.addEventListener("scroll", onScroll);
 
+    return () => window.removeEventListener("scroll", onScroll);
+  }, [scrollTop]);
+
+  useEffect(() => {
     const handleIntersection = (entries: IntersectionObserverEntry[]) => {
       entries.forEach((entry) => {
-        setIsVisible(entry.isIntersecting);
         const target = entry.target;
         const entryRect = target.getBoundingClientRect();
-        const top = entryRect.top;
-        const height = entryRect.height;
-        // const width = entryRect.width;
+        const visibleRect = entry.intersectionRect;
         const firstChild = target.firstElementChild as HTMLElement | null;
-        // const firstChildWidth = firstChild?.getBoundingClientRect().width;
-        let halfPos;
+
         if (firstChild) {
-          if (entry.intersectionRatio >= 0.85 || entry.intersectionRatio <= 0.15) {
-            firstChild.style.position = "relative";
-            firstChild.style.top = "50%";
-            firstChild.style.borderWidth = "1px";
-          } else {
-            firstChild.style.position = "fixed";
-            if (top > 0) {
-              halfPos = top + (window.innerHeight - top) / 2;
-            } else {
-              halfPos = (top + height) / 2;
+          firstChild.style.position = "relative";
+          if (entry.isIntersecting) {
+            if (visibleRect.top === 0 ) { //we're in the bottom part of the visible rect
+              firstChild.style.top = `${((visibleRect.height - 32)/2) - entryRect.top}px`;
+              firstChild.style.verticalAlign = "top";
+            } else { //we're in the top part of the visible rect
+              firstChild.style.top = `${visibleRect.height/2}px`;
+              firstChild.style.verticalAlign = "top";
+              if (entryRect.height > window.innerHeight) {
+                firstChild.style.maxHeight = `${visibleRect.height}px`;
+              }
             }
-            firstChild.style.top = `${halfPos}px`;
-            firstChild.style.height = `${(entry.intersectionRect.height - halfPos - 4.5)}px`;
-            if (firstChild.style.position === "relative") {firstChild.style.borderWidth = "1";}
-              else {firstChild.style.borderWidth = "0";}
           }
         }
       });
     };
-
     const observer = new IntersectionObserver(handleIntersection, { threshold: thresh });
     document.querySelectorAll(".parent-row").forEach((cell) => {
       observer.observe(cell);
@@ -56,7 +58,7 @@ export const PortraitView = (props: ITableProps) => {
         observer.unobserve(cell);
       });
     };
-  }, [isVisible]);
+  }, [scrollTop, scrolling, thresh]);
 
   const renderNestedTable = (parentColl: ICollection) => {
     const firstRowValues = parentColl.cases.map(caseObj => caseObj.values);
