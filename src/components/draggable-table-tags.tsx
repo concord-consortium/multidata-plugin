@@ -7,13 +7,15 @@ const border = "5px solid #FBF719";
 const borderLeft = border;
 const borderRight = border;
 
+const getStyle = (id: string, dragOverId?: string, dragSide?: Side) => {
+  return id === dragOverId ? (dragSide === "left" ? {borderLeft} : {borderRight}) : {};
+};
+
 const getIdAndStyle = (collectionId: number, attrTitle: string, dragOverId?: string, dragSide?: Side)
   : {id: string, style: React.CSSProperties} => {
   const id = `${collectionId}-${attrTitle}`;
-  return {
-    id,
-    style: id === dragOverId ? (dragSide === "left" ? {borderLeft} : {borderRight}) : {}
-  };
+  const style = getStyle(id, dragOverId, dragSide);
+  return { id, style };
 };
 
 interface DraggagleTableHeaderProps {
@@ -44,9 +46,35 @@ export const DraggagleTableHeader: React.FC<DraggagleTableHeaderProps> = ({colle
   );
 };
 
+interface DroppableTableHeaderProps {
+  collectionId: number;
+}
+
+export const DroppableTableHeader: React.FC<DroppableTableHeaderProps> = ({collectionId, children}) => {
+  const {dragOverId, handleDragOver, handleOnDrop, handleDragEnter,
+    handleDragLeave} = useDraggableTableContext();
+
+  const id = `${collectionId}`;
+  const style = getStyle(id, dragOverId, "left");
+
+  return (
+    <th
+      data-id={id}
+      style={style}
+      onDragOver={handleDragOver}
+      onDrop={handleOnDrop}
+      onDragEnter={handleDragEnter}
+      onDragLeave={handleDragLeave}
+    >
+      {children}
+    </th>
+  );
+};
+
 interface DraggagleTableDataProps {
   collectionId: number;
   attrTitle: string;
+  style?: React.CSSProperties;
 }
 
 export const DraggagleTableData: React.FC<DraggagleTableDataProps> = ({collectionId, attrTitle, children}) => {
@@ -60,3 +88,18 @@ export const DraggagleTableData: React.FC<DraggagleTableDataProps> = ({collectio
   );
 };
 
+interface DroppableTableDataProps {
+  collectionId: number;
+  style?: React.CSSProperties;
+}
+
+export const DroppableTableData: React.FC<DroppableTableDataProps> = ({collectionId, style, children}) => {
+  const {dragOverId, dragSide} = useDraggableTableContext();
+  const dragStyle = getStyle(`${collectionId}`, dragOverId, dragSide);
+
+  return (
+    <td style={{...dragStyle, ...style}}>
+      {children}
+    </td>
+  );
+};

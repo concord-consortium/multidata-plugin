@@ -99,7 +99,7 @@ export const useDraggableTable = (options: IUseDraggableTableOptions) => {
 
       if (source && target && (source.collection !== target.collection || source.attr !== target.attr)) {
         const sourceIndex = source.collection.attrs.indexOf(source.attr);
-        const targetIndex = target.collection.attrs.indexOf(target.attr);
+        const targetIndex = target.attr ? target.collection.attrs.indexOf(target.attr) : target.collection.attrs.length;
         const newIndex = dragSide === "left" ? targetIndex : targetIndex + 1;
 
         if (target.collection.id === source.collection.id) {
