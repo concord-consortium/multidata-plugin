@@ -6,7 +6,6 @@ export type Side = "left"|"right";
 
 type DraggableTableContextType = {
   handleDragStart: (e: React.DragEvent<HTMLTableCellElement>) => void
-  handleDragEnd: (e: React.DragEvent<HTMLTableCellElement>) => void
   handleDragOver: (e: React.DragEvent<HTMLTableCellElement>) => void
   handleDragEnter: (e: React.DragEvent<HTMLTableCellElement>) => void
   handleDragLeave: (e: React.DragEvent<HTMLTableCellElement>) => void
@@ -17,7 +16,6 @@ type DraggableTableContextType = {
 
 export const DraggableTableContext = createContext<DraggableTableContextType>({
     handleDragStart: () => undefined,
-    handleDragEnd: () => undefined,
     handleDragOver: () => undefined,
     handleDragEnter: () => undefined,
     handleDragLeave: () => undefined,
@@ -67,12 +65,7 @@ export const useDraggableTable = (options: IUseDraggableTableOptions) => {
   };
 
   const handleDragStart = (e: React.DragEvent<HTMLTableCellElement>) => {
-    (e.target as HTMLElement).classList.add("dragging");
     setDragId(getItemId(e));
-  };
-
-  const handleDragEnd = (e: React.DragEvent<HTMLTableCellElement>) => {
-    (e.target as HTMLElement).classList.remove("dragging");
   };
 
   const handleDragEnter = (e: React.DragEvent<HTMLTableCellElement>) => {
@@ -130,7 +123,6 @@ export const useDraggableTable = (options: IUseDraggableTableOptions) => {
 
   return {
     handleDragStart,
-    handleDragEnd,
     handleDragOver,
     handleDragEnter,
     handleDragLeave,

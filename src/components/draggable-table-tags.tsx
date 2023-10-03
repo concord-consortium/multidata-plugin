@@ -24,7 +24,7 @@ interface DraggagleTableHeaderProps {
 
 export const DraggagleTableHeader: React.FC<DraggagleTableHeaderProps> = ({collectionId, attrTitle, children}) => {
   const {dragOverId, dragSide, handleDragStart, handleDragOver, handleOnDrop, handleDragEnter,
-    handleDragLeave, handleDragEnd} = useDraggableTableContext();
+    handleDragLeave} = useDraggableTableContext();
   const {id, style} = getIdAndStyle(collectionId, attrTitle, dragOverId, dragSide);
 
   return (
@@ -34,7 +34,6 @@ export const DraggagleTableHeader: React.FC<DraggagleTableHeaderProps> = ({colle
       draggable={true}
       className={css.draggable}
       onDragStart={handleDragStart}
-      onDragEnd={handleDragEnd}
       onDragOver={handleDragOver}
       onDrop={handleOnDrop}
       onDragEnter={handleDragEnter}
@@ -52,10 +51,10 @@ interface DraggagleTableDataProps {
 
 export const DraggagleTableData: React.FC<DraggagleTableDataProps> = ({collectionId, attrTitle, children}) => {
   const {dragOverId, dragSide} = useDraggableTableContext();
-  const {id, style} = getIdAndStyle(collectionId, attrTitle, dragOverId, dragSide);
+  const {style} = getIdAndStyle(collectionId, attrTitle, dragOverId, dragSide);
 
   return (
-    <td data-id={id} style={style}>
+    <td style={style}>
       {children}
     </td>
   );
