@@ -3,6 +3,31 @@ import { ICollection } from "../types";
 import { DragEndEvent, DragOverEvent, DragStartEvent } from "@dnd-kit/core";
 import { arrayMove } from "@dnd-kit/sortable";
 
+export const updateCollectionAttributes = (collections: ICollection[], sourceCollection: ICollection,
+  targetCollection: ICollection, activeIdx: number, newIdx: number, attr: any) => {
+  const getIndex = (coll: ICollection) => collections.findIndex(c => c.id === coll.id);
+
+  const collectionIndex = getIndex(targetCollection);
+  const newCollection = {...targetCollection};
+  const newCollections = [...collections];
+
+  if (sourceCollection?.id === targetCollection.id) {
+    newCollection.attrs = arrayMove(newCollection.attrs, activeIdx, newIdx);
+  } else {
+    if (sourceCollection) {
+      // Remove attribute from parent collection.
+      const indexOfParentCollection = getIndex(sourceCollection);
+      const newParentCollection = {...sourceCollection};
+      newParentCollection.attrs.splice(activeIdx, 1);
+      newCollections[indexOfParentCollection] = newParentCollection;
+      // And add to target collection.
+      newCollection.attrs.splice(newIdx, 0, attr);
+    }
+  }
+
+  newCollections[collectionIndex] = newCollection;
+  return newCollections;
+};
 interface IUseDragging {
   collections: Array<ICollection>,
   handleSetCollections: (collections: Array<ICollection>) => void,
@@ -31,32 +56,6 @@ export const useDragging = (props: IUseDragging) => {
     setTargetCollection(target);
   };
 
-  const setCollectionAttributes = (collection: ICollection, activeIdx: number,
-    newIdx: number, attr: any) => {
-    const getIndex = (coll: ICollection) => collections.findIndex(c => c.id === coll.id);
-
-    const collectionIndex = getIndex(collection);
-    const newCollection = {...collection};
-    const newCollections = [...collections];
-
-    if (parentCollection?.id === collection.id) {
-      newCollection.attrs = arrayMove(newCollection.attrs, activeIdx, newIdx);
-    } else {
-      if (parentCollection) {
-        // Remove attribute from parent collection.
-        const indexOfParentCollection = getIndex(parentCollection);
-        const newParentCollection = {...parentCollection};
-        newParentCollection.attrs.splice(activeIdx, 1);
-        newCollections[indexOfParentCollection] = newParentCollection;
-        // And add to target collection.
-        newCollection.attrs.splice(newIdx, 0, attr);
-      }
-    }
-
-    newCollections[collectionIndex] = newCollection;
-    handleSetCollections(newCollections);
-  };
-
   const handleDragEnd = (e: DragEndEvent) => {
     const { active, over } = e;
     const eventObjsDefined = active && over;
@@ -70,7 +69,9 @@ export const useDragging = (props: IUseDragging) => {
         // If the new index is greater than the active index, CODAP will place behind one.
         // Set to +1 to fix this.
         const newIndex = overIndex > activeIndex ? overIndex + 1 : overIndex;
-        setCollectionAttributes(parentCollection, activeIndex, overIndex, null);
+        const newCollections = updateCollectionAttributes(collections, parentCollection,
+          parentCollection, activeIndex, overIndex, null);
+        handleSetCollections(newCollections);
         handleUpdateAttributePosition(parentCollection, activeAttr.name, newIndex);
       } else {
         // If we try to move an attr from one column to the end of another, the attr will automatically be
@@ -81,7 +82,8 @@ export const useDragging = (props: IUseDragging) => {
         const distanceFromTarget = translated ? overRect.top - translated.top : null;
         const isBelowTarget = distanceFromTarget && distanceFromTarget <= .5 * overRect.height;
         const newIndex = isBelowTarget ? overIndex + 1 : overIndex;
-        setCollectionAttributes(targetCollection, activeIndex, newIndex, activeAttr);
+        handleSetCollections(updateCollectionAttributes(collections, parentCollection,
+          targetCollection, activeIndex, newIndex, activeAttr));
         handleUpdateAttributePosition(targetCollection, activeAttr.name, newIndex);
       }
     }
