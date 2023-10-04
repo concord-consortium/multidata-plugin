@@ -4,6 +4,7 @@ table {
 
   margin: 0 auto;
   border-spacing: 0;
+  border-collapse: collapse;
 
   th, td {
     border-spacing: 0;
@@ -117,7 +118,7 @@ table {
     .datasetNameHeader {
       position: sticky;
       top: 0;
-      z-index: 4;
+      z-index: 6;
     }
 
     &.collection0, .collection0, &.collection0>tbody>tr>td {
@@ -129,14 +130,14 @@ table {
       border: 1px solid #3c78d8;
       position: sticky;
       top: 16px;
-      z-index: 3;
+      z-index: 5;
     }
 
     .collection1>th, th.collection1 {
       background-color: #F7EABA;
       position: sticky;
       top: 32px;
-      z-index: 2;
+      z-index: 4;
     }
 
     .subTable.collection1, .collection1>tbody>tr>th, .collection1>tbody>tr>td {
@@ -147,7 +148,7 @@ table {
       background-color: #CCBEE0;
       position: sticky;
       top: 48px;
-      z-index: 1;
+      z-index: 3;
     }
 
     .subTable.collection2,  .collection2>tbody>tr>th, .collection2>tbody>tr>td {
@@ -158,7 +159,7 @@ table {
       background-color: #BEE0CA;
       position: sticky;
       top: 64px;
-      z-index: 1;
+      z-index: 2;
     }
 
     .subTable.collection3, .collection3>tbody>tr>th, .collection3>tbody>tr>td {
