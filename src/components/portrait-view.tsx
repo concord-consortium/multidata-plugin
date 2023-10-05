@@ -110,7 +110,7 @@ export const PortraitView = (props: ITableProps) => {
               )}
             </tr>
           }
-          <tr className={`${css[getClassName(caseObj)]}`}>
+          <tr className={`${css[getClassName(caseObj)]} parent-row`}>
             {mapCellsFromValues(collectionId, `parent-row-${index}`, values)}
             <DroppableTableData collectionId={collectionId} style={paddingStyle}>
               <table style={paddingStyle} className={`${css.subTable} ${css[getClassName(children[0])]}`}>
