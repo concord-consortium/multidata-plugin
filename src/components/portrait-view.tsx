@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { ICollection, IProcessedCaseObj, ITableProps } from "../types";
+import { DroppableTableData, DroppableTableHeader } from "./draggable-table-tags";
 
 import css from "./tables.scss";
 
@@ -86,29 +87,32 @@ export const PortraitView = (props: ITableProps) => {
         <tr className={css[className]}>
           <th colSpan={valueCount}>{parentColl.name}</th>
         </tr>
-        {parentColl.cases.map((caseObj, index) => renderRowFromCaseObj(caseObj, index))}
+        {parentColl.cases.map((caseObj, index) => renderRowFromCaseObj(caseObj.collection.id, caseObj, index))}
       </>
     );
   };
 
-  const renderRowFromCaseObj = (caseObj: IProcessedCaseObj, index?: null|number) => {
+  const renderRowFromCaseObj = (collectionId: number, caseObj: IProcessedCaseObj, index?: null|number) => {
     const {children, values} = caseObj;
+
     if (!children.length) {
       return (
-          <tr>{mapCellsFromValues(values)}</tr>
+          <tr>{mapCellsFromValues(collectionId, `row-${index}`, values)}</tr>
       );
     } else {
       return (
         <>
-          {index === 0 ?
+          {index === 0 &&
             <tr className={`${css[getClassName(caseObj)]}`}>
-              {mapHeadersFromValues(values)}
-              <th>{showHeaders ? children[0].collection.name : ""}</th>
-            </tr> : ""
+              {mapHeadersFromValues(collectionId, `first-row-${index}`, values)}
+              {showHeaders && (
+                <DroppableTableHeader collectionId={collectionId}>{children[0].collection.name}</DroppableTableHeader>
+              )}
+            </tr>
           }
-          <tr className={`${css[getClassName(caseObj)]} parent-row`}>
-            {mapCellsFromValues(values)}
-            <td style={paddingStyle}>
+          <tr className={`${css[getClassName(caseObj)]}`}>
+            {mapCellsFromValues(collectionId, `parent-row-${index}`, values)}
+            <DroppableTableData collectionId={collectionId} style={paddingStyle}>
               <table style={paddingStyle} className={`${css.subTable} ${css[getClassName(children[0])]}`}>
                 <tbody>
                   {caseObj.children.map((child, i) => {
@@ -116,18 +120,18 @@ export const PortraitView = (props: ITableProps) => {
                       return (
                         <>
                           <tr key={child.collection.name} className={`${css[getClassName(child)]}`}>
-                            {mapHeadersFromValues(child.values)}
+                            {mapHeadersFromValues(child.collection.id, `child-row-${index}-${i}`, child.values)}
                           </tr>
-                          {renderRowFromCaseObj(child, i)}
+                          {renderRowFromCaseObj(child.collection.id, child, i)}
                         </>
                       );
                     } else {
-                      return (renderRowFromCaseObj(child, i));
+                      return (renderRowFromCaseObj(child.collection.id, child, i));
                     }
                   })}
                 </tbody>
               </table>
-            </td>
+            </DroppableTableData>
           </tr>
         </>
       );

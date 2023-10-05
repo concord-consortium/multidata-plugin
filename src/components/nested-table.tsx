@@ -5,6 +5,8 @@ import { PortraitView } from "./portrait-view";
 import { Menu } from "./menu";
 import { LandscapeView } from "./landscape-view";
 import { FlatTable } from "./flat-table";
+import { DraggableTableContext, useDraggableTable } from "../hooks/useDraggableTable";
+import { DraggagleTableData, DraggagleTableHeader } from "./draggable-table-tags";
 
 import css from "./nested-table.scss";
 
@@ -21,13 +23,22 @@ interface IProps {
   handleSelectDataSet: (e: React.ChangeEvent<HTMLSelectElement>) => void
   updateInteractiveState: (update: Partial<InteractiveState>) => void
   handleShowComponent: () => void
+  handleSetCollections: (collections: Array<ICollection>) => void
+  handleUpdateAttributePosition: (collection: ICollection, attrName: string, newPosition: number) => void,
 }
 
 export const NestedTable = (props: IProps) => {
   const {selectedDataSet, dataSets, collections, items, interactiveState,
-         handleSelectDataSet, updateInteractiveState, handleShowComponent} = props;
+         handleSelectDataSet, updateInteractiveState, handleShowComponent,
+         handleSetCollections, handleUpdateAttributePosition} = props;
   const [collectionClasses, setCollectionClasses] = useState<Array<ICollectionClass>>([]);
   const [paddingStyle, setPaddingStyle] = useState<Record<string, string>>({padding: "0px"});
+
+  const draggableTable = useDraggableTable({
+    collections,
+    handleSetCollections,
+    handleUpdateAttributePosition
+  });
 
   useEffect(() => {
     if (collections.length) {
@@ -75,30 +86,40 @@ export const NestedTable = (props: IProps) => {
     updateInteractiveState({displayMode: e.target.value});
   }, [updateInteractiveState]);
 
-  const mapHeadersFromValues = (values: IValues) => {
+  const mapHeadersFromValues = (collectionId: number, rowKey: string, values: IValues) => {
     return (
       <>
         {(Object.keys(values)).map((key, index) => {
           if (typeof values[key] === "string" || typeof values[key] === "number") {
-              return (<th key={`${key}-${index}`}>{key}</th>);
-            }
+            return (
+              <DraggagleTableHeader
+                key={`${collectionId}-${rowKey}-${key}-${index}`}
+                collectionId={collectionId}
+                attrTitle={key}
+              >{key}
+              </DraggagleTableHeader>
+            );
           }
-        )}
+        })}
       </>
     );
   };
 
-  const mapCellsFromValues = (values: IValues) => {
-    return (
-      <>
-        {(Object.values(values)).map((val, index) => {
-          if (typeof val === "string" || typeof val === "number") {
-              return (<td key={`${val}-${index}}`}>{val}</td>);
-            }
-          }
-        )}
-      </>
-    );
+  const mapCellsFromValues = (collectionId: number, rowKey: string, values: IValues) => {
+    return Object.keys(values).map((key, index) => {
+      const val = values[key];
+      if (typeof val === "string" || typeof val === "number") {
+        return (
+          <DraggagleTableData
+            collectionId={collectionId}
+            attrTitle={key}
+            key={`${rowKey}-${val}-${index}}`}
+          >
+            {val}
+          </DraggagleTableData>
+        );
+      }
+    });
   };
 
   const getValueLength = (firstRow: Array<IValues>) => {
@@ -143,7 +164,9 @@ export const NestedTable = (props: IProps) => {
         padding={interactiveState.padding}
         displayMode={interactiveState.displayMode}
       />
-      {selectedDataSet && renderTable()}
+      <DraggableTableContext.Provider value={draggableTable}>
+        {selectedDataSet && renderTable()}
+      </DraggableTableContext.Provider>
     </div>
   );
 };

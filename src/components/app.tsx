@@ -76,6 +76,8 @@ function App() {
           handleSelectDataSet={handleSelectDataSet}
           updateInteractiveState={updateInteractiveState}
           handleShowComponent={handleShowComponent}
+          handleUpdateAttributePosition={handleUpdateAttributePosition}
+          handleSetCollections={handleSetCollections}
         />
       );
 
