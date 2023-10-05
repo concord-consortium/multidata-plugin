@@ -39,12 +39,20 @@ export const PortraitView = (props: ITableProps) => {
         if (firstChild) {
         const firstChildTop = parseInt(firstChild?.style.top, 10);
           firstChild.style.position = "relative";
-          firstChild.style.verticalAlign = "top";
+          firstChild.style.top = "0";
+          firstChild.style.verticalAlign = "middle";
           if (entry.isIntersecting) {
+            if (entry.intersectionRatio > 0.85
+                || (entryRect.height <= window.innerHeight && visibleRect.height >= entryRect.height)) {
+              firstChild.style.top = "0";
+              firstChild.style.verticalAlign = "middle";
+            } else
             if (visibleRect.top === 0) { //we're in the bottom part of the visible rect
+              firstChild.style.verticalAlign = "top";
               firstChild.style.top =  firstChildTop >= entryHeight - 16
-                                        ? `${firstChildTop}px` : `${((visibleRect.height)/2) - entryRect.top}px`;
+                                        ? `${firstChildTop - 16}px` : `${((visibleRect.height)/2) - entryRect.top}px`;
             } else { //we're in the top part of the visible rect
+              firstChild.style.verticalAlign = "top";
               firstChild.style.top = `${visibleRect.height/2}px`;
               if (entryRect.height > window.innerHeight) {
                 firstChild.style.maxHeight = `${visibleRect.height}px`;
