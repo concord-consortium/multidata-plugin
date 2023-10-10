@@ -4,7 +4,7 @@ import { connect } from "../scripts/connect";
 import { ICollections, ICollection, IDataSet } from "../types";
 
 export interface InteractiveState {
-  view: "nested-table" | "hierarchy" | null
+  view: "nested-table" | "hierarchy" | "card-view" | null
   dataSetName: string|null;
   padding: boolean;
   showHeaders: boolean;
@@ -205,6 +205,22 @@ export const useCodapState = () => {
     connect.selectSelf();
   };
 
+  const updateTitle = async (title: string) => {
+    connect.updateTitle(title);
+  };
+
+  const selectCases = useCallback(async (caseIds: number[]) => {
+    if (selectedDataSet) {
+      connect.selectCases(selectedDataSet.name, caseIds);
+    }
+  }, [selectedDataSet]);
+
+  const listenForSelectionChanges = useCallback((callback: (notification: any) => void) => {
+    if (selectedDataSet) {
+      codapInterface.on("notify", `dataContextChangeNotice[${selectedDataSet.name}]`, undefined, callback);
+    }
+  }, [selectedDataSet]);
+
   return {
     handleSelectSelf,
     dataSets,
@@ -221,5 +237,8 @@ export const useCodapState = () => {
     handleUpdateAttributePosition,
     handleAddCollection,
     handleAddAttribute,
+    updateTitle,
+    selectCases,
+    listenForSelectionChanges,
   };
 };

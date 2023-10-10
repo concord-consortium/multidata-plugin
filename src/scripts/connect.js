@@ -175,8 +175,7 @@ export const connect = {
       await codapInterface.sendRequest(message);
     },
 
-
-  // Selects this component. In CODAP this will bring this component to the front.
+    // Selects this component. In CODAP this will bring this component to the front.
     selectSelf: async function () {
       let myCODAPId = null;
       const selectComponent = async function (id) {
@@ -195,6 +194,26 @@ export const connect = {
       if (myCODAPId != null) {
           return await selectComponent(myCODAPId);
       }
+    },
+
+    updateTitle: async function(title) {
+      const message = {
+        "action": "update",
+        "resource": "interactiveFrame",
+        "values": {
+          "title": title
+        }
+      };
+      await codapInterface.sendRequest(message);
+    },
+
+    selectCases: async function (dSName, caseIds) {
+      const message = {
+        "action": "create",
+        "resource": `dataContext[${dSName}].selectionList`,
+        "values": caseIds
+      };
+      await codapInterface.sendRequest(message);
     },
 
     iFrameDescriptor: {
