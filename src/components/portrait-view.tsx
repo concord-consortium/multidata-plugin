@@ -38,9 +38,9 @@ export const PortraitView = (props: ITableProps) => {
           {index === 0 &&
             <tr className={`${css[getClassName(caseObj)]}`}>
               {mapHeadersFromValues(collectionId, `first-row-${index}`, values)}
-              {showHeaders && (
+              {showHeaders ? (
                 <DroppableTableHeader collectionId={collectionId}>{children[0].collection.name}</DroppableTableHeader>
-              )}
+              ) : <th />}
             </tr>
           }
           <tr className={`${css[getClassName(caseObj)]}`}>
