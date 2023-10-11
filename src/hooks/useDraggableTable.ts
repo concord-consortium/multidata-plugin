@@ -112,10 +112,10 @@ export const useDraggableTable = (options: IUseDraggableTableOptions) => {
   };
 
   const handleDragOver = (e: React.DragEvent<HTMLTableCellElement>) => {
-    e.stopPropagation();
     // allow drag overs on other headers if it has an item id set
     if (getItemId(e) === dragOverId) {
       updateDragSide(e);
+      e.preventDefault();
     } else {
       dragOverRectRef.current = undefined;
     }
