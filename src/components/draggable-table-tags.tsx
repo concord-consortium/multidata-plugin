@@ -117,10 +117,12 @@ export const DraggableTableContainer: React.FC<DraggableTableContainerProps> = (
   const {dragging, dragOverId, handleDragOver, handleOnDrop, handleDragEnter,
     handleDragLeave} = useDraggableTableContext();
 
+
   const id = collectionId ? `parent:${collectionId}` : `parent:root`;
+  const hovering = id === dragOverId;
   const style: React.CSSProperties = {
     display: dragging ? "table-cell" : "none",
-    backgroundColor: id === dragOverId ? highlightColor : undefined,
+    backgroundColor: hovering ? highlightColor : undefined,
   };
 
   return (
@@ -137,6 +139,7 @@ export const DraggableTableContainer: React.FC<DraggableTableContainerProps> = (
             onDragLeave={handleDragLeave}
           >
             <AddIcon />
+            {hovering && <div>Drop to create new collection</div>}
           </td>
           <td className={css.draggableTableContainerChildren}>{children}</td>
         </tr>

@@ -173,6 +173,12 @@ table.draggableTableContainer {
   }
 
   td.draggableTableContainerDropTarget {
+
+    @keyframes fadeInText {
+      0% { opacity: 0; }
+      100% { opacity: 1; }
+    }
+
     $iconSize: 20px;
 
     width: $iconSize;
@@ -189,6 +195,11 @@ table.draggableTableContainer {
       width: $iconSize;
       height: $iconSize;
       pointer-events: none;
+    }
+
+    div {
+      pointer-events: none;
+      animation: fadeInText 0.75s;
     }
   }
 
