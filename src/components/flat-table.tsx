@@ -1,6 +1,6 @@
 import React from "react";
 import { ITableProps, IValues } from "../types";
-import { DraggagleTableHeader } from "./draggable-table-tags";
+import { DraggableTableContainer, DraggagleTableHeader } from "./draggable-table-tags";
 
 import css from "./tables.scss";
 
@@ -23,31 +23,33 @@ export const FlatTable = (props: IFlatProps) => {
   });
 
   return (
-    <table className={`${css.mainTable} ${css.flatTable} ${css[className]}}`}>
-      <tbody>
-        <tr className={css.mainHeader}>
-          <th colSpan={items.length}>{selectedDataSet.title}</th>
-        </tr>
-        {showHeaders &&
-        <tr className={css[className]}>
-          <th colSpan={items.length}>{collections[0].title}</th>
-        </tr>}
-        <tr>
-          {collection.attrs.map((attr: any) =>
-            <DraggagleTableHeader
-              key={attr.title}
-              collectionId={collection.id}
-              attrTitle={attr.title}
-            >
-              {attr.title}
-            </DraggagleTableHeader>)}
-        </tr>
-        {orderedItems.map((item, index) => {
-          return (
-            <tr key={`${index}-${item.id}`}>{mapCellsFromValues(collection.id, `row-${index}`, item)}</tr>
-          );
-        })}
-      </tbody>
-    </table>
+    <DraggableTableContainer collectionId="root">
+      <table className={`${css.mainTable} ${css.flatTable} ${css[className]}}`}>
+        <tbody>
+          <tr className={css.mainHeader}>
+            <th colSpan={items.length}>{selectedDataSet.title}</th>
+          </tr>
+          {showHeaders &&
+          <tr className={css[className]}>
+            <th colSpan={items.length}>{collections[0].title}</th>
+          </tr>}
+          <tr>
+            {collection.attrs.map((attr: any) =>
+              <DraggagleTableHeader
+                key={attr.title}
+                collectionId={collection.id}
+                attrTitle={attr.title}
+              >
+                {attr.title}
+              </DraggagleTableHeader>)}
+          </tr>
+          {orderedItems.map((item, index) => {
+            return (
+              <tr key={`${index}-${item.id}`}>{mapCellsFromValues(collection.id, `row-${index}`, item)}</tr>
+            );
+          })}
+        </tbody>
+      </table>
+    </DraggableTableContainer>
   );
 };
