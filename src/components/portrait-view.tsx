@@ -34,32 +34,26 @@ export const PortraitView = (props: ITableProps) => {
         const target = entry.target;
         const entryRect = target.getBoundingClientRect();
         const entryHeight = entryRect.height;
-        const visibleRect = entry.intersectionRect;
-        const firstChild = target.firstElementChild as HTMLElement | null;
+        const intersectionRect = entry.intersectionRect;
+        const visibleHeight = intersectionRect.height;
+        const intersectionHeightRatio = visibleHeight/entryHeight;
+        const cells = Array.from(target.querySelectorAll<HTMLElement>(".parent-data"));
 
-        if (firstChild) {
-        const firstChildTop = parseInt(firstChild?.style.top, 10);
-          firstChild.style.position = "relative";
-          firstChild.style.top = "0";
-          firstChild.style.verticalAlign = "middle";
-          if (entry.isIntersecting) {
-            if (entry.intersectionRatio > 0.85
-                || (entryRect.height <= window.innerHeight && visibleRect.height >= entryRect.height)) {
-              firstChild.style.top = "0";
-              firstChild.style.verticalAlign = "middle";
-            } else
-            if (visibleRect.top === 0) { //we're in the bottom part of the visible rect
-              firstChild.style.verticalAlign = "top";
-              firstChild.style.top =  firstChildTop >= entryHeight - 16
-                                        ? `${firstChildTop - 16}px` : `${((visibleRect.height)/2) - entryRect.top}px`;
-            } else { //we're in the top part of the visible rect
-              firstChild.style.verticalAlign = "top";
-              firstChild.style.top = `${visibleRect.height/2}px`;
-              if (entryRect.height > window.innerHeight) {
-                firstChild.style.maxHeight = `${visibleRect.height}px`;
+        if (cells) {
+          cells.forEach(cell => {
+            cell.style.position = "relative";
+            if (entry.isIntersecting && intersectionHeightRatio < 0.85) {
+              if (intersectionRect.top === 0) { //we're in the bottom part of the visible rect
+                cell.style.verticalAlign = "top";
+                cell.style.top = `${(visibleHeight/2) - entryRect.top - 16}px`;
+                cell.style.verticalAlign = "top";
+                cell.style.top = `${visibleHeight/2}px`;
               }
+            } else {
+              cell.style.top = "0";
+              cell.style.verticalAlign = "middle";
             }
-          }
+          });
         }
       });
     };
@@ -87,12 +81,13 @@ export const PortraitView = (props: ITableProps) => {
         <tr className={css[className]}>
           <th colSpan={valueCount}>{parentColl.name}</th>
         </tr>
-        {parentColl.cases.map((caseObj, index) => renderRowFromCaseObj(caseObj.collection.id, caseObj, index))}
+        {parentColl.cases.map((caseObj, index) => renderRowFromCaseObj(caseObj.collection.id, caseObj, index, true))}
       </>
     );
   };
 
-  const renderRowFromCaseObj = (collectionId: number, caseObj: IProcessedCaseObj, index?: null|number) => {
+  const renderRowFromCaseObj = (collectionId: number, caseObj: IProcessedCaseObj,
+                                  index?: null|number, isParent?: boolean) => {
     const {children, values} = caseObj;
 
     if (!children.length) {
@@ -111,7 +106,7 @@ export const PortraitView = (props: ITableProps) => {
             </tr>
           }
           <tr className={`${css[getClassName(caseObj)]} parent-row`}>
-            {mapCellsFromValues(collectionId, `parent-row-${index}`, values)}
+            {mapCellsFromValues(collectionId, `parent-row-${index}`, values, isParent)}
             <DroppableTableData collectionId={collectionId} style={paddingStyle}>
               <table style={paddingStyle} className={`${css.subTable} ${css[getClassName(children[0])]}`}>
                 <tbody>
@@ -126,7 +121,7 @@ export const PortraitView = (props: ITableProps) => {
                         </>
                       );
                     } else {
-                      return (renderRowFromCaseObj(child.collection.id, child, i));
+                      return (renderRowFromCaseObj(child.collection.id, child, i, isParent));
                     }
                   })}
                 </tbody>
