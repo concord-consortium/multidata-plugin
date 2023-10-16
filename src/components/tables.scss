@@ -115,6 +115,9 @@ table {
 
   &.portraitTable {
     overflow: scroll;
+    border-collapse: separate;
+    border-spacing: 0;
+
     .datasetNameHeader {
       position: sticky;
       top: 0;
@@ -129,14 +132,13 @@ table {
       background-color: #CEE9FB;
       border: 1px solid #3c78d8;
       position: sticky;
-
     }
 
     tr.collection0>th {
       top: 16px;
       z-index: 9;
     }
-    
+
     tr.collection0:nth-child(3)>th {
       top: 32px;
       z-index: 8;
@@ -148,9 +150,11 @@ table {
       top: 48px;
       z-index: 6;
     }
-
-    .subTable.collection1, .collection1>tbody>tr>th, .collection1>tbody>tr>td {
+    .collection1>tbody>tr>th, .collection1>tbody>tr>td {
       border: 1px solid #f1c232;
+    }
+    .subTable.collection1 {
+      border: none;
     }
 
     .collection2>th, th.collection2 {
@@ -160,8 +164,11 @@ table {
       z-index: 5;
     }
 
-    .subTable.collection2,  .collection2>tbody>tr>th, .collection2>tbody>tr>td {
+    .collection2>tbody>tr>th, .collection2>tbody>tr>td {
       border: 1px solid #8e7cc3;
+    }
+    .subTable.collection2 {
+      border: none;
     }
 
     .collection3>th, th.collection3 {
@@ -171,8 +178,11 @@ table {
       z-index: 4;
     }
 
-    .subTable.collection3, .collection3>tbody>tr>th, .collection3>tbody>tr>td {
+    .collection3>tbody>tr>th, .collection3>tbody>tr>td {
       border: 1px solid #93c47d;
+    }
+    .subTable.collection3 {
+      border: none;
     }
 
     .collection4>th, th.collection4 {
@@ -182,8 +192,11 @@ table {
       z-index: 3;
     }
 
-    .subTable.collection4, .collection4>tbody>tr>th, .collection4>tbody>tr>td {
+    .collection4>tbody>tr>th, .collection4>tbody>tr>td {
       border: 1px solid #f6b26b;
+    }
+    .subTable.collection4 {
+      border: none;
     }
   }
 }
@@ -191,6 +204,8 @@ table {
 .subTable {
   width: 100%;
   height: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
 }
 
 .portraitTableWrapper {
