@@ -24,20 +24,23 @@ interface IProps {
   updateInteractiveState: (update: Partial<InteractiveState>) => void
   handleShowComponent: () => void
   handleSetCollections: (collections: Array<ICollection>) => void
-  handleUpdateAttributePosition: (collection: ICollection, attrName: string, newPosition: number) => void,
+  handleUpdateAttributePosition: (collection: ICollection, attrName: string, newPosition: number) => void
+  handleCreateCollectionFromAttribute: (collection: ICollection, attr: any, parent: number|string) => Promise<void>
 }
 
 export const NestedTable = (props: IProps) => {
   const {selectedDataSet, dataSets, collections, items, interactiveState,
          handleSelectDataSet, updateInteractiveState, handleShowComponent,
-         handleSetCollections, handleUpdateAttributePosition} = props;
+         handleSetCollections, handleUpdateAttributePosition,
+         handleCreateCollectionFromAttribute} = props;
   const [collectionClasses, setCollectionClasses] = useState<Array<ICollectionClass>>([]);
   const [paddingStyle, setPaddingStyle] = useState<Record<string, string>>({padding: "0px"});
 
   const draggableTable = useDraggableTable({
     collections,
     handleSetCollections,
-    handleUpdateAttributePosition
+    handleUpdateAttributePosition,
+    handleCreateCollectionFromAttribute
   });
 
   useEffect(() => {
