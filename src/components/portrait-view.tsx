@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React from "react";
 import { ICollection, IProcessedCaseObj, ITableProps } from "../types";
 import { DraggableTableContainer, DroppableTableData, DroppableTableHeader } from "./draggable-table-tags";
 
@@ -23,9 +23,9 @@ export const PortraitViewRow = (props: PortraitViewRowProps) => {
         {index === 0 &&
           <tr className={`${css[getClassName(caseObj)]}`}>
             {mapHeadersFromValues(collectionId, `first-row-${index}`, values)}
-            {showHeaders && (
-              <DroppableTableHeader collectionId={collectionId}>{children[0].collection.name}</DroppableTableHeader>
-            )}
+            {showHeaders ? (
+                <DroppableTableHeader collectionId={collectionId}>{children[0].collection.name}</DroppableTableHeader>
+              ) : <th />}
           </tr>
         }
         <tr className={`${css[getClassName(caseObj)]}`}>
@@ -78,7 +78,7 @@ export const PortraitView = (props: ITableProps) => {
         <table className={`${css.mainTable} ${css.portraitTable} ${css[className]}`}>
           <tbody>
             <tr className={css.mainHeader}>
-              <th colSpan={valueCount}>{selectedDataSet.name}</th>
+              <th className={css.datasetNameHeader} colSpan={valueCount}>{selectedDataSet.name}</th>
             </tr>
             <tr className={css[className]}>
               <th colSpan={valueCount}>{parentColl.name}</th>
@@ -99,7 +99,7 @@ export const PortraitView = (props: ITableProps) => {
   };
 
   return (
-    <div className={css.portaitTableContainer}>
+    <div className={css.portraitTableContainer}>
       {collections.length && collectionClasses.length && renderTable()}
     </div>
   );
