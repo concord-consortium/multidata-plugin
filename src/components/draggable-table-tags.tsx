@@ -1,9 +1,13 @@
 import React from "react";
 import { useDraggableTableContext, Side } from "../hooks/useDraggableTable";
 
+import AddIcon from "../assets/plus-level-1.svg";
+
 import css from "./tables.scss";
 
-const border = "5px solid #FBF719";
+const highlightColor = "#FBF719";
+
+const border = `5px solid ${highlightColor}`;
 const borderLeft = border;
 const borderRight = border;
 
@@ -26,7 +30,7 @@ interface DraggagleTableHeaderProps {
 
 export const DraggagleTableHeader: React.FC<DraggagleTableHeaderProps> = ({collectionId, attrTitle, children}) => {
   const {dragOverId, dragSide, handleDragStart, handleDragOver, handleOnDrop, handleDragEnter,
-    handleDragLeave} = useDraggableTableContext();
+    handleDragLeave, handleDragEnd} = useDraggableTableContext();
   const {id, style} = getIdAndStyle(collectionId, attrTitle, dragOverId, dragSide);
 
   return (
@@ -40,6 +44,7 @@ export const DraggagleTableHeader: React.FC<DraggagleTableHeaderProps> = ({colle
       onDrop={handleOnDrop}
       onDragEnter={handleDragEnter}
       onDragLeave={handleDragLeave}
+      onDragEnd={handleDragEnd}
     >
       {children}
     </th>
@@ -103,3 +108,44 @@ export const DroppableTableData: React.FC<DroppableTableDataProps> = ({collectio
     </td>
   );
 };
+
+interface DraggableTableContainerProps {
+  collectionId?: number|string;
+}
+
+export const DraggableTableContainer: React.FC<DraggableTableContainerProps> = ({collectionId, children}) => {
+  const {dragging, dragOverId, handleDragOver, handleOnDrop, handleDragEnter,
+    handleDragLeave} = useDraggableTableContext();
+
+
+  const id = collectionId ? `parent:${collectionId}` : `parent:root`;
+  const hovering = id === dragOverId;
+  const style: React.CSSProperties = {
+    display: dragging ? "table-cell" : "none",
+    backgroundColor: hovering ? highlightColor : undefined,
+  };
+
+  return (
+    <table key={collectionId} className={css.draggableTableContainer}>
+      <tbody>
+        <tr>
+          <td
+            className={css.draggableTableContainerDropTarget}
+            data-id={id}
+            style={style}
+            onDragOver={handleDragOver}
+            onDrop={handleOnDrop}
+            onDragEnter={handleDragEnter}
+            onDragLeave={handleDragLeave}
+          >
+            <AddIcon />
+            {hovering && <div>Drop to create new collection</div>}
+          </td>
+          <td className={css.draggableTableContainerChildren}>{children}</td>
+        </tr>
+      </tbody>
+    </table>
+  );
+};
+
+

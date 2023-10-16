@@ -4,7 +4,7 @@ import { connect } from "../scripts/connect";
 import { ICollections, ICollection, IDataSet } from "../types";
 
 export interface InteractiveState {
-  view: "nested-table" | "hierarchy" | null
+  view: "nested-table" | "hierarchy" | "card-view" | null
   dataSetName: string|null;
   padding: boolean;
   showHeaders: boolean;
@@ -164,6 +164,12 @@ export const useCodapState = () => {
     updateCollections();
   };
 
+  const handleCreateCollectionFromAttribute = async (collection: ICollection, attr: any, parent: number|string) => {
+    await connect.createCollectionFromAttribute(selectedDataSet.name, collection.name, attr, parent);
+    // update collections because CODAP does not send dataContextChangeNotice
+    updateCollections();
+  };
+
   const handleAddAttribute = async (collection: ICollection, attrName: string) => {
     const proposedName = attrName.length ? attrName : "newAttr";
     let newAttributeName;
@@ -205,6 +211,22 @@ export const useCodapState = () => {
     connect.selectSelf();
   };
 
+  const updateTitle = async (title: string) => {
+    connect.updateTitle(title);
+  };
+
+  const selectCases = useCallback(async (caseIds: number[]) => {
+    if (selectedDataSet) {
+      connect.selectCases(selectedDataSet.name, caseIds);
+    }
+  }, [selectedDataSet]);
+
+  const listenForSelectionChanges = useCallback((callback: (notification: any) => void) => {
+    if (selectedDataSet) {
+      codapInterface.on("notify", `dataContextChangeNotice[${selectedDataSet.name}]`, undefined, callback);
+    }
+  }, [selectedDataSet]);
+
   return {
     handleSelectSelf,
     dataSets,
@@ -221,5 +243,9 @@ export const useCodapState = () => {
     handleUpdateAttributePosition,
     handleAddCollection,
     handleAddAttribute,
+    updateTitle,
+    selectCases,
+    listenForSelectionChanges,
+    handleCreateCollectionFromAttribute,
   };
 };
