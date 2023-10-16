@@ -29,7 +29,7 @@ export const PortraitViewRow = (props: PortraitViewRowProps) => {
           </tr>
         }
         <tr className={`${css[getClassName(caseObj)]} parent-row`}>
-          {mapCellsFromValues(collectionId, `parent-row-${index}`, values)}
+          {mapCellsFromValues(collectionId, `parent-row-${index}`, values, isParent)}
           <DroppableTableData collectionId={collectionId} style={paddingStyle}>
             <DraggableTableContainer collectionId={collectionId}>
               <table style={paddingStyle} className={`${css.subTable} ${css[getClassName(children[0])]}`}>
@@ -106,6 +106,7 @@ export const PortraitView = (props: ITableProps) => {
               if (intersectionRect.top === 0) { //we're in the bottom part of the visible rect
                 cell.style.verticalAlign = "top";
                 cell.style.top = `${(visibleHeight/2) - entryRect.top - 16}px`;
+              } else { //we're in the top part of the visible rect
                 cell.style.verticalAlign = "top";
                 cell.style.top = `${visibleHeight/2}px`;
               }
