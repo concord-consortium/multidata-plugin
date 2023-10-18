@@ -80,14 +80,16 @@ interface DraggagleTableDataProps {
   collectionId: number;
   attrTitle: string;
   style?: React.CSSProperties;
+  isParent?: boolean;
 }
 
-export const DraggagleTableData: React.FC<DraggagleTableDataProps> = ({collectionId, attrTitle, children}) => {
+export const DraggagleTableData: React.FC<DraggagleTableDataProps>
+                = ({collectionId, attrTitle, children, isParent}) => {
   const {dragOverId, dragSide} = useDraggableTableContext();
   const {style} = getIdAndStyle(collectionId, attrTitle, dragOverId, dragSide);
 
   return (
-    <td style={style}>
+    <td style={style} className={`draggable-table-data ${isParent ? "parent-data" : ""}`}>
       {children}
     </td>
   );
@@ -103,7 +105,7 @@ export const DroppableTableData: React.FC<DroppableTableDataProps> = ({collectio
   const dragStyle = getStyle(`${collectionId}`, dragOverId, dragSide);
 
   return (
-    <td style={{...dragStyle, ...style}}>
+    <td style={{...dragStyle, ...style}} className="droppable-table-data">
       {children}
     </td>
   );
