@@ -64,7 +64,7 @@ export const NestedTable = (props: IProps) => {
   }, [interactiveState.dataSetName, updateInteractiveState]);
 
   useEffect(() => {
-    const style =  interactiveState.padding ? {padding: "7px"} : {padding: "0px"};
+    const style =  interactiveState.padding ? {padding: "3px"} : {padding: "0px"};
     setPaddingStyle(style);
   }, [interactiveState.padding]);
 
