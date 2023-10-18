@@ -209,8 +209,6 @@ table {
 table.draggableTableContainer {
   width: 100%;
   border-spacing: 0px;
-  overflow-x: auto;
-  overflow-y: hidden;
 
   td.draggableTableContainerDropTarget {
 
@@ -249,6 +247,5 @@ table.draggableTableContainer {
 }
 
 .portraitTableContainer {
-  overflow: auto;
   height: 90vh;
 }
