@@ -90,7 +90,10 @@ export const DraggagleTableData: React.FC<DraggagleTableDataProps>
 
   return (
     <td style={style} className={`draggable-table-data ${isParent ? "parent-data" : ""}`}>
-      {children}
+      {isParent
+        ? <div className="data-text-value">{children}</div>
+        : children
+      }
     </td>
   );
 };
