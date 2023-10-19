@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { ICollection, IProcessedCaseObj, ITableProps } from "../types";
 import { DraggableTableContainer, DroppableTableData, DroppableTableHeader } from "./draggable-table-tags";
 
@@ -33,7 +33,7 @@ export const PortraitViewRow = (props: PortraitViewRowProps) => {
           <DroppableTableData collectionId={collectionId} style={paddingStyle}>
             <DraggableTableContainer collectionId={collectionId}>
               <table style={paddingStyle} className={`${css.subTable} ${css[getClassName(children[0])]}`}>
-                <tbody>
+                <tbody className={`table-body ${css[getClassName(children[0])]}`}>
                   {caseObj.children.map((child, i) => {
                     const nextProps: PortraitViewRowProps = {
                       ...props,
@@ -70,13 +70,27 @@ export const PortraitView = (props: ITableProps) => {
   const thresh = useMemo(() => {
     const t: number[] = [];
     for (let i = 0; i <= 100; i++) {
-      t.push(i / 100);
+      t.push(i/100);
     }
     return t;
   },[]);
 
+  const [scrolling, setScrolling] = useState(false);
+  const [scrollTop, setScrollTop] = useState(0);
+  console.log("scrolling", window.scrollY);
+
   useEffect(() => {
-    const handleIntersection = (entries: IntersectionObserverEntry[]) => {
+    const onScroll = (e: any) => {
+      setScrollTop(window.scrollY);
+      setScrolling(window.scrollY > scrollTop);
+    };
+    window.addEventListener("scroll", onScroll);
+
+    return () => window.removeEventListener("scroll", onScroll);
+  }, [scrollTop]);
+
+  useEffect(() => {
+    const handleIntersection = (entries: IntersectionObserverEntry[], o: any) => {
       entries.forEach((entry) => {
         const target = entry.target;
         const entryRect = target.getBoundingClientRect();
@@ -88,19 +102,24 @@ export const PortraitView = (props: ITableProps) => {
         const cells = Array.from(target.querySelectorAll<HTMLElement>(".parent-data"));
         if (cells) {
           cells.forEach(cell => {
-            const cellTop = cell.getBoundingClientRect().top;
+            // cell.textContent==="Wooden" && console.log("in handleIntersection Wooden",entry);
+            // console.log(cell.textContent, "intersectionRatio", entry.intersectionRatio);
+            const cellRect = cell.getBoundingClientRect();
+            const cellTop = cellRect.top;
             const dataCellHeight = cell.clientHeight;
             const dataTextValue = cell.querySelector<HTMLElement>(".data-text-value");
             const textHeight = dataTextValue?.getBoundingClientRect().height || 16;
             const visiblePortion = Math.min(dataCellHeight, window.innerHeight - cell.getBoundingClientRect().top);
-            // console.log(target.textContent, "target entryRect top", entryRect.top);
+            // console.log(cell.textContent, "target entryRect top", entryRect.top);
             // console.log(cell.textContent, "visibleHeight", visibleHeight);
-            console.log(cell.textContent, "visibleTop", visibleTop);
-            console.log(cell.textContent, "visiblePortion", visiblePortion);
+            // console.log(cell.textContent, "intersectionRect bounds", intersectionRect);
+            // console.log(cell.textContent, "visibleTop", visibleTop);
+            // console.log(cell.textContent, "visiblePortion", visiblePortion);
             // console.log(cell.textContent, "intersectionRect.top", intersectionRect.top, "cellTop",
             // cellTop);
-            console.log(cell.textContent, "cellTop", cellTop);
-            console.log(cell.textContent, "dataCellHeight", dataCellHeight);
+            // console.log(cell.textContent, "cellTop", cellTop);
+            // console.log(cell.textContent, "dataCellHeight", dataCellHeight);
+            // console.log(cell.textContent, "window.innerHeight", window.innerHeight);
             let textTopPosition = 0;
 
             if (dataTextValue) {
@@ -113,36 +132,32 @@ export const PortraitView = (props: ITableProps) => {
               } else
               if (entry.isIntersecting && intersectionHeightRatio < 0.95) {
                 if (cellTop < intersectionRect.top/2) { //we're in the bottom part of the visible rect
-                  console.log(cell.textContent, "BOTTOM PART");
-                  // textTopPosition = (visibleHeight/2) - entryRect.top - 16;
-                  // textTopPosition = (dataCellHeight / 2) + cellTop - textHeight;
+                  // console.log(cell.textContent, "BOTTOM PART");
                   textTopPosition = Math.min((dataCellHeight/2 - textHeight), visibleTop - (cellTop) + textHeight);
-                  // textTopPosition = ((dataCellHeight - visiblePortion) / 2) - textHeight;
                 } else { //we're in the top part of the visible rect
-                  console.log(cell.textContent, "TOP PART");
-                  // dataTextValue.style.top = `${visibleHeight/2}px`;
+                  // console.log(cell.textContent, "TOP PART");
                   textTopPosition = Math.max((-dataCellHeight/2) + textHeight,
                                              (visiblePortion - dataCellHeight) / 2 + textHeight);
                 }
               }
               // console.log(cell.textContent, "textTopPositon", textTopPosition);
-              console.log(cell.textContent, "*****************************************************");
+              // console.log(cell.textContent, "*****************************************************");
               dataTextValue.style.top = `${textTopPosition}px`;
             }
           });
         }
       });
     };
-    const observer = new IntersectionObserver(handleIntersection, { threshold: thresh });
-    document.querySelectorAll(".parent-row").forEach((cell) => {
-      observer.observe(cell);
+    const observer = new IntersectionObserver(handleIntersection, {threshold: thresh});
+    document.querySelectorAll(".parent-row").forEach((row) => {
+      observer.observe(row);
     });
     return () => {
-      document.querySelectorAll(".parent-row").forEach((cell) => {
-        observer.unobserve(cell);
+      document.querySelectorAll(".parent-row").forEach((row) => {
+        observer.unobserve(row);
       });
     };
-  }, []);
+  }, [scrolling, thresh]);
 
   const renderTable = () => {
     const parentColl = collections.filter((coll: ICollection) => !coll.parent)[0];
@@ -153,7 +168,7 @@ export const PortraitView = (props: ITableProps) => {
     return (
       <DraggableTableContainer>
         <table className={`${css.mainTable} ${css.portraitTable} ${css[className]}`}>
-          <tbody>
+          <tbody className={`table-body ${css[className]}`}>
             <tr className={css.mainHeader}>
               <th className={css.datasetNameHeader} colSpan={valueCount}>{selectedDataSet.name}</th>
             </tr>

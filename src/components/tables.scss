@@ -127,7 +127,8 @@ table {
       border: 1px solid #3c78d8;
     }
 
-    &.collection0>th, .collection0>th, th.collection0 {
+    // &.collection0>th, .collection0>th, th.collection0 {
+      &.collection0>th, .collection0>th {
       background-color: #CEE9FB;
       border: 1px solid #3c78d8;
       position: sticky;
@@ -143,7 +144,8 @@ table {
       z-index: 8;
     }
 
-    .collection1>th, th.collection1 {
+    // .collection1>th, th.collection1 {
+    .collection1>th {
       background-color: #F7EABA;
       position: sticky;
       top: 48px;
@@ -156,7 +158,8 @@ table {
       border: none;
     }
 
-    .collection2>th, th.collection2 {
+    // .collection2>th, th.collection2 {
+    .collection2>th {
       background-color: #CCBEE0;
       position: sticky;
       top: 64px;
@@ -170,7 +173,8 @@ table {
       border: none;
     }
 
-    .collection3>th, th.collection3 {
+    // .collection3>th, th.collection3 {
+    .collection3>th {
       background-color: #BEE0CA;
       position: sticky;
       top: 80px;
@@ -184,7 +188,8 @@ table {
       border: none;
     }
 
-    .collection4>th, th.collection4 {
+    // .collection4>th, th.collection4 {
+    .collection4>th {
       background-color: #E7C3A4;
       position: sticky;
       top: 96px;
