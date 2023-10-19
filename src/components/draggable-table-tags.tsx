@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useDraggableTableContext, Side } from "../hooks/useDraggableTable";
 
 import AddIcon from "../assets/plus-level-1.svg";
@@ -81,16 +81,50 @@ interface DraggagleTableDataProps {
   attrTitle: string;
   style?: React.CSSProperties;
   isParent?: boolean;
+  scrollTop?: number;
 }
 
 export const DraggagleTableData: React.FC<DraggagleTableDataProps>
-                = ({collectionId, attrTitle, children, isParent}) => {
+                = ({collectionId, attrTitle, children, isParent, scrollTop=0}) => {
   const {dragOverId, dragSide} = useDraggableTableContext();
   const {style} = getIdAndStyle(collectionId, attrTitle, dragOverId, dragSide);
+  const cellRef = useRef<HTMLTableDataCellElement>(null);
+  const cellValueRef = useRef<HTMLDivElement>(null);
+  const [textTopPosition, setTextTopPosition] = useState(0);
+
+  useEffect(() => {
+    const cellRect = cellRef.current?.getBoundingClientRect();
+    const cellValueText = cellValueRef.current?.textContent;
+
+    if (cellRect) {
+      const isWholeCellVisible = cellRect.top + cellRect.height < window.innerHeight && cellRect.top >= 0;
+      const cellHeight = cellRect.height;
+      console.log(cellValueText, "cellRect", cellRect.x, cellRect.top);
+      console.log(cellValueText, "window.screenTop", window.screenTop, "window.innerHeight", window.innerHeight);
+      if (cellHeight < window.innerHeight && isWholeCellVisible) {
+        console.log(cellValueText, "WHOLE cell is visible");
+        setTextTopPosition(0);
+      } else {
+        // what part of the cell is visible?
+        if (cellRect.top < window.innerHeight && cellRect.top + cellHeight > window.innerHeight) {
+          console.log(cellValueText, "we are at the TOP");
+          setTextTopPosition(-cellHeight/2 + 16);
+        } else {
+          console.log(cellValueText, "we are at the BOTTOM");
+          setTextTopPosition(cellHeight/2 - 16);
+        }
+      }
+    }
+  },[scrollTop]);
 
   return (
-    <td style={style} className={`draggable-table-data ${isParent ? "parent-data" : ""}`}>
-      {children}
+    <td style={style} className={`draggable-table-data ${isParent ? "parent-data" : ""}`} ref={cellRef}>
+      {isParent
+        ? <div className="data-text-value" style={{position: "relative", top: textTopPosition}} ref={cellValueRef}>
+            {children}
+          </div>
+        : children
+      }
     </td>
   );
 };
