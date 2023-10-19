@@ -101,14 +101,14 @@ export const PortraitView = (props: ITableProps) => {
 
         if (cells) {
           cells.forEach(cell => {
-            cell.style.position = "relative";
+            // cell.style.position = "relative";
             if (entry.isIntersecting && intersectionHeightRatio < 0.85) {
               if (intersectionRect.top === 0) { //we're in the bottom part of the visible rect
                 cell.style.verticalAlign = "top";
-                cell.style.top = `${(visibleHeight/2) - entryRect.top - 16}px`;
+                cell.style.paddingTop = `${(visibleHeight/2) - entryRect.top - 16}px`;
               } else { //we're in the top part of the visible rect
                 cell.style.verticalAlign = "top";
-                cell.style.top = `${visibleHeight/2}px`;
+                cell.style.paddingTop = `${visibleHeight/2}px`;
               }
             } else {
               cell.style.top = "0";
