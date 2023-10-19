@@ -108,7 +108,7 @@ export const NestedTable = (props: IProps) => {
     );
   };
 
-  const mapCellsFromValues = (collectionId: number, rowKey: string, values: IValues, isParent?: boolean) => {
+  const mapCellsFromValues = (collectionId: number, rowKey: string, values: IValues, isParent?: boolean, scrollNum?: number) => {
     return Object.keys(values).map((key, index) => {
       const val = values[key];
       if (typeof val === "string" || typeof val === "number") {
@@ -119,7 +119,8 @@ export const NestedTable = (props: IProps) => {
             key={`${rowKey}-${val}-${index}}`}
             isParent={isParent}
           >
-            {val}
+            {scrollNum ?? "none"}
+            {/* {val} */}
           </DraggagleTableData>
         );
       }
