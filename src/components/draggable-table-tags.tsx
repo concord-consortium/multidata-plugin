@@ -10,6 +10,8 @@ const highlightColor = "#FBF719";
 const border = `5px solid ${highlightColor}`;
 const borderLeft = border;
 const borderRight = border;
+const kCellHeight = 16;
+// const headerHeight = kCellHeight * 3;
 
 const getStyle = (id: string, dragOverId?: string, dragSide?: Side) => {
   return id === dragOverId ? (dragSide === "left" ? {borderLeft} : {borderRight}) : {};
@@ -82,40 +84,85 @@ interface DraggagleTableDataProps {
   style?: React.CSSProperties;
   isParent?: boolean;
   scrollTop?: number;
+  idx?: null|number;
+  menuHeight?: number;
 }
 
 export const DraggagleTableData: React.FC<DraggagleTableDataProps>
-                = ({collectionId, attrTitle, children, isParent, scrollTop=0}) => {
+                = ({collectionId, attrTitle, children, isParent, scrollTop=0, idx=0, menuHeight=29}) => {
   const {dragOverId, dragSide} = useDraggableTableContext();
   const {style} = getIdAndStyle(collectionId, attrTitle, dragOverId, dragSide);
   const cellRef = useRef<HTMLTableDataCellElement>(null);
   const cellValueRef = useRef<HTMLDivElement>(null);
   const [textTopPosition, setTextTopPosition] = useState(0);
+  const [cellEnded, setCellEnded] = useState(false);
+  const [scrollT, setScrollT] = useState(0);
+  const headerIndexCount = idx !== null ? idx : 0;
+  const headerHeight = (kCellHeight * (3+headerIndexCount));
 
   useEffect(() => {
     const cellRect = cellRef.current?.getBoundingClientRect();
-    const cellValueText = cellValueRef.current?.textContent;
+    const cellTextValue = cellValueRef.current?.textContent;
+    // const scrollValue = scrollTop;
+    const cellPosition = cellRef.current?.offsetTop;
 
     if (cellRect) {
-      const isWholeCellVisible = cellRect.top + cellRect.height < window.innerHeight && cellRect.top >= 0;
       const cellHeight = cellRect.height;
-      console.log(cellValueText, "cellRect", cellRect.x, cellRect.top);
-      console.log(cellValueText, "window.screenTop", window.screenTop, "window.innerHeight", window.innerHeight);
-      if (cellHeight < window.innerHeight && isWholeCellVisible) {
-        console.log(cellValueText, "WHOLE cell is visible");
+      const cellTop = cellRect.top;
+      // const scrollValue = scrollTop + window.innerHeight - cellTop;
+      // const scrollValue = scrollTop <= headerHeight ? 0 : scrollTop - headerHeight;
+      const scrollValue = scrollTop;
+
+      // const scrollValue = scrollT;
+      const isWholeCellVisible = cellTop + cellHeight < window.innerHeight && cellTop >= headerHeight;
+      //both top and bottom are not visible
+      const isInCellMiddle = cellTop < headerHeight && cellTop + cellHeight > window.innerHeight;
+      // const visibleHeight = cellHeight - cellTop - headerHeight;
+      console.log(cellTextValue, "headerHeight", headerHeight);
+      console.log(cellTextValue, "scrollTop", scrollTop);
+      console.log(cellTextValue, "cellHeight", cellHeight);
+      console.log(cellTextValue, "cellTop", cellTop);
+      console.log(cellTextValue, "cellPosition", cellPosition);
+      // console.log(cellTextValue, "visibleHeight", visibleHeight);
+      console.log(cellTextValue, "scrollValue", scrollValue, "window.innerHeight", window.innerHeight);
+      if (cellHeight < window.innerHeight && isWholeCellVisible) { //center text if whole cell is visible
+        console.log(cellTextValue, "WHOLE cell is visible");
         setTextTopPosition(0);
       } else {
         // what part of the cell is visible?
-        if (cellRect.top < window.innerHeight && cellRect.top + cellHeight > window.innerHeight) {
-          console.log(cellValueText, "we are at the TOP");
-          setTextTopPosition(-cellHeight/2 + 16);
-        } else {
-          console.log(cellValueText, "we are at the BOTTOM");
-          setTextTopPosition(cellHeight/2 - 16);
+        console.log(cellTextValue, "TOP logic", cellTop < window.innerHeight, cellTop >= headerHeight);
+        console.log(cellTextValue, "BOTTOM logic", cellHeight <= window.innerHeight);
+
+        if (cellTop < window.innerHeight && cellTop >= headerHeight) {
+          // we see the top of the cell
+          console.log(cellTextValue, "we are at the TOP");
+          setTextTopPosition(Math.max(-cellHeight/2 + kCellHeight, -cellHeight/2 + kCellHeight + scrollValue));
+        }
+        else
+        // if (cellTop < 0 && cellTop - kCellHeight + cellHeight/2 < window.innerHeight) {
+        if (cellHeight <= window.innerHeight) {
+          // we see the bottom of the cell
+          console.log(cellTextValue, "we are at the BOTTOM");
+          // setTextTopPosition(cellHeight/2 - kCellHeight);
+          setTextTopPosition(Math.min(scrollValue - cellHeight/2 - kCellHeight,
+                                        cellHeight/2 - kCellHeight));
+        } else
+        if (isInCellMiddle) {
+          console.log("in the MIDDLE");
+        }
+        else {
+          console.log(cellTextValue, "IDK");
+          setTextTopPosition(0 + scrollValue);
         }
       }
+      // if (cellTop + cellHeight < window.innerHeight) {
+      //   // we are showing next cell
+      //   console.log(cellTextValue, "SHOWING NEXT CELL");
+      //   setCellEnded(true);
+      // }
     }
-  },[scrollTop]);
+    console.log(cellTextValue, "textTopPosition", textTopPosition, cellEnded);
+  },[cellEnded, scrollTop, textTopPosition]);
 
   return (
     <td style={style} className={`draggable-table-data ${isParent ? "parent-data" : ""}`} ref={cellRef}>

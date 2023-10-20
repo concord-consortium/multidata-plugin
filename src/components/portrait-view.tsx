@@ -13,12 +13,15 @@ export const PortraitViewRow = (props: PortraitViewRowProps) => {
 
   const {children, values} = caseObj;
   const [scrollTop, setScrollTop] = useState(0);
+  const numRecursRef = useRef(0);
 
   useEffect(() => {
     const onScroll = (e: any) => {
       console.log("window.scrollY", window.scrollY, scrollTop );
-      setScrollTop(window.scrollY);
+      const currentScrollTop = window.scrollY;
+      setScrollTop(currentScrollTop);
     };
+
     window.addEventListener("scroll", onScroll);
 
     return () => window.removeEventListener("scroll", onScroll);
@@ -29,6 +32,7 @@ export const PortraitViewRow = (props: PortraitViewRowProps) => {
         <tr>{mapCellsFromValues(collectionId, `row-${index}`, values)}</tr>
     );
   } else {
+    numRecursRef.current++;
     return (
       <>
         {index === 0 &&
@@ -40,7 +44,7 @@ export const PortraitViewRow = (props: PortraitViewRowProps) => {
           </tr>
         }
         <tr className={`${css[getClassName(caseObj)]} parent-row`}>
-          {mapCellsFromValues(collectionId, `parent-row-${index}`, values, isParent, scrollTop)}
+          {mapCellsFromValues(collectionId, `parent-row-${index}`, values, isParent, scrollTop, index)}
           <DroppableTableData collectionId={collectionId} style={paddingStyle}>
             <DraggableTableContainer collectionId={collectionId}>
               <table style={paddingStyle} className={`${css.subTable} ${css[getClassName(children[0])]}`}>

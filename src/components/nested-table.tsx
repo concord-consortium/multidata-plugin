@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import { InteractiveState } from "../hooks/useCodapState";
 import { ICollection, IProcessedCaseObj, IValues, ICollectionClass, IDataSet, ICollections } from "../types";
 import { PortraitView } from "./portrait-view";
@@ -35,7 +35,7 @@ export const NestedTable = (props: IProps) => {
          handleCreateCollectionFromAttribute} = props;
   const [collectionClasses, setCollectionClasses] = useState<Array<ICollectionClass>>([]);
   const [paddingStyle, setPaddingStyle] = useState<Record<string, string>>({padding: "0px"});
-
+  const menuRef = useRef<HTMLDivElement>(null);
   const draggableTable = useDraggableTable({
     collections,
     handleSetCollections,
@@ -109,7 +109,7 @@ export const NestedTable = (props: IProps) => {
   };
 
   const mapCellsFromValues = (collectionId: number, rowKey: string, values: IValues, isParent?: boolean,
-                               scrollTop?: number ) => {
+                               scrollTop?: number, idx?: null|number ) => {
     return Object.keys(values).map((key, index) => {
       const val = values[key];
       if (typeof val === "string" || typeof val === "number") {
@@ -120,6 +120,8 @@ export const NestedTable = (props: IProps) => {
             key={`${rowKey}-${val}-${index}}`}
             isParent={isParent}
             scrollTop={scrollTop}
+            idx={idx}
+            menuHeight={menuRef.current?.getBoundingClientRect().height}
           >
             {val}
           </DraggagleTableData>
@@ -169,6 +171,7 @@ export const NestedTable = (props: IProps) => {
         showHeaders={interactiveState.showHeaders}
         padding={interactiveState.padding}
         displayMode={interactiveState.displayMode}
+        ref={menuRef}
       />
       <DraggableTableContext.Provider value={draggableTable}>
         {selectedDataSet && renderTable()}

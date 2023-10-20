@@ -1,4 +1,4 @@
-import React from "react";
+import React, { forwardRef } from "react";
 import { ICollection, IDataSet } from "../types";
 import css from "./menu.scss";
 
@@ -21,14 +21,15 @@ const portrait = "Portrait";
 const landscape = "Landscape";
 const none = "";
 
-export const Menu = (props: IProps) => {
+// eslint-disable-next-line react/display-name
+export const Menu = forwardRef<HTMLDivElement, IProps>((props: IProps, ref) => {
   const {handleSelectDataSet, collections, dataSets, handleSelectDisplayMode, togglePadding,
     showHeaders, padding, toggleShowHeaders, displayMode, selectedDataSet} = props;
 
   const displayModes = [none, portrait, landscape];
 
   return (
-    <div className={css.menu}>
+    <div className={css.menu} ref={ref}>
       <div className={css.option}>
         <span>Select a Dataset:</span>
         <select value={selectedDataSet?.name} onChange={handleSelectDataSet}>
@@ -67,4 +68,4 @@ export const Menu = (props: IProps) => {
       }
     </div>
   );
-};
+});
