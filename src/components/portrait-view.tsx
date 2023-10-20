@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import React from "react";
 import { ICollection, IProcessedCaseObj, ITableProps } from "../types";
 import { DraggableTableContainer, DroppableTableData, DroppableTableHeader } from "./draggable-table-tags";
 
@@ -67,20 +67,6 @@ export const PortraitViewRow = (props: PortraitViewRowProps) => {
 
 export const PortraitView = (props: ITableProps) => {
   const {collectionClasses, selectedDataSet, collections, getValueLength} = props;
-
-
-  const [scrolling, setScrolling] = useState(false);
-  const [scrollTop, setScrollTop] = useState(0);
-
-  useEffect(() => {
-    const onScroll = (e: any) => {
-      setScrollTop(window.scrollY);
-      setScrolling(window.scrollY > scrollTop);
-    };
-    window.addEventListener("scroll", onScroll);
-
-    return () => window.removeEventListener("scroll", onScroll);
-  }, [scrollTop]);
 
   const renderTable = () => {
     const parentColl = collections.filter((coll: ICollection) => !coll.parent)[0];

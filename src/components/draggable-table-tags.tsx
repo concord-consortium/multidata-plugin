@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { useDraggableTableContext, Side } from "../hooks/useDraggableTable";
 
 import AddIcon from "../assets/plus-level-1.svg";
@@ -95,6 +95,19 @@ export const DraggagleTableData: React.FC<DraggagleTableDataProps>
     return t;
   },[]);
 
+  const [counter, setCounter] = useState(0);
+  const [scrollTop, setScrollTop] = useState(0);
+
+  useEffect(() => {
+    const onScroll = (e: any) => {
+      setScrollTop(window.scrollY);
+      setCounter((prevCounter: number) => prevCounter++);
+    };
+    window.addEventListener("scroll", onScroll);
+
+    return () => window.removeEventListener("scroll", onScroll);
+  }, [scrollTop]);
+
   const positionDataCellValue = useCallback(()=>{
     const cell = document.querySelector<HTMLElement>(css.parentData);
     function calculateVisibilityForDiv(div$) {
@@ -169,61 +182,62 @@ export const DraggagleTableData: React.FC<DraggagleTableDataProps>
 
   useEffect(() => {
     const handleIntersection = (entries: IntersectionObserverEntry[], o: any) => {
-      entries.forEach((entry) => {
-        const target = entry.target;
-        const entryRect = target.getBoundingClientRect();
-        const entryHeight = entryRect.height;
-        const intersectionRect = entry.intersectionRect;
-        const visibleHeight = intersectionRect.height;
-        const visibleTop = intersectionRect.top;
-        const intersectionHeightRatio = visibleHeight/entryHeight;
-        const cells = Array.from(target.querySelectorAll<HTMLElement>(css.parentData));
-        if (cells) {
-          cells.forEach(cell => {
-            console.log(cell.textContent, "intersectionRatio", entry.intersectionRatio);
-            const cellRect = cell.getBoundingClientRect();
-            const cellTop = cellRect.top;
-            const dataCellHeight = cell.clientHeight;
-            const dataTextValue = cell.querySelector<HTMLElement>(".data-text-value");
-            const textHeight = dataTextValue?.getBoundingClientRect().height || 16;
-            const visiblePortion = Math.min(dataCellHeight, window.innerHeight - cell.getBoundingClientRect().top);
-            console.log(cell.textContent, "target entryRect top", entryRect.top);
-            console.log(cell.textContent, "visibleHeight", visibleHeight);
-            console.log(cell.textContent, "intersectionRect bounds", intersectionRect);
-            console.log(cell.textContent, "visibleTop", visibleTop);
-            console.log(cell.textContent, "visiblePortion", visiblePortion);
-            console.log(cell.textContent, "intersectionRect.top", intersectionRect.top, "cellTop",
-            cellTop);
-            console.log(cell.textContent, "cellTop", cellTop);
-            console.log(cell.textContent, "dataCellHeight", dataCellHeight);
-            console.log(cell.textContent, "window.innerHeight", window.innerHeight);
-            let textTopPosition = 0;
+      setCounter((prevCounter: number) => prevCounter++);
+      // entries.forEach((entry) => {
+      //   const target = entry.target;
+      //   const entryRect = target.getBoundingClientRect();
+      //   const entryHeight = entryRect.height;
+      //   const intersectionRect = entry.intersectionRect;
+      //   const visibleHeight = intersectionRect.height;
+      //   const visibleTop = intersectionRect.top;
+      //   const intersectionHeightRatio = visibleHeight/entryHeight;
+      //   const cells = Array.from(target.querySelectorAll<HTMLElement>(css.parentData));
+      //   if (cells) {
+      //     cells.forEach(cell => {
+      //       console.log(cell.textContent, "intersectionRatio", entry.intersectionRatio);
+      //       const cellRect = cell.getBoundingClientRect();
+      //       const cellTop = cellRect.top;
+      //       const dataCellHeight = cell.clientHeight;
+      //       const dataTextValue = cell.querySelector<HTMLElement>(".data-text-value");
+      //       const textHeight = dataTextValue?.getBoundingClientRect().height || 16;
+      //       const visiblePortion = Math.min(dataCellHeight, window.innerHeight - cell.getBoundingClientRect().top);
+      //       console.log(cell.textContent, "target entryRect top", entryRect.top);
+      //       console.log(cell.textContent, "visibleHeight", visibleHeight);
+      //       console.log(cell.textContent, "intersectionRect bounds", intersectionRect);
+      //       console.log(cell.textContent, "visibleTop", visibleTop);
+      //       console.log(cell.textContent, "visiblePortion", visiblePortion);
+      //       console.log(cell.textContent, "intersectionRect.top", intersectionRect.top, "cellTop",
+      //       cellTop);
+      //       console.log(cell.textContent, "cellTop", cellTop);
+      //       console.log(cell.textContent, "dataCellHeight", dataCellHeight);
+      //       console.log(cell.textContent, "window.innerHeight", window.innerHeight);
+      //       let textTopPosition = 0;
 
-            if (dataTextValue) {
-              dataTextValue.style.position = "absolute";
-              // console.log(cell.textContent, "isIntersecting", entry.isIntersecting,
-                //  "intersectionHeightRatio", intersectionHeightRatio);
-              if (dataCellHeight <= visibleHeight) {
-                // console.log(cell.textContent, "WHOLE CELL IS VISIBLE");
-                textTopPosition = 0;
-              } else
-              if (entry.isIntersecting && intersectionHeightRatio < 0.95) {
-                if (cellTop < intersectionRect.top/2) { //we're in the bottom part of the visible rect
-                  // console.log(cell.textContent, "BOTTOM PART");
-                  textTopPosition = Math.min((dataCellHeight/2 - textHeight), visibleTop - (cellTop) + textHeight);
-                } else { //we're in the top part of the visible rect
-                  // console.log(cell.textContent, "TOP PART");
-                  textTopPosition = Math.max((-dataCellHeight/2) + textHeight,
-                                             (visiblePortion - dataCellHeight) / 2 + textHeight);
-                }
-              }
-              // console.log(cell.textContent, "textTopPositon", textTopPosition);
-              // console.log(cell.textContent, "*****************************************************");
-              dataTextValue.style.top = `${textTopPosition}px`;
-            }
-          });
-        }
-      });
+      //       if (dataTextValue) {
+      //         dataTextValue.style.position = "absolute";
+      //         // console.log(cell.textContent, "isIntersecting", entry.isIntersecting,
+      //           //  "intersectionHeightRatio", intersectionHeightRatio);
+      //         if (dataCellHeight <= visibleHeight) {
+      //           // console.log(cell.textContent, "WHOLE CELL IS VISIBLE");
+      //           textTopPosition = 0;
+      //         } else
+      //         if (entry.isIntersecting && intersectionHeightRatio < 0.95) {
+      //           if (cellTop < intersectionRect.top/2) { //we're in the bottom part of the visible rect
+      //             // console.log(cell.textContent, "BOTTOM PART");
+      //             textTopPosition = Math.min((dataCellHeight/2 - textHeight), visibleTop - (cellTop) + textHeight);
+      //           } else { //we're in the top part of the visible rect
+      //             // console.log(cell.textContent, "TOP PART");
+      //             textTopPosition = Math.max((-dataCellHeight/2) + textHeight,
+      //                                        (visiblePortion - dataCellHeight) / 2 + textHeight);
+      //           }
+      //         }
+      //         // console.log(cell.textContent, "textTopPositon", textTopPosition);
+      //         // console.log(cell.textContent, "*****************************************************");
+      //         dataTextValue.style.top = `${textTopPosition}px`;
+      //       }
+      //     });
+      //   }
+      // });
     };
     const observer = new IntersectionObserver(handleIntersection, {threshold: thresh});
     document.querySelectorAll(".parent-row").forEach((row) => {
