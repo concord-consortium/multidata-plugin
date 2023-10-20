@@ -257,4 +257,12 @@ table.draggableTableContainer {
 
 .parentData {
   position: relative;
+  .cellTextValue{
+    position: absolute;
+    width: fit-content;
+    display: flex;
+    flex-wrap: wrap;
+    align-content: center;
+  }
 }
+
