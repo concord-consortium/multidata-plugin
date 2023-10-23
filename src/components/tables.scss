@@ -262,7 +262,8 @@ table.draggableTableContainer {
     width: fit-content;
     display: flex;
     flex-wrap: wrap;
-    align-content: center;
+    // align-content: center;
+    top: 0;
   }
 }
 

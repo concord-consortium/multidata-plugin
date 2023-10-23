@@ -1,8 +1,9 @@
-import React from "react";
+import React, { useRef } from "react";
 import { ICollection, IProcessedCaseObj, ITableProps } from "../types";
 import { DraggableTableContainer, DroppableTableData, DroppableTableHeader } from "./draggable-table-tags";
 
 import css from "./tables.scss";
+import { TableScrollTopContext, useTableScrollTop } from "../hooks/useTableScrollTop";
 
 export type PortraitViewRowProps =
   {collectionId: number, caseObj: IProcessedCaseObj, index?: null|number, isParent: boolean} & ITableProps;
@@ -67,6 +68,8 @@ export const PortraitViewRow = (props: PortraitViewRowProps) => {
 
 export const PortraitView = (props: ITableProps) => {
   const {collectionClasses, selectedDataSet, collections, getValueLength} = props;
+  const tableRef = useRef<HTMLTableElement | null>(null);
+  const tableScrollTop = useTableScrollTop(tableRef);
 
   const renderTable = () => {
     const parentColl = collections.filter((coll: ICollection) => !coll.parent)[0];
@@ -76,7 +79,7 @@ export const PortraitView = (props: ITableProps) => {
 
     return (
       <DraggableTableContainer>
-        <table className={`${css.mainTable} ${css.portraitTable} ${css[className]}`}>
+        <table className={`${css.mainTable} ${css.portraitTable} ${css[className]}`} ref={tableRef}>
           <tbody className={`table-body ${css[className]}`}>
             <tr className={css.mainHeader}>
               <th className={css.datasetNameHeader} colSpan={valueCount}>{selectedDataSet.name}</th>
@@ -101,8 +104,10 @@ export const PortraitView = (props: ITableProps) => {
   };
 
   return (
-    <div className={css.portraitTableContainer}>
-      {collections.length && collectionClasses.length && renderTable()}
-    </div>
+    <TableScrollTopContext.Provider value={tableScrollTop}>
+      <div className={css.portraitTableContainer}>
+        {collections.length && collectionClasses.length && renderTable()}
+      </div>
+    </TableScrollTopContext.Provider>
   );
 };
