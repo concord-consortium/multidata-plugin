@@ -1,4 +1,4 @@
-import React, { useRef } from "react";
+import React, { useEffect, useMemo, useRef } from "react";
 import { ICollection, IProcessedCaseObj, ITableProps } from "../types";
 import { DraggableTableContainer, DroppableTableData, DroppableTableHeader } from "./draggable-table-tags";
 
@@ -6,11 +6,11 @@ import css from "./tables.scss";
 import { TableScrollTopContext, useTableScrollTop } from "../hooks/useTableScrollTop";
 
 export type PortraitViewRowProps =
-  {collectionId: number, caseObj: IProcessedCaseObj, index?: null|number, isParent: boolean} & ITableProps;
+  {collectionId: number, caseObj: IProcessedCaseObj, index?: null|number, isParent: boolean, resizeCounter: number} & ITableProps;
 
 export const PortraitViewRow = (props: PortraitViewRowProps) => {
   const {paddingStyle, mapCellsFromValues, mapHeadersFromValues, showHeaders,
-    getClassName, collectionId, caseObj, index, isParent} = props;
+    getClassName, collectionId, caseObj, index, isParent, resizeCounter} = props;
 
   const {children, values} = caseObj;
 
@@ -30,7 +30,7 @@ export const PortraitViewRow = (props: PortraitViewRowProps) => {
           </tr>
         }
         <tr className={`${css[getClassName(caseObj)]} parent-row`}>
-          {mapCellsFromValues(collectionId, `parent-row-${index}`, values, isParent)}
+          {mapCellsFromValues(collectionId, `parent-row-${index}`, values, isParent, resizeCounter)}
           <DroppableTableData collectionId={collectionId} style={paddingStyle}>
             <DraggableTableContainer collectionId={collectionId}>
               <table style={paddingStyle} className={`${css.subTable} ${css[getClassName(children[0])]}`}>
@@ -70,6 +70,35 @@ export const PortraitView = (props: ITableProps) => {
   const {collectionClasses, selectedDataSet, collections, getValueLength} = props;
   const tableRef = useRef<HTMLTableElement | null>(null);
   const tableScrollTop = useTableScrollTop(tableRef);
+  const [resizeCounter, setResizeCounter] = React.useState(0);
+
+  const thresh = useMemo(() => {
+    const t: number[] = [];
+    for (let i = 0; i <= 100; i++) {
+      t.push(i/100);
+    }
+    return t;
+  }, []);
+
+
+  useEffect(() => {
+    const handleIntersection = (entries: IntersectionObserverEntry[], o: any) => {
+      setResizeCounter((prevState) => prevState + 1);
+    };
+
+    const observer = new IntersectionObserver(handleIntersection, {threshold: thresh});
+
+    document.querySelectorAll(`.parent-row`).forEach((row) => {
+      observer.observe(row);
+    });
+
+    return () => {
+      document.querySelectorAll(`.parent-row`).forEach((row) => {
+        observer.unobserve(row);
+      });
+    };
+
+  }, [thresh]);
 
   const renderTable = () => {
     const parentColl = collections.filter((coll: ICollection) => !coll.parent)[0];
@@ -95,6 +124,7 @@ export const PortraitView = (props: ITableProps) => {
                 caseObj={caseObj}
                 index={index}
                 isParent={true}
+                resizeCounter={resizeCounter}
               />
             ))}
           </tbody>

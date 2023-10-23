@@ -1,4 +1,4 @@
-import React, { useMemo, useRef } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useDraggableTableContext, Side } from "../hooks/useDraggableTable";
 
 import AddIcon from "../assets/plus-level-1.svg";
@@ -82,10 +82,11 @@ interface DraggagleTableDataProps {
   attrTitle: string;
   style?: React.CSSProperties;
   isParent?: boolean;
+  resizeCounter?: number;
 }
 
 export const DraggagleTableData: React.FC<DraggagleTableDataProps>
-                = ({collectionId, attrTitle, children, isParent}) => {
+                = ({collectionId, attrTitle, children, isParent, resizeCounter}) => {
   const {dragOverId, dragSide} = useDraggableTableContext();
   const {style} = getIdAndStyle(collectionId, attrTitle, dragOverId, dragSide);
   const {tableScrollTop, scrollY} = useTableTopScrollTopContext();
@@ -113,8 +114,6 @@ export const DraggagleTableData: React.FC<DraggagleTableDataProps>
       const stickyHeaders = tableScrollTop === 0;
       const stickyHeaderHeight = (3 + level) * 16;
       const visibleTop = stickyHeaders ?  Math.max(top, stickyHeaderHeight) : top;
-      // const visibleTop = stickyHeaders ?  Math.max(top, (stickyHeaderHeight + scrollY)) : tableScrollTop;
-      // const visibleBottom = Math.min(window.innerHeight, Math.max(bottom, 0));
       const visibleBottom = Math.min(window.innerHeight, bottom);
       const text = cellRef.current.innerText;
       const availableHeight = Math.abs(visibleBottom - visibleTop);
@@ -125,26 +124,24 @@ export const DraggagleTableData: React.FC<DraggagleTableDataProps>
         // the whole cell is visible
         return 0;
       } else if (top < visibleTop && bottom < window.innerHeight) {
-        // we are in the bottom part of the cell
+        // we can see the bottom border of the cell but not the top
         const hiddenHeightOfCell = height - availableHeight;
-        newTop = Math.max(0, (hiddenHeightOfCell - 16 + (availableHeight / 2))) /* + height of text */;
+        newTop = Math.max(0, (hiddenHeightOfCell - 16 + (availableHeight / 2)));
       } else if (top >= visibleTop && bottom > visibleBottom) {
-        // we are in the top part of the cell
-        newTop = Math.max(0, ((availableHeight) / 2)) /* + height of text */;
+        // we can see the top border of the cell but not the bottom
+        newTop = Math.max(0, ((availableHeight) / 2));
       } else {
-        // we are in the middle of a cell that's taller than the table window
-        // we need to get the hidden top part of the cell
+        // we are in the middle of a cell - we can see neither the top nor the bottom border
         const hiddenTopPartOfCell = Math.max(0, visibleTop - top);
-        newTop = Math.max(0, (hiddenTopPartOfCell - 16 + (availableHeight) / 2)) /* + height of text */;
+        newTop = Math.max(0, (hiddenTopPartOfCell - 16 + (availableHeight) / 2));
       }
 
-      console.log(cellRef.current?.innerText, JSON.stringify({top, bottom, visibleBottom,
+      console.log(text, JSON.stringify({top, bottom, visibleBottom,
         tableScrollTop, visibleTop, availableHeight, newTop, scrollY}));
       return newTop;
     }
+  }, [tableScrollTop, isParent, scrollY, level, resizeCounter]);
 
-
-  }, [tableScrollTop, isParent, scrollY, level]);
 
   const textStyle: React.CSSProperties = {top: cellTextTop};
   if (cellTextTop === 0) {
@@ -156,7 +153,7 @@ export const DraggagleTableData: React.FC<DraggagleTableDataProps>
       {isParent
         ? <>
             <span style={{opacity: 0}}>{children}</span>
-            <div style={textStyle } className={css.cellTextValue}>{children}</div>
+            <div style={textStyle} className={css.cellTextValue}>{children}</div>
           </>
         : children
       }
