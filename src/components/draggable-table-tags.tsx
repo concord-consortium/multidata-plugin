@@ -1,16 +1,18 @@
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, { useMemo, useRef } from "react";
 import { useDraggableTableContext, Side } from "../hooks/useDraggableTable";
+import { useTableTopScrollTopContext } from "../hooks/useTableScrollTop";
 
 import AddIcon from "../assets/plus-level-1.svg";
 
 import css from "./tables.scss";
-import { useTableTopScrollTopContext } from "../hooks/useTableScrollTop";
 
 const highlightColor = "#FBF719";
 
 const border = `5px solid ${highlightColor}`;
 const borderLeft = border;
 const borderRight = border;
+const kCellHeight = 16;
+const kMinNumHeaders = 3;
 
 const getStyle = (id: string, dragOverId?: string, dragSide?: Side) => {
   return id === dragOverId ? (dragSide === "left" ? {borderLeft} : {borderRight}) : {};
@@ -112,34 +114,31 @@ export const DraggagleTableData: React.FC<DraggagleTableDataProps>
     } else {
       const {top, bottom, height} = cellRef.current.getBoundingClientRect();
       const stickyHeaders = tableScrollTop === 0;
-      const stickyHeaderHeight = (3 + level) * 16;
+      const stickyHeaderHeight = (kMinNumHeaders + level) * kCellHeight;
       const visibleTop = stickyHeaders ?  Math.max(top, stickyHeaderHeight) : top;
       const visibleBottom = Math.min(window.innerHeight, bottom);
-      const text = cellRef.current.innerText;
       const availableHeight = Math.abs(visibleBottom - visibleTop);
 
       let newTop;
 
-      if (top >= visibleTop && bottom <= visibleBottom) {
-        // the whole cell is visible
+      if (top >= visibleTop && bottom <= visibleBottom) { // the whole cell is visible
         return 0;
       } else if (top < visibleTop && bottom < window.innerHeight) {
         // we can see the bottom border of the cell but not the top
         const hiddenHeightOfCell = height - availableHeight;
-        newTop = Math.max(0, (hiddenHeightOfCell - 16 + (availableHeight / 2)));
+        newTop = Math.max(0, (hiddenHeightOfCell - kCellHeight + (availableHeight / 2)));
       } else if (top >= visibleTop && bottom > visibleBottom) {
         // we can see the top border of the cell but not the bottom
         newTop = Math.max(0, ((availableHeight) / 2));
       } else {
         // we are in the middle of a cell - we can see neither the top nor the bottom border
         const hiddenTopPartOfCell = Math.max(0, visibleTop - top);
-        newTop = Math.max(0, (hiddenTopPartOfCell - 16 + (availableHeight) / 2));
+        newTop = Math.max(0, (hiddenTopPartOfCell - kCellHeight + (availableHeight) / 2));
       }
-
-      console.log(text, JSON.stringify({top, bottom, visibleBottom,
-        tableScrollTop, visibleTop, availableHeight, newTop, scrollY}));
       return newTop;
     }
+  // resizeCounter is a hack to force rerender of text positioning when window is resized
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [tableScrollTop, isParent, scrollY, level, resizeCounter]);
 
 

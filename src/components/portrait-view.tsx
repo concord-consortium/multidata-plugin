@@ -1,16 +1,16 @@
-import React, { useEffect, useMemo, useRef } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { ICollection, IProcessedCaseObj, ITableProps } from "../types";
 import { DraggableTableContainer, DroppableTableData, DroppableTableHeader } from "./draggable-table-tags";
-
-import css from "./tables.scss";
 import { TableScrollTopContext, useTableScrollTop } from "../hooks/useTableScrollTop";
 
-export type PortraitViewRowProps =
-  {collectionId: number, caseObj: IProcessedCaseObj, index?: null|number, isParent: boolean, resizeCounter: number} & ITableProps;
+import css from "./tables.scss";
+
+export type PortraitViewRowProps = {collectionId: number, caseObj: IProcessedCaseObj, index?: null|number,
+                                    isParent: boolean, resizeCounter: number} & ITableProps;
 
 export const PortraitViewRow = (props: PortraitViewRowProps) => {
   const {paddingStyle, mapCellsFromValues, mapHeadersFromValues, showHeaders,
-    getClassName, collectionId, caseObj, index, isParent, resizeCounter} = props;
+          getClassName, collectionId, caseObj, index, isParent, resizeCounter} = props;
 
   const {children, values} = caseObj;
 
@@ -70,7 +70,7 @@ export const PortraitView = (props: ITableProps) => {
   const {collectionClasses, selectedDataSet, collections, getValueLength} = props;
   const tableRef = useRef<HTMLTableElement | null>(null);
   const tableScrollTop = useTableScrollTop(tableRef);
-  const [resizeCounter, setResizeCounter] = React.useState(0);
+  const [resizeCounter, setResizeCounter] = useState(0);
 
   const thresh = useMemo(() => {
     const t: number[] = [];
@@ -85,13 +85,10 @@ export const PortraitView = (props: ITableProps) => {
     const handleIntersection = (entries: IntersectionObserverEntry[], o: any) => {
       setResizeCounter((prevState) => prevState + 1);
     };
-
     const observer = new IntersectionObserver(handleIntersection, {threshold: thresh});
-
     document.querySelectorAll(`.parent-row`).forEach((row) => {
       observer.observe(row);
     });
-
     return () => {
       document.querySelectorAll(`.parent-row`).forEach((row) => {
         observer.unobserve(row);

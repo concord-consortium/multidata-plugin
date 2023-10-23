@@ -108,7 +108,8 @@ export const NestedTable = (props: IProps) => {
     );
   };
 
-  const mapCellsFromValues = (collectionId: number, rowKey: string, values: IValues, isParent?: boolean, resizeCounter?: number) => {
+  const mapCellsFromValues = (collectionId: number, rowKey: string, values: IValues, isParent?: boolean,
+                              resizeCounter?: number) => {
     return Object.keys(values).map((key, index) => {
       const val = values[key];
       if (typeof val === "string" || typeof val === "number") {
