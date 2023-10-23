@@ -106,35 +106,45 @@ export const DraggagleTableData: React.FC<DraggagleTableDataProps>
   level = level / 2;
 
   const cellTextTop = useMemo (() =>{
-    if (!cellRef.current) {
+    if (!cellRef.current || !isParent) {
       return 0;
-    }
+    } else {
+      const {top, bottom, height} = cellRef.current.getBoundingClientRect();
+      const stickyHeaders = tableScrollTop === 0;
+      const stickyHeaderHeight = (3 + level) * 16;
+      const visibleTop = stickyHeaders ?  Math.max(top, stickyHeaderHeight) : top;
+      // const visibleTop = stickyHeaders ?  Math.max(top, (stickyHeaderHeight + scrollY)) : tableScrollTop;
+      // const visibleBottom = Math.min(window.innerHeight, Math.max(bottom, 0));
+      const visibleBottom = Math.min(window.innerHeight, bottom);
+      const text = cellRef.current.innerText;
+      const availableHeight = Math.abs(visibleBottom - visibleTop);
 
-    const {top, bottom, height} = cellRef.current.getBoundingClientRect();
-    const stickyHeaders = tableScrollTop === 0;
-    const stickyHeaderHeight = (3 + level) * 16;
-    const visibleTop = stickyHeaders ?  Math.max(top, stickyHeaderHeight) : tableScrollTop;
-    const visibleBottom = Math.min(window.innerHeight, visibleTop + height);
-    const text = cellRef.current.innerText;
-    const log = text.indexOf("plants") !== -1;
+      let newTop;
 
-    // whole cell visible?
-    if (top >= visibleTop && bottom <= visibleBottom) {
-      if (log) {
-        console.log(cellRef.current?.innerText, "ALL VISIBLE");
+      if (top >= visibleTop && bottom <= visibleBottom) {
+        // the whole cell is visible
+        return 0;
+      } else if (top < visibleTop && bottom < window.innerHeight) {
+        // we are in the bottom part of the cell
+        const hiddenHeightOfCell = height - availableHeight;
+        newTop = Math.max(0, (hiddenHeightOfCell - 16 + (availableHeight / 2))) /* + height of text */;
+      } else if (top >= visibleTop && bottom > visibleBottom) {
+        // we are in the top part of the cell
+        newTop = Math.max(0, ((availableHeight) / 2)) /* + height of text */;
+      } else {
+        // we are in the middle of a cell that's taller than the table window
+        // we need to get the hidden top part of the cell
+        const hiddenTopPartOfCell = Math.max(0, visibleTop - top);
+        newTop = Math.max(0, (hiddenTopPartOfCell - 16 + (availableHeight) / 2)) /* + height of text */;
       }
-      return 0;
-    }
 
-    const availableHeight = visibleBottom - visibleTop;
-    const newTop = Math.max(0, ((availableHeight - 16) / 2)) /* + height of text */;
-
-    if (log) {
       console.log(cellRef.current?.innerText, JSON.stringify({top, bottom, visibleBottom,
         tableScrollTop, visibleTop, availableHeight, newTop, scrollY}));
+      return newTop;
     }
-    return newTop;
-  }, [tableScrollTop, scrollY, level]);
+
+
+  }, [tableScrollTop, isParent, scrollY, level]);
 
   const textStyle: React.CSSProperties = {top: cellTextTop};
   if (cellTextTop === 0) {
