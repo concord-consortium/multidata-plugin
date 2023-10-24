@@ -56,7 +56,7 @@ export interface ITableProps {
   selectedDataSet: IDataSet,
   collections: Array<ICollection>,
   mapCellsFromValues: (collectionId: number, rowKey: string, values: IValues, isParent?: boolean,
-      resizeCounter?: number) => void,
+      resizeCounter?: number, parentLevel?: number) => void,
   mapHeadersFromValues: (collectionId: number, rowKey: string, values: IValues) => void,
   getValueLength: (firstRow: Array<IValues>) => number
   paddingStyle: Record<string, string>

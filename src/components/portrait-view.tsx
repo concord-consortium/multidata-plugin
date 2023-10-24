@@ -6,11 +6,12 @@ import { TableScrollTopContext, useTableScrollTop } from "../hooks/useTableScrol
 import css from "./tables.scss";
 
 export type PortraitViewRowProps = {collectionId: number, caseObj: IProcessedCaseObj, index?: null|number,
-                                    isParent: boolean, resizeCounter: number} & ITableProps;
+                                    isParent: boolean, resizeCounter: number, parentLevel?: number}
+                                    & ITableProps;
 
 export const PortraitViewRow = (props: PortraitViewRowProps) => {
   const {paddingStyle, mapCellsFromValues, mapHeadersFromValues, showHeaders,
-          getClassName, collectionId, caseObj, index, isParent, resizeCounter} = props;
+          getClassName, collectionId, caseObj, index, isParent, resizeCounter, parentLevel} = props;
 
   const {children, values} = caseObj;
 
@@ -30,7 +31,7 @@ export const PortraitViewRow = (props: PortraitViewRowProps) => {
           </tr>
         }
         <tr className={`${css[getClassName(caseObj)]} parent-row`}>
-          {mapCellsFromValues(collectionId, `parent-row-${index}`, values, isParent, resizeCounter)}
+          {mapCellsFromValues(collectionId, `parent-row-${index}`, values, isParent, resizeCounter, parentLevel)}
           <DroppableTableData collectionId={collectionId} style={paddingStyle}>
             <DraggableTableContainer collectionId={collectionId}>
               <table style={paddingStyle} className={`${css.subTable} ${css[getClassName(children[0])]}`}>
@@ -41,7 +42,8 @@ export const PortraitViewRow = (props: PortraitViewRowProps) => {
                       collectionId: child.collection.id,
                       caseObj: child,
                       index: i,
-                      isParent
+                      isParent,
+                      parentLevel: parentLevel !== undefined && parentLevel !== null ? parentLevel + 1 : undefined,
                     };
                     if (i === 0 && !child.children.length) {
                       return (
@@ -122,6 +124,7 @@ export const PortraitView = (props: ITableProps) => {
                 index={index}
                 isParent={true}
                 resizeCounter={resizeCounter}
+                parentLevel={0}
               />
             ))}
           </tbody>

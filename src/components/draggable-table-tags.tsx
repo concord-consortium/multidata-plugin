@@ -85,28 +85,16 @@ interface DraggagleTableDataProps {
   style?: React.CSSProperties;
   isParent?: boolean;
   resizeCounter?: number;
+  parentLevel?: number;
 }
 
 export const DraggagleTableData: React.FC<DraggagleTableDataProps>
-                = ({collectionId, attrTitle, children, isParent, resizeCounter}) => {
+                = ({collectionId, attrTitle, children, isParent, resizeCounter, parentLevel=0}) => {
   const {dragOverId, dragSide} = useDraggableTableContext();
   const {style} = getIdAndStyle(collectionId, attrTitle, dragOverId, dragSide);
   const {tableScrollTop, scrollY} = useTableTopScrollTopContext();
 
   const cellRef = useRef<HTMLTableCellElement | null>(null);
-
-  // HACK!!!
-  let level = 0;
-  if (cellRef.current) {
-    let walker: HTMLElement|null = cellRef.current;
-    while (walker && !walker.classList.contains("tables-portraitTable")) {
-      if (walker.tagName === "TABLE") {
-        level++;
-      }
-      walker = walker.parentElement;
-    }
-  }
-  level = level / 2;
 
   const cellTextTop = useMemo (() =>{
     if (!cellRef.current || !isParent) {
@@ -114,7 +102,7 @@ export const DraggagleTableData: React.FC<DraggagleTableDataProps>
     } else {
       const {top, bottom, height} = cellRef.current.getBoundingClientRect();
       const stickyHeaders = tableScrollTop === 0;
-      const stickyHeaderHeight = (kMinNumHeaders + level) * kCellHeight;
+      const stickyHeaderHeight = (kMinNumHeaders + parentLevel) * kCellHeight;
       const visibleTop = stickyHeaders ?  Math.max(top, stickyHeaderHeight) : top;
       const visibleBottom = Math.min(window.innerHeight, bottom);
       const availableHeight = Math.abs(visibleBottom - visibleTop);
@@ -139,7 +127,7 @@ export const DraggagleTableData: React.FC<DraggagleTableDataProps>
     }
   // resizeCounter is a hack to force rerender of text positioning when window is resized
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [tableScrollTop, isParent, scrollY, level, resizeCounter]);
+  }, [tableScrollTop, isParent, scrollY, parentLevel, resizeCounter]);
 
 
   const textStyle: React.CSSProperties = {top: cellTextTop};
