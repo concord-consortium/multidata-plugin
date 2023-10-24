@@ -64,7 +64,7 @@ export const NestedTable = (props: IProps) => {
   }, [interactiveState.dataSetName, updateInteractiveState]);
 
   useEffect(() => {
-    const style =  interactiveState.padding ? {padding: "7px"} : {padding: "0px"};
+    const style =  interactiveState.padding ? {padding: "3px"} : {padding: "0px"};
     setPaddingStyle(style);
   }, [interactiveState.padding]);
 
@@ -108,7 +108,8 @@ export const NestedTable = (props: IProps) => {
     );
   };
 
-  const mapCellsFromValues = (collectionId: number, rowKey: string, values: IValues, isParent?: boolean) => {
+  const mapCellsFromValues = (collectionId: number, rowKey: string, values: IValues, isParent?: boolean,
+                              resizeCounter?: number, parentLevel?: number) => {
     return Object.keys(values).map((key, index) => {
       const val = values[key];
       if (typeof val === "string" || typeof val === "number") {
@@ -118,6 +119,8 @@ export const NestedTable = (props: IProps) => {
             attrTitle={key}
             key={`${rowKey}-${val}-${index}}`}
             isParent={isParent}
+            resizeCounter={resizeCounter}
+            parentLevel={parentLevel}
           >
             {val}
           </DraggagleTableData>

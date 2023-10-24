@@ -1,17 +1,15 @@
 table {
   font-family: 'Montserrat', sans-serif;
   font-size: 8pt;
-
   margin: 0 auto;
-  border-collapse: collapse;
+  border-spacing: 0;
 
   th, td {
-    border-collapse: collapse;
+    border-spacing: 0;
   }
 
   tr {
-    /*this is ignored but it's so a td element can take up the entire height of a row*/
-    height: 1px;
+    border-spacing: 0;
   }
 
   th {
@@ -20,7 +18,6 @@ table {
 
   td {
     padding: 1px 4px 2px 4px;
-    height: 1px;
   }
 }
 
@@ -39,6 +36,7 @@ table {
   .mainHeader {
     th {
       background-color: #EFEFEF;
+      border: 1px solid #3c78d8;
     }
   }
 
@@ -116,61 +114,106 @@ table {
   }
 
   &.portraitTable {
+    border-collapse: separate;
+    border-spacing: 0;
+
+    .datasetNameHeader {
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+
     &.collection0, .collection0, &.collection0>tbody>tr>td {
       border: 1px solid #3c78d8;
     }
 
-    &.collection0>th, .collection0>th, th.collection0 {
+    // &.collection0>th, .collection0>th, th.collection0 {
+      &.collection0>th, .collection0>th {
       background-color: #CEE9FB;
       border: 1px solid #3c78d8;
+      position: sticky;
     }
 
-    .collection1>th, th.collection1 {
+    tr.collection0>th {
+      top: 16px;
+      z-index: 9;
+    }
+
+    tr.collection0:nth-child(3)>th {
+      top: 32px;
+      z-index: 8;
+    }
+
+    // .collection1>th, th.collection1 {
+    .collection1>th {
       background-color: #F7EABA;
+      position: sticky;
+      top: 48px;
+      z-index: 6;
     }
-
-    .subTable.collection1, .collection1>tbody>tr>th, .collection1>tbody>tr>td {
+    .collection1>tbody>tr>th, .collection1>tbody>tr>td {
       border: 1px solid #f1c232;
     }
-
-    .collection2>th, th.collection2 {
-      background-color: #CCBEE0;
+    .subTable.collection1 {
+      border: none;
     }
 
-    .subTable.collection2,  .collection2>tbody>tr>th, .collection2>tbody>tr>td {
+    // .collection2>th, th.collection2 {
+    .collection2>th {
+      background-color: #CCBEE0;
+      position: sticky;
+      top: 64px;
+      z-index: 5;
+    }
+
+    .collection2>tbody>tr>th, .collection2>tbody>tr>td {
       border: 1px solid #8e7cc3;
     }
-
-    .collection3>th, th.collection3 {
-      background-color: #BEE0CA;
+    .subTable.collection2 {
+      border: none;
     }
 
-    .subTable.collection3, .collection3>tbody>tr>th, .collection3>tbody>tr>td {
+    // .collection3>th, th.collection3 {
+    .collection3>th {
+      background-color: #BEE0CA;
+      position: sticky;
+      top: 80px;
+      z-index: 4;
+    }
+
+    .collection3>tbody>tr>th, .collection3>tbody>tr>td {
       border: 1px solid #93c47d;
     }
-
-    .collection4>th, th.collection4 {
-      background-color: #E7C3A4;
+    .subTable.collection3 {
+      border: none;
     }
 
-    .subTable.collection4, .collection4>tbody>tr>th, .collection4>tbody>tr>td {
+    // .collection4>th, th.collection4 {
+    .collection4>th {
+      background-color: #E7C3A4;
+      position: sticky;
+      top: 96px;
+      z-index: 3;
+    }
+
+    .collection4>tbody>tr>th, .collection4>tbody>tr>td {
       border: 1px solid #f6b26b;
+    }
+    .subTable.collection4 {
+      border: none;
     }
   }
 }
 
 .subTable {
   width: 100%;
-  height: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
 }
 
 table.draggableTableContainer {
   width: 100%;
   border-spacing: 0px;
-
-  > tr {
-    height: 1px;
-  }
 
   td.draggableTableContainerDropTarget {
 
@@ -207,3 +250,20 @@ table.draggableTableContainer {
     padding: 0;
   }
 }
+
+.portraitTableContainer {
+  height: 90vh;
+}
+
+.parentData {
+  position: relative;
+  .cellTextValue{
+    position: absolute;
+    width: fit-content;
+    display: flex;
+    flex-wrap: wrap;
+    // align-content: center;
+    top: 0;
+  }
+}
+

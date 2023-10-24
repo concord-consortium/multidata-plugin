@@ -1,5 +1,6 @@
-import React from "react";
+import React, { useMemo, useRef } from "react";
 import { useDraggableTableContext, Side } from "../hooks/useDraggableTable";
+import { useTableTopScrollTopContext } from "../hooks/useTableScrollTop";
 
 import AddIcon from "../assets/plus-level-1.svg";
 
@@ -10,6 +11,8 @@ const highlightColor = "#FBF719";
 const border = `5px solid ${highlightColor}`;
 const borderLeft = border;
 const borderRight = border;
+const kCellHeight = 16;
+const kMinNumHeaders = 3;
 
 const getStyle = (id: string, dragOverId?: string, dragSide?: Side) => {
   return id === dragOverId ? (dragSide === "left" ? {borderLeft} : {borderRight}) : {};
@@ -81,16 +84,66 @@ interface DraggagleTableDataProps {
   attrTitle: string;
   style?: React.CSSProperties;
   isParent?: boolean;
+  resizeCounter?: number;
+  parentLevel?: number;
 }
 
 export const DraggagleTableData: React.FC<DraggagleTableDataProps>
-                = ({collectionId, attrTitle, children, isParent}) => {
+                = ({collectionId, attrTitle, children, isParent, resizeCounter, parentLevel=0}) => {
   const {dragOverId, dragSide} = useDraggableTableContext();
   const {style} = getIdAndStyle(collectionId, attrTitle, dragOverId, dragSide);
+  const {tableScrollTop, scrollY} = useTableTopScrollTopContext();
 
+  const cellRef = useRef<HTMLTableCellElement | null>(null);
+
+  const cellTextTop = useMemo (() =>{
+    if (!cellRef.current || !isParent) {
+      return 0;
+    } else {
+      const {top, bottom, height} = cellRef.current.getBoundingClientRect();
+      const stickyHeaders = tableScrollTop === 0;
+      const stickyHeaderHeight = (kMinNumHeaders + parentLevel) * kCellHeight;
+      const visibleTop = stickyHeaders ?  Math.max(top, stickyHeaderHeight) : top;
+      const visibleBottom = Math.min(window.innerHeight, bottom);
+      const availableHeight = Math.abs(visibleBottom - visibleTop);
+
+      let newTop;
+
+      if (top >= visibleTop && bottom <= visibleBottom) { // the whole cell is visible
+        return 0;
+      } else if (top < visibleTop && bottom < window.innerHeight) {
+        // we can see the bottom border of the cell but not the top
+        const hiddenHeightOfCell = height - availableHeight;
+        newTop = Math.max(0, (hiddenHeightOfCell - kCellHeight + (availableHeight / 2)));
+      } else if (top >= visibleTop && bottom > visibleBottom) {
+        // we can see the top border of the cell but not the bottom
+        newTop = Math.max(0, ((availableHeight) / 2));
+      } else {
+        // we are in the middle of a cell - we can see neither the top nor the bottom border
+        const hiddenTopPartOfCell = Math.max(0, visibleTop - top);
+        newTop = Math.max(0, (hiddenTopPartOfCell - kCellHeight + (availableHeight) / 2));
+      }
+      return newTop;
+    }
+  // resizeCounter is a hack to force rerender of text positioning when window is resized
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [tableScrollTop, isParent, scrollY, parentLevel, resizeCounter]);
+
+
+  const textStyle: React.CSSProperties = {top: cellTextTop};
+  if (cellTextTop === 0) {
+    textStyle.alignContent = "center";
+    textStyle.bottom = 0;
+  }
   return (
-    <td style={style} className={`draggable-table-data ${isParent ? "parent-data" : ""}`}>
-      {children}
+    <td style={style} className={`draggable-table-data ${isParent ? css.parentData : ""}`} ref={cellRef}>
+      {isParent
+        ? <>
+            <span style={{opacity: 0}}>{children}</span>
+            <div style={textStyle} className={css.cellTextValue}>{children}</div>
+          </>
+        : children
+      }
     </td>
   );
 };
