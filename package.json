@@ -4,6 +4,10 @@
   "description": "Concord Consortium Multidata Plugin",
   "main": "index.js",
   "browserslist": "> 0.2%, last 5 versions, Firefox ESR, not dead, not ie > 0",
+	"engines": {
+		"node": ">= 16",
+		"npm": ">= 8"
+	},
   "jest": {
     "preset": "ts-jest/presets/js-with-ts",
     "setupFilesAfterEnv": [
