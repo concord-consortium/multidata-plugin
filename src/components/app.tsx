@@ -12,7 +12,7 @@ function App() {
          updateInteractiveState: _updateInteractiveState,
          handleSelectDataSet: _handleSelectDataSet, handleUpdateAttributePosition,
          handleAddCollection, handleAddAttribute, handleSetCollections, handleSelectSelf,
-         updateTitle, selectCases, listenForSelectionChanges,
+         updateTitle, selectCODAPCases, listenForSelectionChanges,
          handleCreateCollectionFromAttribute
         } = useCodapState();
 
@@ -131,7 +131,7 @@ function App() {
           interactiveState={interactiveState}
           handleSelectDataSet={handleSelectDataSet}
           updateTitle={updateTitle}
-          selectCases={selectCases}
+          selectCases={selectCODAPCases}
           codapSelectedCase={codapSelectedCase}
         />
       );
