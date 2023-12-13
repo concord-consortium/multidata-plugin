@@ -1,7 +1,31 @@
 import {useState, useEffect, useCallback} from "react";
-import { codapInterface } from "../scripts/codapInterface";
-import { connect } from "../scripts/connect";
+import {
+  addDataContextChangeListener,
+  addDataContextsListListener,
+  getDataContext,
+  getListOfDataContexts,
+  initializePlugin,
+  codapInterface,
+  selectCases,
+  createNewAttribute,
+  selectSelf,
+  createCollectionFromAttribute,
+  createNewCollection,
+  updateAttributePosition,
+  getAllItems
+} from "@concord-consortium/codap-plugin-api";
+import { getDataSetCollections } from "../utils/apiHelpers";
 import { ICollections, ICollection, IDataSet } from "../types";
+
+const iFrameDescriptor = {
+  version: "0.0.1",
+  pluginName: "multidata-plugin",
+  title: "MultiData",
+  dimensions: {
+    width: 300,
+    height: 400
+  }
+};
 
 export interface InteractiveState {
   view: "nested-table" | "hierarchy" | "card-view" | null
@@ -30,29 +54,24 @@ export const useCodapState = () => {
   const handleDocumentChangeNotice = useCallback(() => getDataSets(), []);
 
   const getDataSets = async () => {
-    const sets = await connect.getListOfDatasets();
-    setDataSets(sets);
+    const sets = await getListOfDataContexts();
+    setDataSets(sets.values);
   };
 
   const handleSetDataSet = async (name: string|null) => {
     let dataSetInfo = null;
     if (name) {
       setSelectedDataSetName(name);
-      dataSetInfo = await connect.getDataSet(name);
+      dataSetInfo = await getDataContext(name);
     }
-    setSelectedDataSet(dataSetInfo);
+    setSelectedDataSet(dataSetInfo?.values);
   };
 
   useEffect(() => {
-    const setUpDocumentNotifications = async () => {
-      //  receive notifications about doc changes, especially number of datasets
-      const tResource = `documentChangeNotice`;
-      codapInterface.on("notify", tResource, undefined, handleDocumentChangeNotice);
-    };
 
     const init = async () => {
-      const newState = await connect.initialize();
-      await setUpDocumentNotifications();
+      const newState = await initializePlugin(iFrameDescriptor);
+      addDataContextsListListener(handleDocumentChangeNotice);
       await getDataSets();
 
       // plugins in new documents return an empty object for the interactive state
@@ -104,8 +123,7 @@ export const useCodapState = () => {
     };
 
     const setUpNotifications = async () => {
-      const sResource = `dataContextChangeNotice[${selectedDataSetName}]`;
-      codapInterface.on("notify", sResource, undefined, handleDataContextChangeNotice);
+      addDataContextChangeListener(selectedDataSetName, handleDataContextChangeNotice);
     };
 
     if (selectedDataSetName) {
@@ -115,7 +133,7 @@ export const useCodapState = () => {
   }, [selectedDataSetName]);
 
   const updateCollections = useCallback(async () => {
-    const colls = await connect.getDataSetCollections(selectedDataSet.name);
+    const colls = await getDataSetCollections(selectedDataSet.name);
     setCollections(colls);
   }, [selectedDataSet]);
 
@@ -129,7 +147,8 @@ export const useCodapState = () => {
 
   useEffect(() => {
     const fetchItems = async () => {
-      const fetchedItems = await connect.getItems(selectedDataSet.name);
+      const itemRes = await getAllItems(selectedDataSet.name);
+      const fetchedItems = itemRes.values.map((item: any) => item.values);
       setItems(fetchedItems);
     };
 
@@ -155,17 +174,18 @@ export const useCodapState = () => {
   };
 
   const handleUpdateAttributePosition = async (coll: ICollection, attrName: string, position: number) => {
-    await connect.updateAttributePosition(selectedDataSet.name, coll.name, attrName, position);
+    await updateAttributePosition(selectedDataSet.name, coll.name, attrName, position);
   };
 
   const handleAddCollection = async (newCollectionName: string) => {
-    await connect.createNewCollection(selectedDataSet.name, newCollectionName);
+    await createNewCollection(selectedDataSet.name, newCollectionName, [{"name": "newAttr"}]);
     // update collections because CODAP does not send dataContextChangeNotice
     updateCollections();
   };
 
   const handleCreateCollectionFromAttribute = async (collection: ICollection, attr: any, parent: number|string) => {
-    await connect.createCollectionFromAttribute(selectedDataSet.name, collection.name, attr, parent);
+    const parentStr = parent.toString();
+    await createCollectionFromAttribute(selectedDataSet.name, collection.name, attr, parentStr);
     // update collections because CODAP does not send dataContextChangeNotice
     updateCollections();
   };
@@ -197,7 +217,7 @@ export const useCodapState = () => {
         }
       }
     }
-    await connect.createNewAttribute(selectedDataSet.name, collection.name, newAttributeName);
+    await createNewAttribute(selectedDataSet.name, collection.name, newAttributeName||"");
     updateCollections();
   };
 
@@ -208,22 +228,30 @@ export const useCodapState = () => {
   }, [interactiveState, setInteractiveState]);
 
   const handleSelectSelf = async () => {
-    connect.selectSelf();
+    selectSelf();
   };
 
   const updateTitle = async (title: string) => {
-    connect.updateTitle(title);
+    const message = {
+      "action": "update",
+      "resource": "interactiveFrame",
+      "values": {
+        title
+      }
+    };
+    await codapInterface.sendRequest(message);
   };
 
-  const selectCases = useCallback(async (caseIds: number[]) => {
+  const selectCODAPCases = useCallback(async (caseIds: number[]) => {
+    const caseIdsToStrings = caseIds.map(c => c.toString());
     if (selectedDataSet) {
-      connect.selectCases(selectedDataSet.name, caseIds);
+     selectCases(selectedDataSet.name, caseIdsToStrings);
     }
   }, [selectedDataSet]);
 
   const listenForSelectionChanges = useCallback((callback: (notification: any) => void) => {
     if (selectedDataSet) {
-      codapInterface.on("notify", `dataContextChangeNotice[${selectedDataSet.name}]`, undefined, callback);
+      addDataContextChangeListener(selectedDataSet.name, callback);
     }
   }, [selectedDataSet]);
 
@@ -244,7 +272,7 @@ export const useCodapState = () => {
     handleAddCollection,
     handleAddAttribute,
     updateTitle,
-    selectCases,
+    selectCODAPCases,
     listenForSelectionChanges,
     handleCreateCollectionFromAttribute,
   };
