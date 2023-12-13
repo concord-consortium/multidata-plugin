@@ -36,14 +36,15 @@ export const getCases = async (selectedDataSetName: string, collName: string) =>
 };
 
 export const getDataSetCollections = async (selectedDataSetName: string) => {
-  const collectionList = await getCollectionList(selectedDataSetName);
+  const collectionList = (await getCollectionList(selectedDataSetName)).values;
   const colls: ICollections = [];
 
-  for (let i = 0; i < collectionList.values.length; i++) {
-    const coll = await getCollection(selectedDataSetName, collectionList.values[i].name);
-    const cases = await getCases(selectedDataSetName, collectionList.values[i].name);
-    coll.values.cases = cases;
-    colls.push(coll.values);
+  for (let i = 0; i < collectionList.length; i++) {
+    const coll = (await getCollection(selectedDataSetName, collectionList[i].name)).values;
+    const cases = await getCases(selectedDataSetName, collectionList[i].name);
+    coll.cases = cases;
+    colls.push(coll);
   }
+
   return colls;
 };

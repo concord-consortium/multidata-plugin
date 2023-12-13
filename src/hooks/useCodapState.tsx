@@ -123,7 +123,7 @@ export const useCodapState = () => {
     };
 
     const setUpNotifications = async () => {
-      addDataContextChangeListener(selectedDataSet, handleDataContextChangeNotice);
+      addDataContextChangeListener(selectedDataSetName, handleDataContextChangeNotice);
     };
 
     if (selectedDataSetName) {
@@ -148,7 +148,7 @@ export const useCodapState = () => {
   useEffect(() => {
     const fetchItems = async () => {
       const itemRes = await getAllItems(selectedDataSet.name);
-      const fetchedItems = itemRes.values;
+      const fetchedItems = itemRes.values.map((item: any) => item.values);
       setItems(fetchedItems);
     };
 
