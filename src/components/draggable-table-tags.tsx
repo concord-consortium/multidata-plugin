@@ -1,8 +1,10 @@
-import React, { useMemo, useRef } from "react";
+import React, { useMemo, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { useDraggableTableContext, Side } from "../hooks/useDraggableTable";
 import { useTableTopScrollTopContext } from "../hooks/useTableScrollTop";
 
 import AddIcon from "../assets/plus-level-1.svg";
+import DropdownIcon from "../assets/dropdown-arrow-icon.svg";
 
 import css from "./tables.scss";
 
@@ -35,22 +37,60 @@ export const DraggagleTableHeader: React.FC<DraggagleTableHeaderProps> = ({colle
   const {dragOverId, dragSide, handleDragStart, handleDragOver, handleOnDrop, handleDragEnter,
     handleDragLeave, handleDragEnd} = useDraggableTableContext();
   const {id, style} = getIdAndStyle(collectionId, attrTitle, dragOverId, dragSide);
+  const headerRef = useRef<HTMLTableHeaderCellElement | null>(null);
+  const [showDropdownIcon, setShowDropdownIcon] = useState(false);
+  const [showHeaderMenu, setShowHeaderMenu] = useState(false);
+  const headerPos = headerRef.current?.getBoundingClientRect();
+  const tableContainer = document.querySelector(".nested-table-nestedTableWrapper");
+
+  const handleShowHeaderMenu = (e: React.MouseEvent<HTMLTableHeaderCellElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setShowHeaderMenu(!showHeaderMenu);
+  };
+
+  const handleSortAttr = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    console.log(e.target.value);
+    setShowHeaderMenu(false);
+  };
 
   return (
-    <th
-      data-id={id}
-      style={style}
-      draggable={true}
-      className={css.draggable}
-      onDragStart={handleDragStart}
-      onDragOver={handleDragOver}
-      onDrop={handleOnDrop}
-      onDragEnter={handleDragEnter}
-      onDragLeave={handleDragLeave}
-      onDragEnd={handleDragEnd}
-    >
-      {children}
-    </th>
+    <>
+      <th
+        ref={headerRef}
+        data-id={id}
+        style={style}
+        draggable={true}
+        className={css.draggable}
+        onDragStart={handleDragStart}
+        onDragOver={handleDragOver}
+        onDrop={handleOnDrop}
+        onDragEnter={handleDragEnter}
+        onDragLeave={handleDragLeave}
+        onDragEnd={handleDragEnd}
+        onMouseEnter={() => setShowDropdownIcon(true)}
+        onMouseLeave={() => setShowDropdownIcon(false)}
+        onClick={handleShowHeaderMenu}
+      >
+        {children}
+        {showDropdownIcon &&
+          <DropdownIcon onClick={handleShowHeaderMenu}
+                        style={{position: "absolute", right: 0, top: -2}}/>
+        }
+      </th>
+      { showHeaderMenu && tableContainer && headerPos &&
+          createPortal(
+            <div className={css.headerMenu}
+                  style={{left: headerPos?.left + 5, top: headerPos?.bottom}}>
+                <select className={css.headerMenuSelect} size={2} onChange={handleSortAttr}>
+                    <option value="asc">Sort Ascending (A➞Z, 0➞9)</option>
+                    <option value="desc">Sort Descending (Z➞A, 9➞0)</option>
+                </select>
+            </div>,
+            tableContainer
+          )
+      }
+    </>
   );
 };
 
