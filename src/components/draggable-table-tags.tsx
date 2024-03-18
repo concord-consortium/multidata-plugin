@@ -2,6 +2,9 @@ import React, { useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { useDraggableTableContext, Side } from "../hooks/useDraggableTable";
 import { useTableTopScrollTopContext } from "../hooks/useTableScrollTop";
+import { useCodapState } from "../hooks/useCodapState";
+import { getAttribute } from "@concord-consortium/codap-plugin-api";
+import { getCollectionById } from "../utils/apiHelpers";
 
 import AddIcon from "../assets/plus-level-1.svg";
 import DropdownIcon from "../assets/dropdown-arrow-icon.svg";
@@ -31,11 +34,14 @@ interface DraggagleTableHeaderProps {
   collectionId: number;
   attrTitle: string;
   colSpan?: number;
+  dataSetName: string;
 }
 
-export const DraggagleTableHeader: React.FC<DraggagleTableHeaderProps> = ({collectionId, attrTitle, children}) => {
+export const DraggagleTableHeader: React.FC<DraggagleTableHeaderProps> = ({collectionId, attrTitle, dataSetName,
+    children}) => {
   const {dragOverId, dragSide, handleDragStart, handleDragOver, handleOnDrop, handleDragEnter,
     handleDragLeave, handleDragEnd} = useDraggableTableContext();
+  const {handleSortAttribute} = useCodapState();
   const {id, style} = getIdAndStyle(collectionId, attrTitle, dragOverId, dragSide);
   const headerRef = useRef<HTMLTableHeaderCellElement | null>(null);
   const [showDropdownIcon, setShowDropdownIcon] = useState(false);
@@ -49,8 +55,11 @@ export const DraggagleTableHeader: React.FC<DraggagleTableHeaderProps> = ({colle
     setShowHeaderMenu(!showHeaderMenu);
   };
 
-  const handleSortAttr = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    console.log(e.target.value);
+  const handleSortAttr = async (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const isDescending = e.target.value === "desc";
+    const collectionName = await getCollectionById(dataSetName, collectionId);
+    const attribute = (await getAttribute(dataSetName, collectionName, attrTitle)).values;
+    handleSortAttribute(dataSetName, attribute.id, isDescending);
     setShowHeaderMenu(false);
   };
 

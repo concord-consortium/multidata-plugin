@@ -99,6 +99,7 @@ export const NestedTable = (props: IProps) => {
                 key={`${collectionId}-${rowKey}-${key}-${index}`}
                 collectionId={collectionId}
                 attrTitle={key}
+                dataSetName={selectedDataSet.title}
               >{key}
               </DraggagleTableHeader>
             );

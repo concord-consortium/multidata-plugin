@@ -48,3 +48,9 @@ export const getDataSetCollections = async (selectedDataSetName: string) => {
 
   return colls;
 };
+
+export const getCollectionById = async (selectedDataSetName: string, collId: number) => {
+  const collectionList = (await getCollectionList(selectedDataSetName)).values;
+  const collectionName = collectionList.find((c: any) => c.id === collId).name;
+  return collectionName;
+};

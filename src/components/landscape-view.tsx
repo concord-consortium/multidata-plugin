@@ -96,7 +96,9 @@ export const LandscapeView = (props: ITableProps) => {
           <DraggagleTableHeader
             collectionId={parentColl[0].id}
             attrTitle={selectedDataSet.name}
-            colSpan={getValueLength(firstRowValues)}>
+            colSpan={getValueLength(firstRowValues)}
+            dataSetName={selectedDataSet.title}
+          >
             {selectedDataSet.name}
           </DraggagleTableHeader>
         </tr>

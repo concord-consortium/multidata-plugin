@@ -64,6 +64,7 @@ export const useCodapState = () => {
       setSelectedDataSetName(name);
       dataSetInfo = await getDataContext(name);
     }
+    console.log("***** in handleSetDataSet dataSetInfo", dataSetInfo?.values);
     setSelectedDataSet(dataSetInfo?.values);
   };
 
@@ -90,6 +91,7 @@ export const useCodapState = () => {
     const handleDataContextChangeNotice = (iMessage: any) => {
       if (iMessage.resource === `dataContextChangeNotice[${selectedDataSetName}]`) {
         const theValues = iMessage.values;
+        console.log("***** in handleDataContextChangeNotice theValues", theValues.operation);
         switch (theValues.operation) {
           case `selectCases`:
           case `updateCases`:
@@ -109,6 +111,9 @@ export const useCodapState = () => {
           case `updateDataContext`:       //  includes renaming dataset, so we have to redo the menu
               refreshDataSetInfo();
               break;
+          case `moveCases`:
+              handleUpdateTable();
+              break;
           case "createCases":
           case "createItems":
               break;
@@ -122,6 +127,12 @@ export const useCodapState = () => {
       handleSetDataSet(selectedDataSetName);
     };
 
+    const handleUpdateTable = () => {
+      console.log("***** in handleUpdateTable");
+      setNumUpdates(numUpdates + 1);
+      refreshDataSetInfo();
+    };
+
     const setUpNotifications = async () => {
       addDataContextChangeListener(selectedDataSetName, handleDataContextChangeNotice);
     };
@@ -130,7 +141,7 @@ export const useCodapState = () => {
       setUpNotifications();
     }
 
-  }, [selectedDataSetName]);
+  }, [numUpdates, selectedDataSetName]);
 
   const updateCollections = useCallback(async () => {
     const colls = await getDataSetCollections(selectedDataSet.name);
@@ -188,6 +199,19 @@ export const useCodapState = () => {
     await createCollectionFromAttribute(selectedDataSet.name, collection.name, attr, parentStr);
     // update collections because CODAP does not send dataContextChangeNotice
     updateCollections();
+  };
+
+  const handleSortAttribute = async (context: string, attrId: number, isDescending: boolean) => {
+    await codapInterface.sendRequest({
+      "action": "update",
+      "resource": `dataContext[${context}]`,
+      "values": {
+        "sort": {
+          attrId,
+          isDescending,
+        }
+      }
+    });
   };
 
   const handleAddAttribute = async (collection: ICollection, attrName: string) => {
@@ -268,8 +292,10 @@ export const useCodapState = () => {
     interactiveState,
     items,
     connected,
+    numUpdates,
     handleUpdateAttributePosition,
     handleAddCollection,
+    handleSortAttribute,
     handleAddAttribute,
     updateTitle,
     selectCODAPCases,
