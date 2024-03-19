@@ -62,7 +62,6 @@ export const useCodapState = () => {
     if (name) {
       setSelectedDataSetName(name);
       dataSetInfo = await getDataContext(name);
-      console.log("***** in handleSetDataSet dataSetInfo", dataSetInfo?.values);
       setSelectedDataSet(dataSetInfo?.values);
     }
   };
@@ -90,7 +89,6 @@ export const useCodapState = () => {
     const handleDataContextChangeNotice = (iMessage: any) => {
       if (iMessage.resource === `dataContextChangeNotice[${selectedDataSetName}]`) {
         const theValues = iMessage.values;
-        console.log("***** in handleDataContextChangeNotice theValues", theValues);
         switch (theValues.operation) {
           case `selectCases`:
           case `updateCases`:
@@ -121,8 +119,6 @@ export const useCodapState = () => {
     };
 
     const refreshDataSetInfo = () => {
-      console.log("***** in refreshDataSetInfo selectedDataSetName", selectedDataSetName, collections);
-      console.log("***** in refreshDataSetInfo selectedDataSet", selectedDataSet);
       handleSetDataSet(selectedDataSetName);
     };
 
@@ -138,13 +134,10 @@ export const useCodapState = () => {
 
   const updateCollections = useCallback(async () => {
     const colls = await getDataSetCollections(selectedDataSetName);
-    console.log("***** in updateCollections selectedDataSetName collections", selectedDataSetName, colls);
     setCollections(colls);
   }, [selectedDataSetName]);
 
   useEffect(() => {
-    console.log("***** in useEffect Update collection selectedDataSet", selectedDataSet);
-    // console.log("***** in useEffect Update collection selectedDataSetName", selectedDataSetName);
     if (selectedDataSet) {
       updateCollections();
     } else {
@@ -154,7 +147,6 @@ export const useCodapState = () => {
 
   useEffect(() => {
     const fetchItems = async () => {
-      console.log("IN USEEFFECT FETCHITEMS");
       const itemRes = await getCases(selectedDataSet.name, collections[0].name);
       const fetchedItems = itemRes.map((item: any) => item.values);
       setItems(fetchedItems);
@@ -165,7 +157,7 @@ export const useCodapState = () => {
     } else {
       setItems([]);
     }
-  }, [collections, selectedDataSet]);
+  }, [collections, selectedDataSet, updateCollections]);
 
   const handleSelectDataSet = (name: string) => {
     const selected = dataSets.filter((d) => d.title === name);
