@@ -12,9 +12,8 @@ import {
   createCollectionFromAttribute,
   createNewCollection,
   updateAttributePosition,
-  getAllItems
 } from "@concord-consortium/codap-plugin-api";
-import { getDataSetCollections } from "../utils/apiHelpers";
+import { getCases, getDataSetCollections, sortAttribute } from "../utils/apiHelpers";
 import { ICollections, ICollection, IDataSet } from "../types";
 
 const iFrameDescriptor = {
@@ -63,9 +62,9 @@ export const useCodapState = () => {
     if (name) {
       setSelectedDataSetName(name);
       dataSetInfo = await getDataContext(name);
+      console.log("***** in handleSetDataSet dataSetInfo", dataSetInfo?.values);
+      setSelectedDataSet(dataSetInfo?.values);
     }
-    console.log("***** in handleSetDataSet dataSetInfo", dataSetInfo?.values);
-    setSelectedDataSet(dataSetInfo?.values);
   };
 
   useEffect(() => {
@@ -106,13 +105,11 @@ export const useCodapState = () => {
           case `updateAttributes`:
           case `hideAttributes`:
           case `showAttributes`:
+          case `moveCases`:
               refreshDataSetInfo();
               break;
           case `updateDataContext`:       //  includes renaming dataset, so we have to redo the menu
               refreshDataSetInfo();
-              break;
-          case `moveCases`:
-              refreshTable();
               break;
           case "createCases":
           case "createItems":
@@ -124,11 +121,9 @@ export const useCodapState = () => {
     };
 
     const refreshDataSetInfo = () => {
+      console.log("***** in refreshDataSetInfo selectedDataSetName", selectedDataSetName, collections);
+      console.log("***** in refreshDataSetInfo selectedDataSet", selectedDataSet);
       handleSetDataSet(selectedDataSetName);
-    };
-
-    const refreshTable = () => {
-      handleUpdateTable();
     };
 
     const setUpNotifications = async () => {
@@ -138,36 +133,18 @@ export const useCodapState = () => {
     if (selectedDataSetName) {
       setUpNotifications();
     }
-
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedDataSetName]);
+  }, [collections, selectedDataSet, selectedDataSetName]);
 
   const updateCollections = useCallback(async () => {
-    const colls = await getDataSetCollections(selectedDataSet.name);
+    const colls = await getDataSetCollections(selectedDataSetName);
+    console.log("***** in updateCollections selectedDataSetName collections", selectedDataSetName, colls);
     setCollections(colls);
-  }, [selectedDataSet]);
-
-  const handleUpdateTable = useCallback(async() => {
-    console.log("***** in handleUpdateTable selectedDataSetName", selectedDataSetName);
-
-    const fetchCases = async () => {
-      const itemRes: any = await codapInterface.sendRequest({
-          "action": "get",
-          "resource": `dataContext[${selectedDataSetName}].collection[Mammals].caseSearch[*]`
-      });
-      console.log("***** in fetchCases itemRes", itemRes);
-      const fetchedItems = itemRes.values.map((item: any) => item.values);
-      setItems(fetchedItems);
-    };
-
-    // if (dsName) {
-      fetchCases();
-    // }
-    // setNumUpdates(numUpdates + 1);
-    // refreshDataSetInfo();
   }, [selectedDataSetName]);
 
   useEffect(() => {
+    console.log("***** in useEffect Update collection selectedDataSet", selectedDataSet);
+    // console.log("***** in useEffect Update collection selectedDataSetName", selectedDataSetName);
     if (selectedDataSet) {
       updateCollections();
     } else {
@@ -177,8 +154,9 @@ export const useCodapState = () => {
 
   useEffect(() => {
     const fetchItems = async () => {
-      const itemRes = await getAllItems(selectedDataSet.name);
-      const fetchedItems = itemRes.values.map((item: any) => item.values);
+      console.log("IN USEEFFECT FETCHITEMS");
+      const itemRes = await getCases(selectedDataSet.name, collections[0].name);
+      const fetchedItems = itemRes.map((item: any) => item.values);
       setItems(fetchedItems);
     };
 
@@ -221,16 +199,8 @@ export const useCodapState = () => {
   };
 
   const handleSortAttribute = async (context: string, attrId: number, isDescending: boolean) => {
-    await codapInterface.sendRequest({
-      "action": "update",
-      "resource": `dataContext[${context}]`,
-      "values": {
-        "sort": {
-          attrId,
-          isDescending,
-        }
-      }
-    });
+    sortAttribute(context, attrId, isDescending);
+    updateCollections();
   };
 
   const handleAddAttribute = async (collection: ICollection, attrName: string) => {

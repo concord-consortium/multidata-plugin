@@ -3,7 +3,8 @@ import {
   getCollection,
   getCaseCount,
   getCaseByIndex,
-  getCaseByID
+  getCaseByID,
+  codapInterface
 } from "@concord-consortium/codap-plugin-api";
 import { ICollections } from "../types";
 
@@ -53,4 +54,17 @@ export const getCollectionById = async (selectedDataSetName: string, collId: num
   const collectionList = (await getCollectionList(selectedDataSetName)).values;
   const collectionName = collectionList.find((c: any) => c.id === collId).name;
   return collectionName;
+};
+
+export const sortAttribute = async (context: string, attrId: number, isDescending: boolean) => {
+  await codapInterface.sendRequest({
+    "action": "update",
+    "resource": `dataContext[${context}]`,
+    "values": {
+      "sort": {
+        attrId,
+        isDescending,
+      }
+    }
+  });
 };
