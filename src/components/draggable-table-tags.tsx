@@ -1,4 +1,4 @@
-import React, { useMemo, useRef, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { useDraggableTableContext, Side } from "../hooks/useDraggableTable";
 import { useTableTopScrollTopContext } from "../hooks/useTableScrollTop";
@@ -47,7 +47,25 @@ export const DraggagleTableHeader: React.FC<DraggagleTableHeaderProps> = ({colle
   const [showDropdownIcon, setShowDropdownIcon] = useState(false);
   const [showHeaderMenu, setShowHeaderMenu] = useState(false);
   const headerPos = headerRef.current?.getBoundingClientRect();
+  const headerMenuRef = useRef<HTMLDivElement | null>(null);
   const tableContainer = document.querySelector(".nested-table-nestedTableWrapper");
+
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (headerMenuRef.current && !headerMenuRef.current.contains(e.target as Node)) {
+        setShowHeaderMenu(false);
+      }
+    };
+    if (showHeaderMenu) {
+      document.addEventListener("mousedown", handleClickOutside);
+    } else {
+      document.removeEventListener("mousedown", handleClickOutside);
+    }
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [showHeaderMenu, tableContainer]);
+
 
   const handleShowHeaderMenu = (e: React.MouseEvent<HTMLTableHeaderCellElement>) => {
     e.preventDefault();
@@ -89,7 +107,7 @@ export const DraggagleTableHeader: React.FC<DraggagleTableHeaderProps> = ({colle
       </th>
       { showHeaderMenu && tableContainer && headerPos &&
           createPortal(
-            <div className={css.headerMenu}
+            <div className={css.headerMenu} ref={headerMenuRef}
                   style={{left: headerPos?.left + 5, top: headerPos?.bottom}}>
                 <select className={css.headerMenuSelect} size={2} onChange={handleSortAttr}>
                     <option value="asc">Sort Ascending (A➞Z, 0➞9)</option>
