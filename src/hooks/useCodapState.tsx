@@ -91,7 +91,7 @@ export const useCodapState = () => {
     const handleDataContextChangeNotice = (iMessage: any) => {
       if (iMessage.resource === `dataContextChangeNotice[${selectedDataSetName}]`) {
         const theValues = iMessage.values;
-        console.log("***** in handleDataContextChangeNotice theValues", theValues.operation);
+        console.log("***** in handleDataContextChangeNotice theValues", theValues);
         switch (theValues.operation) {
           case `selectCases`:
           case `updateCases`:
@@ -112,7 +112,7 @@ export const useCodapState = () => {
               refreshDataSetInfo();
               break;
           case `moveCases`:
-              handleUpdateTable();
+              refreshTable();
               break;
           case "createCases":
           case "createItems":
@@ -127,10 +127,8 @@ export const useCodapState = () => {
       handleSetDataSet(selectedDataSetName);
     };
 
-    const handleUpdateTable = () => {
-      console.log("***** in handleUpdateTable");
-      setNumUpdates(numUpdates + 1);
-      refreshDataSetInfo();
+    const refreshTable = () => {
+      handleUpdateTable();
     };
 
     const setUpNotifications = async () => {
@@ -141,12 +139,33 @@ export const useCodapState = () => {
       setUpNotifications();
     }
 
-  }, [numUpdates, selectedDataSetName]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedDataSetName]);
 
   const updateCollections = useCallback(async () => {
     const colls = await getDataSetCollections(selectedDataSet.name);
     setCollections(colls);
   }, [selectedDataSet]);
+
+  const handleUpdateTable = useCallback(async() => {
+    console.log("***** in handleUpdateTable selectedDataSetName", selectedDataSetName);
+
+    const fetchCases = async () => {
+      const itemRes: any = await codapInterface.sendRequest({
+          "action": "get",
+          "resource": `dataContext[${selectedDataSetName}].collection[Mammals].caseSearch[*]`
+      });
+      console.log("***** in fetchCases itemRes", itemRes);
+      const fetchedItems = itemRes.values.map((item: any) => item.values);
+      setItems(fetchedItems);
+    };
+
+    // if (dsName) {
+      fetchCases();
+    // }
+    // setNumUpdates(numUpdates + 1);
+    // refreshDataSetInfo();
+  }, [selectedDataSetName]);
 
   useEffect(() => {
     if (selectedDataSet) {
