@@ -1,11 +1,10 @@
 import React from "react";
-import { ICollection, IDataSet } from "../types";
+import { IDataSet } from "../types";
 import css from "./menu.scss";
 
 interface IProps {
   selectedDataSet: any,
   handleSelectDataSet: (e: React.ChangeEvent<HTMLSelectElement>) => void,
-  collections: Array<ICollection>,
   dataSets: Array<IDataSet>,
 
   // these are optional and only used by the nested table view
@@ -14,7 +13,8 @@ interface IProps {
   toggleShowHeaders?: () => void,
   showHeaders?: boolean,
   padding?: boolean;
-  displayMode?: string
+  displayMode?: string;
+  showDisplayMode?: boolean;
 }
 
 const portrait = "Portrait";
@@ -22,11 +22,11 @@ const landscape = "Landscape";
 const none = "";
 
 export const Menu = (props: IProps) => {
-  const {handleSelectDataSet, collections, dataSets, handleSelectDisplayMode, togglePadding,
-    showHeaders, padding, toggleShowHeaders, displayMode, selectedDataSet} = props;
+  const {handleSelectDataSet, dataSets, handleSelectDisplayMode, togglePadding,
+    showHeaders, padding, toggleShowHeaders, displayMode, selectedDataSet, showDisplayMode} = props;
 
   const displayModes = [none, portrait, landscape];
-
+console.log("********** in Menu");
   return (
     <div className={css.menu}>
       <div className={css.option}>
@@ -39,7 +39,7 @@ export const Menu = (props: IProps) => {
         </select>
       </div>
       {/* Only allow shift in display mode if we are viewing a hierarhical data structure*/}
-      {collections.length > 1 && handleSelectDisplayMode &&
+      {showDisplayMode && handleSelectDisplayMode &&
         <div className={css.option}>
           <span>Display mode:</span>
           <select value={displayMode} onChange={handleSelectDisplayMode}>
