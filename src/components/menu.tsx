@@ -26,7 +26,6 @@ export const Menu = (props: IProps) => {
     showHeaders, padding, toggleShowHeaders, displayMode, selectedDataSet, showDisplayMode} = props;
 
   const displayModes = [none, portrait, landscape];
-console.log("********** in Menu");
   return (
     <div className={css.menu}>
       <div className={css.option}>
