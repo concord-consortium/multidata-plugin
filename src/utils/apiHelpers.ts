@@ -64,7 +64,7 @@ export const sortAttribute = async (context: string, attrId: number, isDescendin
     "resource": `dataContext[${context}]`,
     "values": {
       "sort": {
-        attrId,
+        attr: attrId,
         isDescending,
       }
     }
