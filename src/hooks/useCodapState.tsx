@@ -66,9 +66,7 @@ export const useCodapState = () => {
     }
   };
 
-  useEffect(() => {
-
-    const init = async () => {
+  const init = async () => {
       const newState = await initializePlugin(iFrameDescriptor);
       addDataContextsListListener(handleDocumentChangeNotice);
       await getDataSets();
@@ -78,12 +76,9 @@ export const useCodapState = () => {
       if (Object.keys(newState || {}).length > 0) {
         setInteractiveState(newState);
       }
-
       setConnected(true);
     };
 
-    init();
-  }, [handleDocumentChangeNotice]);
 
   useEffect(() => {
     const handleDataContextChangeNotice = (iMessage: any) => {
@@ -92,6 +87,7 @@ export const useCodapState = () => {
         switch (theValues.operation) {
           case `selectCases`:
           case `updateCases`:
+          case `moveCases`:
               refreshDataSetInfo();
               break;
           case `updateCollection`:
@@ -103,7 +99,6 @@ export const useCodapState = () => {
           case `updateAttributes`:
           case `hideAttributes`:
           case `showAttributes`:
-          case `moveCases`:
               refreshDataSetInfo();
               break;
           case `updateDataContext`:       //  includes renaming dataset, so we have to redo the menu
@@ -129,7 +124,6 @@ export const useCodapState = () => {
     if (selectedDataSetName) {
       setUpNotifications();
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [collections, selectedDataSet, selectedDataSetName]);
 
   const updateCollections = useCallback(async () => {
@@ -138,26 +132,14 @@ export const useCodapState = () => {
   }, [selectedDataSetName]);
 
   useEffect(() => {
+    console.log("*********** in useEffect selectedDataSet ***********", selectedDataSet);
     if (selectedDataSet) {
       updateCollections();
     } else {
       setCollections([]);
     }
-  }, [selectedDataSet, updateCollections]);
+  }, [selectedDataSet]);
 
-  useEffect(() => {
-    const fetchItems = async () => {
-      const itemRes = await getCases(selectedDataSet.name, collections[0].name);
-      const fetchedItems = itemRes.map((item: any) => item.values);
-      setItems(fetchedItems);
-    };
-
-    if (collections.length === 1 && selectedDataSet) {
-      fetchItems();
-    } else {
-      setItems([]);
-    }
-  }, [collections, selectedDataSet, updateCollections]);
 
   const handleSelectDataSet = (name: string) => {
     const selected = dataSets.filter((d) => d.title === name);
@@ -192,7 +174,7 @@ export const useCodapState = () => {
 
   const handleSortAttribute = async (context: string, attrId: number, isDescending: boolean) => {
     sortAttribute(context, attrId, isDescending);
-    updateCollections();
+    // updateCollections();
   };
 
   const handleAddAttribute = async (collection: ICollection, attrName: string) => {
@@ -270,6 +252,7 @@ export const useCodapState = () => {
     handleRefreshDataSet,
     getCollectionNameFromId,
     updateInteractiveState,
+    init,
     interactiveState,
     items,
     connected,

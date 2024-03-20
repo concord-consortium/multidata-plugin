@@ -9,6 +9,7 @@ import {
 import { ICollections } from "../types";
 
 export const getCases = async (selectedDataSetName: string, collName: string) => {
+  console.log("*********** in getCases ***********");
   const processCase = async (caseObj: any) => {
     if (caseObj.children) {
       for (let i = 0; i < caseObj.children.length; i++){
@@ -39,6 +40,7 @@ export const getCases = async (selectedDataSetName: string, collName: string) =>
 export const getDataSetCollections = async (selectedDataSetName: string) => {
   const collectionList = (await getCollectionList(selectedDataSetName)).values;
   const colls: ICollections = [];
+  console.log("*********** in getDataSetCollections ***********");
 
   for (let i = 0; i < collectionList.length; i++) {
     const coll = (await getCollection(selectedDataSetName, collectionList[i].name)).values;
