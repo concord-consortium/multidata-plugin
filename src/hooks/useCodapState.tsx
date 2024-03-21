@@ -63,6 +63,9 @@ export const useCodapState = () => {
       setSelectedDataSetName(name);
       dataSetInfo = await getDataContext(name);
       setSelectedDataSet(dataSetInfo?.values);
+    } else {
+      setSelectedDataSetName("");
+      setSelectedDataSet(null);
     }
   };
 
@@ -154,7 +157,7 @@ export const useCodapState = () => {
 
   const handleSelectDataSet = (name: string) => {
     const selected = dataSets.find((d) => d.title === name);
-    return selected && handleSetDataSet(selected.name);
+    return selected ? handleSetDataSet(selected.name) :  handleSetDataSet("");
   };
 
   const getCollectionNameFromId = (id: number) => {
