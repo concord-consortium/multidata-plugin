@@ -57,6 +57,7 @@ export const getCollectionById = async (selectedDataSetName: string, collId: num
 };
 
 export const sortAttribute = async (context: string, attrId: number, isDescending: boolean) => {
+console.log("*IN sortAttribute");
   await codapInterface.sendRequest({
     "action": "update",
     "resource": `dataContext[${context}]`,

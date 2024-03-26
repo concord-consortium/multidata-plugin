@@ -1,4 +1,4 @@
-import {useState, useEffect, useCallback} from "react";
+import {useState, useEffect, useCallback, useMemo} from "react";
 import {
   addDataContextChangeListener,
   addDataContextsListListener,
@@ -12,6 +12,7 @@ import {
   createCollectionFromAttribute,
   createNewCollection,
   updateAttributePosition,
+  getAllItems,
 } from "@concord-consortium/codap-plugin-api";
 import { getCases, getDataSetCollections, sortAttribute } from "../utils/apiHelpers";
 import { ICollections, ICollection, IDataSet } from "../types";
@@ -87,10 +88,12 @@ export const useCodapState = () => {
     const handleDataContextChangeNotice = (iMessage: any) => {
       if (iMessage.resource === `dataContextChangeNotice[${selectedDataSetName}]`) {
         const theValues = iMessage.values;
+        console.log("*IN theValues.operation: ", theValues.operation, numUpdates);
+        setNumUpdates(numUpdates + 1);
         switch (theValues.operation) {
           case `selectCases`:
           case `updateCases`:
-          case `moveCases`:
+          // case `moveCases`:
               refreshDataSetInfo();
               break;
           case `updateCollection`:
@@ -107,6 +110,9 @@ export const useCodapState = () => {
           case `updateDataContext`:       //  includes renaming dataset, so we have to redo the menu
               refreshDataSetInfo();
               break;
+          case `moveCases`:
+              handleMoveCases();
+              break;
           case "createCases":
           case "createItems":
               break;
@@ -117,7 +123,9 @@ export const useCodapState = () => {
     };
 
     const refreshDataSetInfo = () => {
-      handleSetDataSet(selectedDataSetName);
+      console.log("*IN REFRESHDATASETINFO");
+      // handleSetDataSet(selectedDataSetName);
+      updateCollections();
     };
 
     const setUpNotifications = async () => {
@@ -127,24 +135,34 @@ export const useCodapState = () => {
     if (selectedDataSetName) {
       setUpNotifications();
     }
-  }, [collections, selectedDataSet, selectedDataSetName]);
+  }, [selectedDataSet, selectedDataSetName]);
+
+  const handleMoveCases = () => {
+    console.log("*IN handleMoveCases");
+    updateCollections();
+  };
 
   const updateCollections = useCallback(async () => {
+    console.log("*IN UPDATECOLLECTIONS");
+
     const colls = await getDataSetCollections(selectedDataSetName);
     setCollections(colls);
   }, [selectedDataSetName]);
 
-  useEffect(() => {
+  useMemo(() => {
     if (selectedDataSet) {
+      // This is not where updateCollections is called multiple times
       updateCollections();
     }
   }, [selectedDataSet]);
 
-  useEffect(() => {
+  useMemo(() => {
     const fetchItems = async () => {
-      const itemRes = await getCases(selectedDataSetName, collections[0].name);
-      const fetchedItems = itemRes.map((item: any) => item.values);
-      setItems(fetchedItems);
+      if (selectedDataSet) {
+        const itemRes = await getAllItems(selectedDataSet.name);
+        const fetchedItems = itemRes.values.map((item: any) => item.values);
+        setItems(fetchedItems);
+      }
     };
 
     if (collections.length === 1 && selectedDataSet) {
@@ -152,7 +170,7 @@ export const useCodapState = () => {
     } else {
       setItems([]);
     }
-  }, [collections, selectedDataSetName, updateCollections]);
+  }, [collections, selectedDataSetName]);
 
 
   const handleSelectDataSet = (name: string) => {
@@ -181,6 +199,7 @@ export const useCodapState = () => {
     const parentStr = parent.toString();
     await createCollectionFromAttribute(selectedDataSet.name, collection.name, attr, parentStr);
     // update collections because CODAP does not send dataContextChangeNotice
+    console.log("*IN handleCreateCollectionFromAttribute updateCollections");
     updateCollections();
   };
 
