@@ -80,7 +80,7 @@ export const DraggagleTableHeader: React.FC<DraggagleTableHeaderProps> = ({colle
     handleSortAttribute(dataSetName, attribute.id, isDescending);
     setShowHeaderMenu(false);
   };
-
+console.log("****** headerPos", headerPos, scrollY);
   return (
     <>
       <th
@@ -108,7 +108,7 @@ export const DraggagleTableHeader: React.FC<DraggagleTableHeaderProps> = ({colle
       { showHeaderMenu && tableContainer && headerPos &&
           createPortal(
             <div className={css.headerMenu} ref={headerMenuRef}
-                  style={{left: headerPos?.left + 5, top: headerPos?.bottom}}>
+                  style={{left: headerPos?.left + 5, top: headerPos?.bottom  + scrollY}}>
                 <select className={css.headerMenuSelect} size={2} onChange={handleSortAttr}>
                     <option value="asc">Sort Ascending (A➞Z, 0➞9)</option>
                     <option value="desc">Sort Descending (Z➞A, 9➞0)</option>
