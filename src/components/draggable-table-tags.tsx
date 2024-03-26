@@ -80,7 +80,6 @@ export const DraggagleTableHeader: React.FC<DraggagleTableHeaderProps> = ({colle
     handleSortAttribute(dataSetName, attribute.id, isDescending);
     setShowHeaderMenu(false);
   };
-console.log("****** headerPos", headerPos, scrollY);
   return (
     <>
       <th
