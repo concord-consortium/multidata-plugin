@@ -1,7 +1,7 @@
 import React from "react";
 import { ICollection, IProcessedCaseObj, ITableProps } from "../types";
 import { DraggagleTableHeader } from "./draggable-table-tags";
-import { getAttrPrecisions, getAttrTypes } from "../utils/utils";
+import { getAttrPrecisions, getAttrTypes, getAttrVisibility } from "../utils/utils";
 
 import css from "./tables.scss";
 
@@ -15,6 +15,7 @@ export const LandscapeView = (props: ITableProps) => {
     const className = getClassName(parentColl.cases[0]);
     const precisions = getAttrPrecisions(collections);
     const attrTypes = getAttrTypes(collections);
+    const attrVisibilities = getAttrVisibility(collections);
     return (
       <>
         {showHeaders &&
@@ -22,10 +23,12 @@ export const LandscapeView = (props: ITableProps) => {
           <th colSpan={valueCount}>{parentColl.name}</th>
         </tr> }
         <tr className={css[className]}>
-          {firstRowValues.map(values => mapHeadersFromValues(parentColl.id, "first-row", values))}
+          {firstRowValues.map(values => mapHeadersFromValues(parentColl.id, "first-row", values, attrVisibilities))}
         </tr>
         <tr className={css[className]}>
-          {firstRowValues.map(values => mapCellsFromValues(parentColl.id, "first-row", values, precisions, attrTypes))}
+          {firstRowValues.map(values =>
+            mapCellsFromValues(parentColl.id, "first-row", values, precisions, attrTypes, attrVisibilities))
+          }
         </tr>
         <tr className={css[className]}>
           {parentColl.cases.map((caseObj) => {
@@ -51,6 +54,8 @@ export const LandscapeView = (props: ITableProps) => {
     const isFirstIndex = index === 0;
     const precisions = getAttrPrecisions(collections);
     const attrTypes = getAttrTypes(collections);
+    const attrVisibilities = getAttrVisibility(collections);
+
     if (!children.length) {
       const className = getClassName(caseObj);
       return (
@@ -62,10 +67,10 @@ export const LandscapeView = (props: ITableProps) => {
           }
           {isFirstIndex &&
             <tr className={css[className]}>
-              {mapHeadersFromValues(collection.id, `first-row-${index}`, values)}
+              {mapHeadersFromValues(collection.id, `first-row-${index}`, values, attrVisibilities)}
             </tr>
           }
-          <tr>{mapCellsFromValues(collection.id, `row-${index}`, values, precisions, attrTypes)}</tr>
+          <tr>{mapCellsFromValues(collection.id, `row-${index}`, values, precisions, attrTypes, attrVisibilities)}</tr>
         </>
       );
     } else {

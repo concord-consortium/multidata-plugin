@@ -89,11 +89,12 @@ export const NestedTable = (props: IProps) => {
     updateInteractiveState({displayMode: e.target.value});
   }, [updateInteractiveState]);
 
-  const mapHeadersFromValues = (collectionId: number, rowKey: string, values: IValues) => {
+  const mapHeadersFromValues = (collectionId: number, rowKey: string, values: IValues,
+      attrVisibilities: Record<string, boolean>) => {
     return (
       <>
         {(Object.keys(values)).map((key, index) => {
-          if (typeof values[key] === "string" || typeof values[key] === "number") {
+          if (!attrVisibilities[key] && (typeof values[key] === "string" || typeof values[key] === "number")) {
             return (
               <DraggagleTableHeader
                 key={`${collectionId}-${rowKey}-${key}-${index}`}
@@ -110,8 +111,11 @@ export const NestedTable = (props: IProps) => {
 
   const mapCellsFromValues = (collectionId: number, rowKey: string, values: IValues,
       precisions: Record<string, number>, attrTypes: Record<string, string | undefined | null>,
-      isParent?: boolean, resizeCounter?: number, parentLevel?: number) => {
+      attrVisibilities: Record<string, boolean>, isParent?: boolean, resizeCounter?: number, parentLevel?: number) => {
     return Object.keys(values).map((key, index) => {
+      if (attrVisibilities[key]) {
+        return null;
+      }
       const val = attrTypes[key] === "numeric" ? parseFloat(values[key]) : values[key];
       if (typeof val === "string" || typeof val === "number") {
         if (typeof val === "number") {

@@ -2,39 +2,40 @@ import React, { useEffect, useMemo, useRef, useState } from "react";
 import { ICollection, IProcessedCaseObj, ITableProps } from "../types";
 import { DraggableTableContainer, DroppableTableData, DroppableTableHeader } from "./draggable-table-tags";
 import { TableScrollTopContext, useTableScrollTop } from "../hooks/useTableScrollTop";
-import { getAttrPrecisions, getAttrTypes } from "../utils/utils";
+import { getAttrPrecisions, getAttrTypes, getAttrVisibility } from "../utils/utils";
 
 import css from "./tables.scss";
 
 export type PortraitViewRowProps = {collectionId: number, caseObj: IProcessedCaseObj, index?: null|number,
                                     precisions: Record<string, number>,
                                     attrTypes: Record<string, string | undefined | null>,
+                                    attrVisibilities: Record<string, boolean>,
                                     isParent: boolean, resizeCounter: number, parentLevel?: number}
                                     & ITableProps;
 
 export const PortraitViewRow = (props: PortraitViewRowProps) => {
-  const {paddingStyle, mapCellsFromValues, mapHeadersFromValues, showHeaders, precisions, attrTypes,
+  const {paddingStyle, mapCellsFromValues, mapHeadersFromValues, showHeaders, precisions, attrTypes, attrVisibilities,
           getClassName, collectionId, caseObj, index, isParent, resizeCounter, parentLevel} = props;
 
   const {children, values} = caseObj;
 
   if (!children.length) {
     return (
-        <tr>{mapCellsFromValues(collectionId, `row-${index}`, values, precisions, attrTypes)}</tr>
+        <tr>{mapCellsFromValues(collectionId, `row-${index}`, values, precisions, attrTypes, attrVisibilities)}</tr>
     );
   } else {
     return (
       <>
         {index === 0 &&
           <tr className={`${css[getClassName(caseObj)]}`}>
-            {mapHeadersFromValues(collectionId, `first-row-${index}`, values)}
+            {mapHeadersFromValues(collectionId, `first-row-${index}`, values, attrVisibilities)}
             {showHeaders ? (
                 <DroppableTableHeader collectionId={collectionId}>{children[0].collection.name}</DroppableTableHeader>
               ) : <th />}
           </tr>
         }
         <tr className={`${css[getClassName(caseObj)]} parent-row`}>
-          {mapCellsFromValues(collectionId, `parent-row-${index}`, values, precisions, attrTypes,
+          {mapCellsFromValues(collectionId, `parent-row-${index}`, values, precisions, attrTypes, attrVisibilities,
                               isParent, resizeCounter, parentLevel)}
           <DroppableTableData collectionId={collectionId} style={paddingStyle}>
             <DraggableTableContainer collectionId={collectionId}>
@@ -53,7 +54,8 @@ export const PortraitViewRow = (props: PortraitViewRowProps) => {
                       return (
                         <React.Fragment key={child.collection.id}>
                           <tr className={`${css[getClassName(child)]}`}>
-                            {mapHeadersFromValues(child.collection.id, `child-row-${index}-${i}`, child.values)}
+                            {mapHeadersFromValues(child.collection.id, `child-row-${index}-${i}`, child.values,
+                                attrVisibilities)}
                           </tr>
                           <PortraitViewRow {...nextProps} />
                         </React.Fragment>
@@ -110,6 +112,7 @@ export const PortraitView = (props: ITableProps) => {
     const valueCount = getValueLength(firstRowValues);
     const precisions = getAttrPrecisions(collections);
     const attrTypes = getAttrTypes(collections);
+    const attrVisibilities = getAttrVisibility(collections);
 
     return (
       <DraggableTableContainer>
@@ -130,6 +133,7 @@ export const PortraitView = (props: ITableProps) => {
                 index={index}
                 precisions={precisions}
                 attrTypes={attrTypes}
+                attrVisibilities={attrVisibilities}
                 isParent={true}
                 resizeCounter={resizeCounter}
                 parentLevel={0}

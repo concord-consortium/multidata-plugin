@@ -27,3 +27,13 @@ export const getAttrTypes = (collections: any) => {
   }, {});
   return attrTypes;
 };
+
+export const getAttrVisibility = (collections: any) => {
+  const attrs = getAllAttributesFromCollections(collections);
+  const attrVisibilities = attrs.reduce(
+      (acc: Record<string, boolean>, attr: any) => {
+    acc[attr.name] = attr.hidden || false;
+    return acc;
+  }, {});
+  return attrVisibilities;
+};
