@@ -1,6 +1,7 @@
 import React from "react";
 import { ICollection, IProcessedCaseObj, ITableProps } from "../types";
 import { DraggagleTableHeader } from "./draggable-table-tags";
+import { getAttrPrecisions, getAttrTypes } from "../utils/utils";
 
 import css from "./tables.scss";
 
@@ -12,6 +13,8 @@ export const LandscapeView = (props: ITableProps) => {
     const firstRowValues = parentColl.cases.map(caseObj => caseObj.values);
     const valueCount = getValueLength(firstRowValues);
     const className = getClassName(parentColl.cases[0]);
+    const precisions = getAttrPrecisions(collections);
+    const attrTypes = getAttrTypes(collections);
     return (
       <>
         {showHeaders &&
@@ -22,7 +25,7 @@ export const LandscapeView = (props: ITableProps) => {
           {firstRowValues.map(values => mapHeadersFromValues(parentColl.id, "first-row", values))}
         </tr>
         <tr className={css[className]}>
-          {firstRowValues.map(values => mapCellsFromValues(parentColl.id, "first-row", values))}
+          {firstRowValues.map(values => mapCellsFromValues(parentColl.id, "first-row", values, precisions, attrTypes))}
         </tr>
         <tr className={css[className]}>
           {parentColl.cases.map((caseObj) => {
@@ -46,6 +49,8 @@ export const LandscapeView = (props: ITableProps) => {
   const renderColFromCaseObj = (collection: ICollection, caseObj: IProcessedCaseObj, index?: number) => {
     const {children, values} = caseObj;
     const isFirstIndex = index === 0;
+    const precisions = getAttrPrecisions(collections);
+    const attrTypes = getAttrTypes(collections);
     if (!children.length) {
       const className = getClassName(caseObj);
       return (
@@ -60,7 +65,7 @@ export const LandscapeView = (props: ITableProps) => {
               {mapHeadersFromValues(collection.id, `first-row-${index}`, values)}
             </tr>
           }
-          <tr>{mapCellsFromValues(collection.id, `row-${index}`, values)}</tr>
+          <tr>{mapCellsFromValues(collection.id, `row-${index}`, values, precisions, attrTypes)}</tr>
         </>
       );
     } else {

@@ -55,8 +55,9 @@ export interface ITableProps {
   getClassName: (caseObj: IProcessedCaseObj) => string,
   selectedDataSet: IDataSet,
   collections: Array<ICollection>,
-  mapCellsFromValues: (collectionId: number, rowKey: string, values: IValues, isParent?: boolean,
-      resizeCounter?: number, parentLevel?: number) => void,
+  mapCellsFromValues: (collectionId: number, rowKey: string, values: IValues, precisions: Record<string, number>,
+      attrTypes: Record<string, string | undefined | null>, isParent?: boolean, resizeCounter?: number,
+      parentLevel?: number) => void,
   mapHeadersFromValues: (collectionId: number, rowKey: string, values: IValues) => void,
   getValueLength: (firstRow: Array<IValues>) => number
   paddingStyle: Record<string, string>

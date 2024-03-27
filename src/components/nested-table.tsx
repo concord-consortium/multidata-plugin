@@ -108,11 +108,27 @@ export const NestedTable = (props: IProps) => {
     );
   };
 
-  const mapCellsFromValues = (collectionId: number, rowKey: string, values: IValues, isParent?: boolean,
-                              resizeCounter?: number, parentLevel?: number) => {
+  const mapCellsFromValues = (collectionId: number, rowKey: string, values: IValues,
+      precisions: Record<string, number>, attrTypes: Record<string, string | undefined | null>,
+      isParent?: boolean, resizeCounter?: number, parentLevel?: number) => {
     return Object.keys(values).map((key, index) => {
-      const val = values[key];
+      const val = attrTypes[key] === "numeric" ? parseFloat(values[key]) : values[key];
       if (typeof val === "string" || typeof val === "number") {
+        if (typeof val === "number") {
+          const precision = precisions[key] || 2; // default to 2 decimal places
+          return (
+            <DraggagleTableData
+              collectionId={collectionId}
+              attrTitle={key}
+              key={`${rowKey}-${val}-${index}}`}
+              isParent={isParent}
+              resizeCounter={resizeCounter}
+              parentLevel={parentLevel}
+            >
+              {val.toFixed(precision)}
+            </DraggagleTableData>
+          );
+        }
         return (
           <DraggagleTableData
             collectionId={collectionId}

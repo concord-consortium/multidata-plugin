@@ -1,6 +1,7 @@
 import React from "react";
 import { ITableProps, IValues } from "../types";
 import { DraggableTableContainer, DraggagleTableHeader } from "./draggable-table-tags";
+import { getAttrPrecisions, getAttrTypes } from "../utils/utils";
 
 import css from "./tables.scss";
 
@@ -14,6 +15,8 @@ export const FlatTable = (props: IFlatProps) => {
   const {className} = collectionClasses[0];
 
   const titles = collection.attrs.map(attr => attr.title);
+  const precisions = getAttrPrecisions(collections);
+  const attrTypes = getAttrTypes(collections);
   const orderedItems = items.map(item => {
     const orderedItem: IValues = {};
     titles.forEach(title => {
@@ -45,7 +48,9 @@ export const FlatTable = (props: IFlatProps) => {
           </tr>
           {orderedItems.map((item, index) => {
             return (
-              <tr key={`${index}-${item.id}`}>{mapCellsFromValues(collection.id, `row-${index}`, item)}</tr>
+              <tr key={`${index}-${item.id}`}>
+                {mapCellsFromValues(collection.id, `row-${index}`, item, precisions, attrTypes)}
+              </tr>
             );
           })}
         </tbody>
