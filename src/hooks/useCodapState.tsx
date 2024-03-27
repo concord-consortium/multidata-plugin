@@ -12,7 +12,6 @@ import {
   createCollectionFromAttribute,
   createNewCollection,
   updateAttributePosition,
-  getAllItems,
 } from "@concord-consortium/codap-plugin-api";
 import { getCases, getDataSetCollections, sortAttribute } from "../utils/apiHelpers";
 import { ICollections, ICollection, IDataSet } from "../types";
@@ -88,7 +87,6 @@ export const useCodapState = () => {
     const handleDataContextChangeNotice = (iMessage: any) => {
       if (iMessage.resource === `dataContextChangeNotice[${selectedDataSetName}]`) {
         const theValues = iMessage.values;
-        console.log("*IN theValues.operation: ", theValues.operation, numUpdates);
         setNumUpdates(numUpdates + 1);
         switch (theValues.operation) {
           case `selectCases`:
@@ -123,8 +121,6 @@ export const useCodapState = () => {
     };
 
     const refreshDataSetInfo = () => {
-      console.log("*IN REFRESHDATASETINFO");
-      // handleSetDataSet(selectedDataSetName);
       updateCollections();
     };
 
@@ -135,16 +131,14 @@ export const useCodapState = () => {
     if (selectedDataSetName) {
       setUpNotifications();
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedDataSet, selectedDataSetName]);
 
   const handleMoveCases = () => {
-    console.log("*IN handleMoveCases");
     updateCollections();
   };
 
   const updateCollections = useCallback(async () => {
-    console.log("*IN UPDATECOLLECTIONS");
-
     const colls = await getDataSetCollections(selectedDataSetName);
     setCollections(colls);
   }, [selectedDataSetName]);
@@ -154,13 +148,14 @@ export const useCodapState = () => {
       // This is not where updateCollections is called multiple times
       updateCollections();
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedDataSet]);
 
-  useMemo(() => {
+  useEffect(() => {
     const fetchItems = async () => {
       if (selectedDataSet) {
-        const itemRes = await getAllItems(selectedDataSet.name);
-        const fetchedItems = itemRes.values.map((item: any) => item.values);
+        const casesFetched = await getCases(selectedDataSet.name, collections[0].name);
+        const fetchedItems = casesFetched.map((item: any) => item.values);
         setItems(fetchedItems);
       }
     };
@@ -170,7 +165,7 @@ export const useCodapState = () => {
     } else {
       setItems([]);
     }
-  }, [collections, selectedDataSetName]);
+  }, [collections, selectedDataSet]);
 
 
   const handleSelectDataSet = (name: string) => {
@@ -199,7 +194,6 @@ export const useCodapState = () => {
     const parentStr = parent.toString();
     await createCollectionFromAttribute(selectedDataSet.name, collection.name, attr, parentStr);
     // update collections because CODAP does not send dataContextChangeNotice
-    console.log("*IN handleCreateCollectionFromAttribute updateCollections");
     updateCollections();
   };
 
