@@ -2,22 +2,25 @@ import React, { useEffect, useMemo, useRef, useState } from "react";
 import { ICollection, IProcessedCaseObj, ITableProps } from "../types";
 import { DraggableTableContainer, DroppableTableData, DroppableTableHeader } from "./draggable-table-tags";
 import { TableScrollTopContext, useTableScrollTop } from "../hooks/useTableScrollTop";
+import { getAttrPrecisions, getAttrTypes } from "../utils/utils";
 
 import css from "./tables.scss";
 
 export type PortraitViewRowProps = {collectionId: number, caseObj: IProcessedCaseObj, index?: null|number,
+                                    precisions: Record<string, number>,
+                                    attrTypes: Record<string, string | undefined | null>,
                                     isParent: boolean, resizeCounter: number, parentLevel?: number}
                                     & ITableProps;
 
 export const PortraitViewRow = (props: PortraitViewRowProps) => {
-  const {paddingStyle, mapCellsFromValues, mapHeadersFromValues, showHeaders,
+  const {paddingStyle, mapCellsFromValues, mapHeadersFromValues, showHeaders, precisions, attrTypes,
           getClassName, collectionId, caseObj, index, isParent, resizeCounter, parentLevel} = props;
 
   const {children, values} = caseObj;
 
   if (!children.length) {
     return (
-        <tr>{mapCellsFromValues(collectionId, `row-${index}`, values)}</tr>
+        <tr>{mapCellsFromValues(collectionId, `row-${index}`, values, precisions, attrTypes)}</tr>
     );
   } else {
     return (
@@ -31,7 +34,8 @@ export const PortraitViewRow = (props: PortraitViewRowProps) => {
           </tr>
         }
         <tr className={`${css[getClassName(caseObj)]} parent-row`}>
-          {mapCellsFromValues(collectionId, `parent-row-${index}`, values, isParent, resizeCounter, parentLevel)}
+          {mapCellsFromValues(collectionId, `parent-row-${index}`, values, precisions, attrTypes,
+                              isParent, resizeCounter, parentLevel)}
           <DroppableTableData collectionId={collectionId} style={paddingStyle}>
             <DraggableTableContainer collectionId={collectionId}>
               <table style={paddingStyle} className={`${css.subTable} ${css[getClassName(children[0])]}`}>
@@ -104,6 +108,8 @@ export const PortraitView = (props: ITableProps) => {
     const {className} = collectionClasses[0];
     const firstRowValues = parentColl.cases.map(caseObj => caseObj.values);
     const valueCount = getValueLength(firstRowValues);
+    const precisions = getAttrPrecisions(collections);
+    const attrTypes = getAttrTypes(collections);
 
     return (
       <DraggableTableContainer>
@@ -122,6 +128,8 @@ export const PortraitView = (props: ITableProps) => {
                 collectionId={caseObj.collection.id}
                 caseObj={caseObj}
                 index={index}
+                precisions={precisions}
+                attrTypes={attrTypes}
                 isParent={true}
                 resizeCounter={resizeCounter}
                 parentLevel={0}
