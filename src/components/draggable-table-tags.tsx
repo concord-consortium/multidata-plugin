@@ -35,10 +35,11 @@ interface DraggagleTableHeaderProps {
   attrTitle: string;
   colSpan?: number;
   dataSetName: string;
+  dataSetTitle: string;
 }
 
 export const DraggagleTableHeader: React.FC<DraggagleTableHeaderProps> = ({collectionId, attrTitle, dataSetName,
-    children}) => {
+    dataSetTitle, children}) => {
   const {dragOverId, dragSide, handleDragStart, handleDragOver, handleOnDrop, handleDragEnter,
     handleDragLeave, handleDragEnd} = useDraggableTableContext();
   const {handleSortAttribute} = useCodapState();
