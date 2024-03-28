@@ -112,10 +112,18 @@ export const NestedTable = (props: IProps) => {
       precisions: Record<string, number>, attrTypes: Record<string, string | undefined | null>,
       isParent?: boolean, resizeCounter?: number, parentLevel?: number) => {
     return Object.keys(values).map((key, index) => {
-      const val = attrTypes[key] === "numeric" ? parseFloat(values[key]) : values[key];
+      const isWholeNumber = values[key] % 1 === 0;
+      const precision = precisions[key] || 2; // default to 2 decimal places
+      // Numbers are sometimes passed in from CODAP as a string so we use the attribute type to
+      // determine if it should be parsed as a number.
+      // Numbers that are whole numbers are treated as integers, so we should ignore the precision.
+      // Numeric cells that are empty should be treated as empty strings.
+      const val = attrTypes[key] !== "numeric" || (attrTypes[key] === "numeric" && values[key] === "")
+                    ? values[key]
+                    : attrTypes[key] === "numeric" && !isWholeNumber
+                      ? (parseFloat(values[key])).toFixed(precision)
+                      : parseInt(values[key],10);
       if (typeof val === "string" || typeof val === "number") {
-        if (typeof val === "number") {
-          const precision = precisions[key] || 2; // default to 2 decimal places
           return (
             <DraggagleTableData
               collectionId={collectionId}
@@ -125,22 +133,9 @@ export const NestedTable = (props: IProps) => {
               resizeCounter={resizeCounter}
               parentLevel={parentLevel}
             >
-              {val.toFixed(precision)}
+              {val}
             </DraggagleTableData>
           );
-        }
-        return (
-          <DraggagleTableData
-            collectionId={collectionId}
-            attrTitle={key}
-            key={`${rowKey}-${val}-${index}}`}
-            isParent={isParent}
-            resizeCounter={resizeCounter}
-            parentLevel={parentLevel}
-          >
-            {val}
-          </DraggagleTableData>
-        );
       }
     });
   };
