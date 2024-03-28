@@ -9,12 +9,17 @@ import css from "./app.scss";
 
 function App() {
   const {connected, selectedDataSet, dataSets, collections, items, interactiveState,
-         updateInteractiveState: _updateInteractiveState,
+         updateInteractiveState: _updateInteractiveState, init,
          handleSelectDataSet: _handleSelectDataSet, handleUpdateAttributePosition,
          handleAddCollection, handleAddAttribute, handleSetCollections, handleSelectSelf,
          updateTitle, selectCODAPCases, listenForSelectionChanges,
          handleCreateCollectionFromAttribute
         } = useCodapState();
+
+  useEffect(() => {
+    init();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const updateInteractiveState = useCallback((update: Partial<InteractiveState>) => {
     const newState = {...interactiveState, ...update};

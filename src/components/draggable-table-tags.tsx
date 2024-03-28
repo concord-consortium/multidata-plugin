@@ -1,8 +1,13 @@
-import React, { useMemo, useRef } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { useDraggableTableContext, Side } from "../hooks/useDraggableTable";
 import { useTableTopScrollTopContext } from "../hooks/useTableScrollTop";
+import { useCodapState } from "../hooks/useCodapState";
+import { getAttribute } from "@concord-consortium/codap-plugin-api";
+import { getCollectionById } from "../utils/apiHelpers";
 
 import AddIcon from "../assets/plus-level-1.svg";
+import DropdownIcon from "../assets/dropdown-arrow-icon.svg";
 
 import css from "./tables.scss";
 
@@ -29,28 +34,90 @@ interface DraggagleTableHeaderProps {
   collectionId: number;
   attrTitle: string;
   colSpan?: number;
+  dataSetName: string;
+  dataSetTitle: string;
 }
 
-export const DraggagleTableHeader: React.FC<DraggagleTableHeaderProps> = ({collectionId, attrTitle, children}) => {
+export const DraggagleTableHeader: React.FC<DraggagleTableHeaderProps> = ({collectionId, attrTitle, dataSetName,
+    dataSetTitle, children}) => {
   const {dragOverId, dragSide, handleDragStart, handleDragOver, handleOnDrop, handleDragEnter,
     handleDragLeave, handleDragEnd} = useDraggableTableContext();
+  const {handleSortAttribute} = useCodapState();
   const {id, style} = getIdAndStyle(collectionId, attrTitle, dragOverId, dragSide);
+  const headerRef = useRef<HTMLTableHeaderCellElement | null>(null);
+  const [showDropdownIcon, setShowDropdownIcon] = useState(false);
+  const [showHeaderMenu, setShowHeaderMenu] = useState(false);
+  const headerPos = headerRef.current?.getBoundingClientRect();
+  const headerMenuRef = useRef<HTMLDivElement | null>(null);
+  const tableContainer = document.querySelector(".nested-table-nestedTableWrapper");
 
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (headerMenuRef.current && !headerMenuRef.current.contains(e.target as Node)) {
+        setShowHeaderMenu(false);
+      }
+    };
+    if (showHeaderMenu) {
+      document.addEventListener("mousedown", handleClickOutside);
+    } else {
+      document.removeEventListener("mousedown", handleClickOutside);
+    }
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [showHeaderMenu, tableContainer]);
+
+
+  const handleShowHeaderMenu = (e: React.MouseEvent<HTMLTableHeaderCellElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setShowHeaderMenu(!showHeaderMenu);
+  };
+
+  const handleSortAttr = async (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const isDescending = e.target.value === "desc";
+    const collectionName = await getCollectionById(dataSetName, collectionId);
+    const attribute = (await getAttribute(dataSetName, collectionName, attrTitle)).values;
+    handleSortAttribute(dataSetName, attribute.id, isDescending);
+    setShowHeaderMenu(false);
+  };
   return (
-    <th
-      data-id={id}
-      style={style}
-      draggable={true}
-      className={css.draggable}
-      onDragStart={handleDragStart}
-      onDragOver={handleDragOver}
-      onDrop={handleOnDrop}
-      onDragEnter={handleDragEnter}
-      onDragLeave={handleDragLeave}
-      onDragEnd={handleDragEnd}
-    >
-      {children}
-    </th>
+    <>
+      <th
+        ref={headerRef}
+        data-id={id}
+        style={style}
+        draggable={true}
+        className={css.draggable}
+        onDragStart={handleDragStart}
+        onDragOver={handleDragOver}
+        onDrop={handleOnDrop}
+        onDragEnter={handleDragEnter}
+        onDragLeave={handleDragLeave}
+        onDragEnd={handleDragEnd}
+        onMouseEnter={() => setShowDropdownIcon(true)}
+        onMouseLeave={() => setShowDropdownIcon(false)}
+        onClick={handleShowHeaderMenu}
+      >
+        {children}
+        {showDropdownIcon &&
+          <DropdownIcon onClick={handleShowHeaderMenu}
+                        style={{position: "absolute", right: 0, top: -2}}/>
+        }
+      </th>
+      { showHeaderMenu && tableContainer && headerPos &&
+          createPortal(
+            <div className={css.headerMenu} ref={headerMenuRef}
+                  style={{left: headerPos?.left + 5, top: headerPos?.bottom  + scrollY}}>
+                <select className={css.headerMenuSelect} size={2} onChange={handleSortAttr}>
+                    <option value="asc">Sort Ascending (A➞Z, 0➞9)</option>
+                    <option value="desc">Sort Descending (Z➞A, 9➞0)</option>
+                </select>
+            </div>,
+            tableContainer
+          )
+      }
+    </>
   );
 };
 
