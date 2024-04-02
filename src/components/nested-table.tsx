@@ -114,48 +114,36 @@ export const NestedTable = (props: IProps) => {
       attrVisibilities: Record<string, boolean>, isParent?: boolean, resizeCounter?: number, parentLevel?: number) => {
     return Object.keys(values).map((key, index) => {
       const isWholeNumber = values[key] % 1 === 0;
-      const precision = precisions[key] || 2; // default to 2 decimal places
+      const precision = precisions[key];
       // Numbers are sometimes passed in from CODAP as a string so we use the attribute type to
       // determine if it should be parsed as a number.
       // Numbers that are whole numbers are treated as integers, so we should ignore the precision.
       // Numeric cells that are empty should be treated as empty strings.
-      const val = attrTypes[key] !== "numeric" || (attrTypes[key] === "numeric" && values[key] === "")
+      const val = (attrTypes[key] !== "numeric" && attrTypes[key] !== null)
+                      || (values[key] === "")
+                      || (typeof values[key] !== "number")
                     ? values[key]
-                    : attrTypes[key] === "numeric" && !isWholeNumber
-                      ? (parseFloat(values[key])).toFixed(precision)
-                      : parseInt(values[key],10);
+                    : isWholeNumber
+                      ? parseInt(values[key],10)
+                      : precision !== undefined
+                        ? (parseFloat(values[key])).toFixed(precision)
+                        : (parseFloat(values[key])).toFixed(2); // default to 2 decimal places
       if (attrVisibilities[key]) {
         return null;
       }
-      const val = attrTypes[key] === "numeric" ? parseFloat(values[key]) : values[key];
       if (typeof val === "string" || typeof val === "number") {
-        if (typeof val === "number") {
-          const precision = precisions[key] || 2; // default to 2 decimal places
-          return (
-            <DraggagleTableData
-              collectionId={collectionId}
-              attrTitle={key}
-              key={`${rowKey}-${val}-${index}}`}
-              isParent={isParent}
-              resizeCounter={resizeCounter}
-              parentLevel={parentLevel}
-            >
-              {val.toFixed(precision)}
-            </DraggagleTableData>
-          );
-      if (typeof val === "string" || typeof val === "number") {
-          return (
-            <DraggagleTableData
-              collectionId={collectionId}
-              attrTitle={key}
-              key={`${rowKey}-${val}-${index}}`}
-              isParent={isParent}
-              resizeCounter={resizeCounter}
-              parentLevel={parentLevel}
-            >
-              {val}
-            </DraggagleTableData>
-          );
+        return (
+          <DraggagleTableData
+            collectionId={collectionId}
+            attrTitle={key}
+            key={`${rowKey}-${val}-${index}}`}
+            isParent={isParent}
+            resizeCounter={resizeCounter}
+            parentLevel={parentLevel}
+          >
+            {val}
+          </DraggagleTableData>
+        );
       }
     });
   };
