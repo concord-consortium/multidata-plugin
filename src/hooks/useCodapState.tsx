@@ -12,7 +12,8 @@ import {
   createCollectionFromAttribute,
   createNewCollection,
   updateAttributePosition,
-  getAllItems
+  getAllItems,
+  getCollectionList
 } from "@concord-consortium/codap-plugin-api";
 import { getDataSetCollections } from "../utils/apiHelpers";
 import { ICollections, ICollection, IDataSet } from "../types";
@@ -123,13 +124,14 @@ export const useCodapState = () => {
     };
 
     const setUpNotifications = async () => {
-      addDataContextChangeListener(selectedDataSetName, handleDataContextChangeNotice);
+      addDataContextChangeListener(selectedDataSet, handleDataContextChangeNotice);
     };
 
-    if (selectedDataSetName) {
+    if (selectedDataSet) {
       setUpNotifications();
     }
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedDataSetName]);
 
   const updateCollections = useCallback(async () => {
@@ -177,16 +179,18 @@ export const useCodapState = () => {
     await updateAttributePosition(selectedDataSet.name, coll.name, attrName, position);
   };
 
-  const handleAddCollection = async (newCollectionName: string) => {
+  const handleAddCollection = async (newCollectionName: string, parent?: string) => {
     await createNewCollection(selectedDataSet.name, newCollectionName, [{"name": "newAttr"}]);
     // update collections because CODAP does not send dataContextChangeNotice
     updateCollections();
   };
 
   const handleCreateCollectionFromAttribute = async (collection: ICollection, attr: any, parent: number|string) => {
-    const parentStr = parent.toString();
-    await createCollectionFromAttribute(selectedDataSet.name, collection.name, attr, parentStr);
+    const result = await createCollectionFromAttribute(selectedDataSet.name, collection.name, attr, parent);
+    console.log("***** in handleCreateCollectionFromAttribute, result: ", result);
     // update collections because CODAP does not send dataContextChangeNotice
+    const newCollectionList = await getCollectionList(selectedDataSet.name);
+    console.log("***** in handleCreateCollectionFromAttribute, newCollectionList: ", newCollectionList);
     updateCollections();
   };
 
