@@ -13,7 +13,6 @@ import {
   createNewCollection,
   updateAttributePosition,
   getAllItems,
-  getCollectionList
 } from "@concord-consortium/codap-plugin-api";
 import { getDataSetCollections } from "../utils/apiHelpers";
 import { ICollections, ICollection, IDataSet } from "../types";
