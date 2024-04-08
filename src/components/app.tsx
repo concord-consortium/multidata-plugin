@@ -46,7 +46,6 @@ function App() {
     return (
       <div className={css.selectView}>
         <p>Which MultiData view do you want to use?</p>
-
         <div className={css.buttons}>
           <button onClick={() => handleSetView("hierarchy")}>Hierarchy</button>
           <button onClick={() => handleSetView("nested-table")}>Nested Table</button>
