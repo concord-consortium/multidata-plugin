@@ -1,4 +1,4 @@
-import {useState, useEffect, useCallback, useMemo} from "react";
+import {useState, useEffect, useCallback} from "react";
 import {
   addDataContextChangeListener,
   addDataContextsListListener,
@@ -37,11 +37,12 @@ export interface InteractiveState {
 export const useCodapState = () => {
   const [connected, setConnected] = useState(false);
   const [dataSets, setDataSets] = useState<IDataSet[]>([]);
-  const [selectedDataSet, setSelectedDataSet] = useState<IDataSet|null>(null);
+  const [selectedDataSet, setSelectedDataSet] = useState<any>(null);
+
+  // const [selectedDataSet, setSelectedDataSet] = useState<IDataSet|null>(null);
   const [selectedDataSetName, setSelectedDataSetName] = useState<string>("");
   const [collections, setCollections] = useState<ICollections>([]);
   const [items, setItems] = useState<any[]>([]);
-  const [numUpdates, setNumUpdates] = useState<number>(0);
   const [interactiveState, setInteractiveState] = useState<InteractiveState>({
     view: null,
     dataSetName: null,
@@ -62,11 +63,8 @@ export const useCodapState = () => {
     if (name) {
       setSelectedDataSetName(name);
       dataSetInfo = await getDataContext(name);
-      setSelectedDataSet(dataSetInfo?.values);
-    } else {
-      setSelectedDataSetName("");
-      setSelectedDataSet(null);
     }
+    setSelectedDataSet(dataSetInfo?.values);
   };
 
   const init = async () => {
@@ -87,7 +85,6 @@ export const useCodapState = () => {
     const handleDataContextChangeNotice = (iMessage: any) => {
       if (iMessage.resource === `dataContextChangeNotice[${selectedDataSetName}]`) {
         const theValues = iMessage.values;
-        setNumUpdates(numUpdates + 1);
         switch (theValues.operation) {
           case `selectCases`:
           case `updateCases`:
@@ -124,11 +121,11 @@ export const useCodapState = () => {
       updateCollections();
     };
 
-    const setUpNotifications = async () => {
-      addDataContextChangeListener(selectedDataSetName, handleDataContextChangeNotice);
+    const setUpNotifications = () => {
+      addDataContextChangeListener(selectedDataSet.name, handleDataContextChangeNotice);
     };
 
-    if (selectedDataSetName) {
+    if (selectedDataSet) {
       setUpNotifications();
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -143,10 +140,11 @@ export const useCodapState = () => {
     setCollections(colls);
   }, [selectedDataSetName]);
 
-  useMemo(() => {
+  useEffect(() => {
     if (selectedDataSet) {
-      // This is not where updateCollections is called multiple times
       updateCollections();
+    } else {
+      setCollections([]);
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedDataSet]);
@@ -178,23 +176,17 @@ export const useCodapState = () => {
   };
 
   const handleUpdateAttributePosition = async (coll: ICollection, attrName: string, position: number) => {
-    if (selectedDataSet === null) return;
     await updateAttributePosition(selectedDataSet.name, coll.name, attrName, position);
   };
 
   const handleAddCollection = async (newCollectionName: string) => {
-    if (selectedDataSet === null) return;
     await createNewCollection(selectedDataSet.name, newCollectionName, [{"name": "newAttr"}]);
     // update collections because CODAP does not send dataContextChangeNotice
     updateCollections();
   };
 
   const handleCreateCollectionFromAttribute = async (collection: ICollection, attr: any, parent: number|string) => {
-    if (selectedDataSet === null) return;
-    const parentStr = parent.toString();
-    await createCollectionFromAttribute(selectedDataSet.name, collection.name, attr, parentStr);
-    // update collections because CODAP does not send dataContextChangeNotice
-    updateCollections();
+    await createCollectionFromAttribute(selectedDataSet.name, collection.name, attr, parent);
   };
 
   const handleSortAttribute = async (context: string, attrId: number, isDescending: boolean) => {
@@ -202,7 +194,6 @@ export const useCodapState = () => {
   };
 
   const handleAddAttribute = async (collection: ICollection, attrName: string) => {
-    if (selectedDataSet === null) return;
     const proposedName = attrName.length ? attrName : "newAttr";
     let newAttributeName;
     const allAttributes: Array<any> = [];
@@ -268,6 +259,7 @@ export const useCodapState = () => {
   }, [selectedDataSet]);
 
   return {
+    init,
     handleSelectSelf,
     dataSets,
     selectedDataSet,
@@ -276,7 +268,6 @@ export const useCodapState = () => {
     handleSelectDataSet,
     getCollectionNameFromId,
     updateInteractiveState,
-    init,
     interactiveState,
     items,
     connected,
