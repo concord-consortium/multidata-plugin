@@ -121,15 +121,23 @@ export const NestedTable = (props: IProps) => {
       // determine if it should be parsed as a number.
       // Numbers that are whole numbers are treated as integers, so we should ignore the precision.
       // Numeric cells that are empty should be treated as empty strings.
-      const val = (attrTypes[key] !== "numeric" && attrTypes[key] !== null)
-                      || (values[key] === "")
-                      || (typeof values[key] !== "number")
-                    ? values[key]
-                    : isWholeNumber
-                      ? parseInt(values[key],10)
-                      : precision !== undefined
-                        ? (parseFloat(values[key])).toFixed(precision)
-                        : (parseFloat(values[key])).toFixed(2); // default to 2 decimal places
+      const isNumericType = attrTypes[key] === "numeric";
+      const hasValue = values[key] !== "";
+      const parsedValue = parseFloat(values[key]);
+      const isNumber = !isNaN(parsedValue);
+      const hasPrecision = precision !== undefined;
+      const defaultValue = values[key];
+      const isNumberType = typeof values[key] === "number";
+      let val;
+      if (isNumericType && hasValue && isNumber) {
+          val = isWholeNumber ? parseInt(values[key], 10)
+                              : parsedValue.toFixed(hasPrecision ? precision : 2);
+      } else if (!isNumericType && isNumberType && hasValue) {
+          val = defaultValue.toFixed(hasPrecision ? precision : 2);
+      } else {
+          val = defaultValue;
+      }
+
       if (attrVisibilities[key]) {
         return null;
       }
