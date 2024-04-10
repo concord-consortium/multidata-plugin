@@ -12,9 +12,8 @@ import {
   createCollectionFromAttribute,
   createNewCollection,
   updateAttributePosition,
-  getAllItems
 } from "@concord-consortium/codap-plugin-api";
-import { getDataSetCollections } from "../utils/apiHelpers";
+import { getCases, getDataSetCollections, sortAttribute } from "../utils/apiHelpers";
 import { ICollections, ICollection, IDataSet } from "../types";
 
 const iFrameDescriptor = {
@@ -39,10 +38,11 @@ export const useCodapState = () => {
   const [connected, setConnected] = useState(false);
   const [dataSets, setDataSets] = useState<IDataSet[]>([]);
   const [selectedDataSet, setSelectedDataSet] = useState<any>(null);
+
+  // const [selectedDataSet, setSelectedDataSet] = useState<IDataSet|null>(null);
   const [selectedDataSetName, setSelectedDataSetName] = useState<string>("");
   const [collections, setCollections] = useState<ICollections>([]);
   const [items, setItems] = useState<any[]>([]);
-  const [numUpdates, setNumUpdates] = useState<number>(0);
   const [interactiveState, setInteractiveState] = useState<InteractiveState>({
     view: null,
     dataSetName: null,
@@ -67,24 +67,19 @@ export const useCodapState = () => {
     setSelectedDataSet(dataSetInfo?.values);
   };
 
-  useEffect(() => {
+  const init = async () => {
+    const newState = await initializePlugin(iFrameDescriptor);
+    addDataContextsListListener(handleDocumentChangeNotice);
+    await getDataSets();
 
-    const init = async () => {
-      const newState = await initializePlugin(iFrameDescriptor);
-      addDataContextsListListener(handleDocumentChangeNotice);
-      await getDataSets();
+    // plugins in new documents return an empty object for the interactive state
+    // so ignore the new state and keep the default starting state in that case
+    if (Object.keys(newState || {}).length > 0) {
+      setInteractiveState(newState);
+    }
+    setConnected(true);
+  };
 
-      // plugins in new documents return an empty object for the interactive state
-      // so ignore the new state and keep the default starting state in that case
-      if (Object.keys(newState || {}).length > 0) {
-        setInteractiveState(newState);
-      }
-
-      setConnected(true);
-    };
-
-    init();
-  }, [handleDocumentChangeNotice]);
 
   useEffect(() => {
     const handleDataContextChangeNotice = (iMessage: any) => {
@@ -93,6 +88,7 @@ export const useCodapState = () => {
         switch (theValues.operation) {
           case `selectCases`:
           case `updateCases`:
+          // case `moveCases`:
               refreshDataSetInfo();
               break;
           case `updateCollection`:
@@ -110,6 +106,9 @@ export const useCodapState = () => {
           case `updateDataContext`:       //  includes renaming dataset, so we have to redo the menu
               refreshDataSetInfo();
               break;
+          case `moveCases`:
+              handleMoveCases();
+              break;
           case "createCases":
           case "createItems":
               break;
@@ -120,23 +119,27 @@ export const useCodapState = () => {
     };
 
     const refreshDataSetInfo = () => {
-      handleSetDataSet(selectedDataSetName);
+      updateCollections();
     };
 
-    const setUpNotifications = async () => {
-      addDataContextChangeListener(selectedDataSetName, handleDataContextChangeNotice);
+    const setUpNotifications = () => {
+      addDataContextChangeListener(selectedDataSet.name, handleDataContextChangeNotice);
     };
 
-    if (selectedDataSetName) {
+    if (selectedDataSet) {
       setUpNotifications();
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedDataSet, selectedDataSetName]);
 
-  }, [selectedDataSetName]);
+  const handleMoveCases = () => {
+    updateCollections();
+  };
 
   const updateCollections = useCallback(async () => {
-    const colls = await getDataSetCollections(selectedDataSet.name);
+    const colls = await getDataSetCollections(selectedDataSetName);
     setCollections(colls);
-  }, [selectedDataSet]);
+  }, [selectedDataSetName]);
 
   useEffect(() => {
     if (selectedDataSet) {
@@ -144,13 +147,16 @@ export const useCodapState = () => {
     } else {
       setCollections([]);
     }
-  }, [selectedDataSet, updateCollections]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedDataSet]);
 
   useEffect(() => {
     const fetchItems = async () => {
-      const itemRes = await getAllItems(selectedDataSet.name);
-      const fetchedItems = itemRes.values.map((item: any) => item.values);
-      setItems(fetchedItems);
+      if (selectedDataSet) {
+        const casesFetched = await getCases(selectedDataSet.name, collections[0].name);
+        const fetchedItems = casesFetched.map((item: any) => item.values);
+        setItems(fetchedItems);
+      }
     };
 
     if (collections.length === 1 && selectedDataSet) {
@@ -160,14 +166,10 @@ export const useCodapState = () => {
     }
   }, [collections, selectedDataSet]);
 
-  const handleSelectDataSet = (name: string) => {
-    const selected = dataSets.filter((d) => d.title === name);
-    return selected.length ? handleSetDataSet(selected[0].name) : handleSetDataSet(null);
-  };
 
-  const handleRefreshDataSet = () => {
-    setNumUpdates(numUpdates + 1);
-    return selectedDataSet ? handleSetDataSet(selectedDataSet) : handleSetDataSet(null);
+  const handleSelectDataSet = (name: string) => {
+    const selected = dataSets.find((d) => d.title === name);
+    return selected ? handleSetDataSet(selected.name) :  handleSetDataSet("");
   };
 
   const getCollectionNameFromId = (id: number) => {
@@ -185,10 +187,11 @@ export const useCodapState = () => {
   };
 
   const handleCreateCollectionFromAttribute = async (collection: ICollection, attr: any, parent: number|string) => {
-    const parentStr = parent.toString();
-    await createCollectionFromAttribute(selectedDataSet.name, collection.name, attr, parentStr);
-    // update collections because CODAP does not send dataContextChangeNotice
-    updateCollections();
+    await createCollectionFromAttribute(selectedDataSet.name, collection.name, attr, parent);
+  };
+
+  const handleSortAttribute = async (context: string, attrId: number, isDescending: boolean) => {
+    sortAttribute(context, attrId, isDescending);
   };
 
   const handleAddAttribute = async (collection: ICollection, attrName: string) => {
@@ -257,13 +260,13 @@ export const useCodapState = () => {
   }, [selectedDataSet]);
 
   return {
+    init,
     handleSelectSelf,
     dataSets,
     selectedDataSet,
     collections,
     handleSetCollections: setCollections,
     handleSelectDataSet,
-    handleRefreshDataSet,
     getCollectionNameFromId,
     updateInteractiveState,
     interactiveState,
@@ -271,6 +274,7 @@ export const useCodapState = () => {
     connected,
     handleUpdateAttributePosition,
     handleAddCollection,
+    handleSortAttribute,
     handleAddAttribute,
     updateTitle,
     selectCODAPCases,

@@ -100,6 +100,8 @@ export const NestedTable = (props: IProps) => {
                 key={`${collectionId}-${rowKey}-${key}-${index}`}
                 collectionId={collectionId}
                 attrTitle={key}
+                dataSetName={selectedDataSet.name}
+                dataSetTitle={selectedDataSet.title}
               >{key}
               </DraggagleTableHeader>
             );
@@ -176,11 +178,12 @@ export const NestedTable = (props: IProps) => {
     }
   };
 
+  const showDisplayMode = collections.length > 1 && selectedDataSet;
+
   return (
     <div className={css.nestedTableWrapper} onClick={handleShowComponent}>
       <Menu
         dataSets={dataSets}
-        collections={collections}
         selectedDataSet={selectedDataSet}
         handleSelectDataSet={handleSelectDataSet}
         handleSelectDisplayMode={handleSelectDisplayMode}
@@ -189,6 +192,7 @@ export const NestedTable = (props: IProps) => {
         showHeaders={interactiveState.showHeaders}
         padding={interactiveState.padding}
         displayMode={interactiveState.displayMode}
+        showDisplayMode={showDisplayMode}
       />
       <DraggableTableContext.Provider value={draggableTable}>
         {selectedDataSet && renderTable()}

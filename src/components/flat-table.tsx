@@ -44,6 +44,8 @@ export const FlatTable = (props: IFlatProps) => {
                 key={attr.title}
                 collectionId={collection.id}
                 attrTitle={attr.title}
+                dataSetName={selectedDataSet.name}
+                dataSetTitle={selectedDataSet.title}
               >
                 {attr.title}
               </DraggagleTableHeader>)}

@@ -85,7 +85,6 @@ export const Hierarchy = (props: IProps) => {
     <div>
       <Menu
         dataSets={dataSets}
-        collections={collections}
         selectedDataSet={selectedDataSet}
         handleSelectDataSet={handleSelectDataSet}
       />
