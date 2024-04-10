@@ -89,11 +89,12 @@ export const NestedTable = (props: IProps) => {
     updateInteractiveState({displayMode: e.target.value});
   }, [updateInteractiveState]);
 
-  const mapHeadersFromValues = (collectionId: number, rowKey: string, values: IValues) => {
+  const mapHeadersFromValues = (collectionId: number, rowKey: string, values: IValues,
+      attrVisibilities: Record<string, boolean>) => {
     return (
       <>
         {(Object.keys(values)).map((key, index) => {
-          if (typeof values[key] === "string" || typeof values[key] === "number") {
+          if (!attrVisibilities[key] && (typeof values[key] === "string" || typeof values[key] === "number")) {
             return (
               <DraggagleTableHeader
                 key={`${collectionId}-${rowKey}-${key}-${index}`}
@@ -110,10 +111,28 @@ export const NestedTable = (props: IProps) => {
     );
   };
 
-  const mapCellsFromValues = (collectionId: number, rowKey: string, values: IValues, isParent?: boolean,
-                              resizeCounter?: number, parentLevel?: number) => {
+  const mapCellsFromValues = (collectionId: number, rowKey: string, values: IValues,
+      precisions: Record<string, number>, attrTypes: Record<string, string | undefined | null>,
+      attrVisibilities: Record<string, boolean>, isParent?: boolean, resizeCounter?: number, parentLevel?: number) => {
     return Object.keys(values).map((key, index) => {
-      const val = values[key];
+      const isWholeNumber = values[key] % 1 === 0;
+      const precision = precisions[key];
+      // Numbers are sometimes passed in from CODAP as a string so we use the attribute type to
+      // determine if it should be parsed as a number.
+      // Numbers that are whole numbers are treated as integers, so we should ignore the precision.
+      // Numeric cells that are empty should be treated as empty strings.
+      const val = (attrTypes[key] !== "numeric" && attrTypes[key] !== null)
+                      || (values[key] === "")
+                      || (typeof values[key] !== "number")
+                    ? values[key]
+                    : isWholeNumber
+                      ? parseInt(values[key],10)
+                      : precision !== undefined
+                        ? (parseFloat(values[key])).toFixed(precision)
+                        : (parseFloat(values[key])).toFixed(2); // default to 2 decimal places
+      if (attrVisibilities[key]) {
+        return null;
+      }
       if (typeof val === "string" || typeof val === "number") {
         return (
           <DraggagleTableData

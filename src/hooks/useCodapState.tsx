@@ -100,6 +100,7 @@ export const useCodapState = () => {
           case `updateAttributes`:
           case `hideAttributes`:
           case `showAttributes`:
+          case `unhideAttributes`:
               refreshDataSetInfo();
               break;
           case `updateDataContext`:       //  includes renaming dataset, so we have to redo the menu
