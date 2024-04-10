@@ -9,12 +9,17 @@ import css from "./app.scss";
 
 function App() {
   const {connected, selectedDataSet, dataSets, collections, items, interactiveState,
-         updateInteractiveState: _updateInteractiveState,
+         updateInteractiveState: _updateInteractiveState, init,
          handleSelectDataSet: _handleSelectDataSet, handleUpdateAttributePosition,
          handleAddCollection, handleAddAttribute, handleSetCollections, handleSelectSelf,
          updateTitle, selectCODAPCases, listenForSelectionChanges,
          handleCreateCollectionFromAttribute
         } = useCodapState();
+
+  useEffect(() => {
+    init();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const updateInteractiveState = useCallback((update: Partial<InteractiveState>) => {
     const newState = {...interactiveState, ...update};
@@ -41,7 +46,6 @@ function App() {
     return (
       <div className={css.selectView}>
         <p>Which MultiData view do you want to use?</p>
-
         <div className={css.buttons}>
           <button onClick={() => handleSetView("hierarchy")}>Hierarchy</button>
           <button onClick={() => handleSetView("nested-table")}>Nested Table</button>
