@@ -71,7 +71,6 @@ export const CardView = (props: ICardViewProps) => {
     return (
       <Menu
         dataSets={dataSets}
-        collections={collections}
         selectedDataSet={selectedDataSet}
         handleSelectDataSet={handleSelectDataSet}
       />
