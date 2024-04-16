@@ -17,7 +17,7 @@ import { getCases, getDataSetCollections, sortAttribute } from "../utils/apiHelp
 import { ICollections, ICollection, IDataSet } from "../types";
 
 const iFrameDescriptor = {
-  version: "0.0.1",
+  version: "0.4.0",
   pluginName: "multidata-plugin",
   title: "MultiData",
   dimensions: {
