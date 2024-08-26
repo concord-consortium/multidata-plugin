@@ -280,3 +280,21 @@ table.draggableTableContainer {
     padding: 5px;
   }
 }
+
+.thChildContainer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 15px;
+  width: 100%;
+  gap: 5px;
+  .dropdownIcon {
+    &:hover {
+      cursor: pointer;
+    }
+    svg {
+      width: 10px;
+    }
+  }
+}

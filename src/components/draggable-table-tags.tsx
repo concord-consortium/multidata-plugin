@@ -99,11 +99,17 @@ export const DraggagleTableHeader: React.FC<DraggagleTableHeaderProps> = ({colle
         onMouseLeave={() => setShowDropdownIcon(false)}
         onClick={handleShowHeaderMenu}
       >
-        {children}
-        {showDropdownIcon &&
-          <DropdownIcon onClick={handleShowHeaderMenu}
-                        style={{position: "absolute", right: 0, top: -2}}/>
-        }
+        <div className={css.thChildContainer}>
+          <div>{children}</div>
+          {showDropdownIcon &&
+            <div className={css.dropdownIcon}>
+              <DropdownIcon
+                onClick={handleShowHeaderMenu}
+                className={css.dropdownIcon}
+              />
+            </div>
+          }
+        </div>
       </th>
       { showHeaderMenu && tableContainer && headerPos &&
           createPortal(
