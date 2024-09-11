@@ -1,3 +1,5 @@
+$iconSize: 20px;
+
 table {
   font-family: 'Montserrat', sans-serif;
   font-size: 8pt;
@@ -217,13 +219,6 @@ table.draggableTableContainer {
 
   td.draggableTableContainerDropTarget {
 
-    @keyframes fadeInText {
-      0% { opacity: 0; }
-      100% { opacity: 1; }
-    }
-
-    $iconSize: 20px;
-
     width: $iconSize;
     padding: 5px;
     text-align: center;
@@ -297,4 +292,9 @@ table.draggableTableContainer {
       width: 10px;
     }
   }
+}
+
+@keyframes fadeInText {
+  0% { opacity: 0; }
+  100% { opacity: 1; }
 }

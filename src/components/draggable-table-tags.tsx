@@ -5,6 +5,7 @@ import { useTableTopScrollTopContext } from "../hooks/useTableScrollTop";
 import { useCodapState } from "../hooks/useCodapState";
 import { getAttribute } from "@concord-consortium/codap-plugin-api";
 import { getCollectionById } from "../utils/apiHelpers";
+import { PropsWithChildren } from "../types";
 
 import AddIcon from "../assets/plus-level-1.svg";
 import DropdownIcon from "../assets/dropdown-arrow-icon.svg";
@@ -38,8 +39,8 @@ interface DraggagleTableHeaderProps {
   dataSetTitle: string;
 }
 
-export const DraggagleTableHeader: React.FC<DraggagleTableHeaderProps> = ({collectionId, attrTitle, dataSetName,
-    dataSetTitle, children}) => {
+export const DraggagleTableHeader: React.FC<PropsWithChildren<DraggagleTableHeaderProps>> = (props) => {
+  const {collectionId, attrTitle, dataSetName, children} = props;
   const {dragOverId, dragSide, handleDragStart, handleDragOver, handleOnDrop, handleDragEnter,
     handleDragLeave, handleDragEnd} = useDraggableTableContext();
   const {handleSortAttribute} = useCodapState();
@@ -131,7 +132,8 @@ interface DroppableTableHeaderProps {
   collectionId: number;
 }
 
-export const DroppableTableHeader: React.FC<DroppableTableHeaderProps> = ({collectionId, children}) => {
+export const DroppableTableHeader: React.FC<PropsWithChildren<DroppableTableHeaderProps>> = (props) => {
+  const {collectionId, children} = props;
   const {dragOverId, handleDragOver, handleOnDrop, handleDragEnter,
     handleDragLeave} = useDraggableTableContext();
 
@@ -161,8 +163,8 @@ interface DraggagleTableDataProps {
   parentLevel?: number;
 }
 
-export const DraggagleTableData: React.FC<DraggagleTableDataProps>
-                = ({collectionId, attrTitle, children, isParent, resizeCounter, parentLevel=0}) => {
+export const DraggagleTableData: React.FC<PropsWithChildren<DraggagleTableDataProps>> = (props) => {
+  const {collectionId, attrTitle, children, isParent, resizeCounter, parentLevel=0} = props;
   const {dragOverId, dragSide} = useDraggableTableContext();
   const {style} = getIdAndStyle(collectionId, attrTitle, dragOverId, dragSide);
   const {tableScrollTop, scrollY} = useTableTopScrollTopContext();
@@ -226,7 +228,8 @@ interface DroppableTableDataProps {
   style?: React.CSSProperties;
 }
 
-export const DroppableTableData: React.FC<DroppableTableDataProps> = ({collectionId, style, children}) => {
+export const DroppableTableData: React.FC<PropsWithChildren<DroppableTableDataProps>> = (props) => {
+  const {collectionId, style, children} = props;
   const {dragOverId, dragSide} = useDraggableTableContext();
   const dragStyle = getStyle(`${collectionId}`, dragOverId, dragSide);
 
@@ -241,7 +244,8 @@ interface DraggableTableContainerProps {
   collectionId?: number|string;
 }
 
-export const DraggableTableContainer: React.FC<DraggableTableContainerProps> = ({collectionId, children}) => {
+export const DraggableTableContainer: React.FC<PropsWithChildren<DraggableTableContainerProps>> = (props) => {
+  const {collectionId, children} = props;
   const {dragging, dragOverId, handleDragOver, handleOnDrop, handleDragEnter,
     handleDragLeave} = useDraggableTableContext();
 
