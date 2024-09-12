@@ -1,3 +1,7 @@
+import { ReactNode } from "react";
+
+export type PropsWithChildren<P> = P & { children?: ReactNode | ReactNode[] };
+
 export interface IDataSet {
   guid: number,
   id: number,
@@ -57,9 +61,9 @@ export interface ITableProps {
   collections: Array<ICollection>,
   mapCellsFromValues: (collectionId: number, rowKey: string, values: IValues, precisions: Record<string, number>,
       attrTypes: Record<string, string | undefined | null>, attrVisibilities: Record<string, boolean>,
-      isParent?: boolean, resizeCounter?: number, parentLevel?: number) => void,
+      isParent?: boolean, resizeCounter?: number, parentLevel?: number) => ReactNode | ReactNode[],
   mapHeadersFromValues: (collectionId: number, rowKey: string, values: IValues,
-      attrVisibilities: Record<string, boolean>) => void,
+      attrVisibilities: Record<string, boolean>) => ReactNode | ReactNode[],
   getValueLength: (firstRow: Array<IValues>) => number
   paddingStyle: Record<string, string>
 }
