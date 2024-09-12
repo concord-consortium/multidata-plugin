@@ -10,7 +10,6 @@ interface ICardViewProps {
   selectedDataSet: any;
   dataSets: IDataSet[];
   collections: ICollections;
-  items: any[];
   interactiveState: InteractiveState
   handleSelectDataSet: (e: React.ChangeEvent<HTMLSelectElement>) => void
   updateTitle: (title: string) => Promise<void>

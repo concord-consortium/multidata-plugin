@@ -8,12 +8,12 @@ import { ICaseObjCommon } from "../types";
 import css from "./app.scss";
 
 function App() {
-  const {connected, selectedDataSet, dataSets, collections, items, interactiveState,
+  const {connected, selectedDataSet, dataSets, collections, cases, interactiveState,
          updateInteractiveState: _updateInteractiveState, init,
          handleSelectDataSet: _handleSelectDataSet, handleUpdateAttributePosition,
          handleAddCollection, handleAddAttribute, handleSetCollections, handleSelectSelf,
          updateTitle, selectCODAPCases, listenForSelectionChanges,
-         handleCreateCollectionFromAttribute
+         handleCreateCollectionFromAttribute, handleUpdateCollections
         } = useCodapState();
 
   useEffect(() => {
@@ -96,7 +96,7 @@ function App() {
           selectedDataSet={selectedDataSet}
           dataSets={dataSets}
           collections={collections}
-          items={items}
+          cases={cases}
           interactiveState={interactiveState}
           handleSelectDataSet={handleSelectDataSet}
           updateInteractiveState={updateInteractiveState}
@@ -104,6 +104,7 @@ function App() {
           handleUpdateAttributePosition={handleUpdateAttributePosition}
           handleSetCollections={handleSetCollections}
           handleCreateCollectionFromAttribute={handleCreateCollectionFromAttribute}
+          handleUpdateCollections={handleUpdateCollections}
         />
       );
 
@@ -113,7 +114,6 @@ function App() {
           selectedDataSet={selectedDataSet}
           dataSets={dataSets}
           collections={collections}
-          items={items}
           interactiveState={interactiveState}
           handleSelectDataSet={handleSelectDataSet}
           handleUpdateAttributePosition={handleUpdateAttributePosition}
@@ -131,7 +131,6 @@ function App() {
           selectedDataSet={selectedDataSet}
           dataSets={dataSets}
           collections={collections}
-          items={items}
           interactiveState={interactiveState}
           handleSelectDataSet={handleSelectDataSet}
           updateTitle={updateTitle}

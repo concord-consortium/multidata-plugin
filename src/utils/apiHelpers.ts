@@ -29,7 +29,8 @@ export const getCases = async (selectedDataSetName: string, collName: string) =>
   const cases = [];
 
   for (let i = 0; i < caseCount; i++) {
-    const caseObj = (await getCaseByIndex(selectedDataSetName, collName, i)).values.case;
+    const caseByIndex = await getCaseByIndex(selectedDataSetName, collName, i);
+    const caseObj = caseByIndex.values.case;
     const processedCase = await processCase(caseObj);
     cases.push(processedCase);
   }

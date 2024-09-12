@@ -35,10 +35,14 @@ export interface ICaseObjCommon {
   },
   id: number,
   parent: number,
-  values: IValues
+  values: Values
 }
 
-export type IValues = Record<string, any>;
+export type Values = Record<string, any>;
+
+export type CaseValuesWithId = Values & {
+  id: number
+};
 
 export interface ICaseObj extends ICaseObjCommon {
   children: Array<number>
@@ -59,13 +63,15 @@ export interface ITableProps {
   getClassName: (caseObj: IProcessedCaseObj) => string,
   selectedDataSet: IDataSet,
   collections: Array<ICollection>,
-  mapCellsFromValues: (collectionId: number, rowKey: string, values: IValues, precisions: Record<string, number>,
-      attrTypes: Record<string, string | undefined | null>, attrVisibilities: Record<string, boolean>,
-      isParent?: boolean, resizeCounter?: number, parentLevel?: number) => ReactNode | ReactNode[],
-  mapHeadersFromValues: (collectionId: number, rowKey: string, values: IValues,
+  mapCellsFromValues: (collectionId: number, rowKey: string, caseValuesWithId: Values,
+      precisions: Record<string, number>, attrTypes: Record<string, string | undefined | null>,
+      attrVisibilities: Record<string, boolean>, isParent?: boolean, resizeCounter?: number,
+      parentLevel?: number) => ReactNode | ReactNode[],
+  mapHeadersFromValues: (collectionId: number, rowKey: string, values: Values,
       attrVisibilities: Record<string, boolean>) => ReactNode | ReactNode[],
-  getValueLength: (firstRow: Array<IValues>) => number
+  getValueLength: (firstRow: Array<Values>) => number
   paddingStyle: Record<string, string>
+  handleUpdateCollections: () => void
 }
 
 export interface IBoundingBox {

@@ -16,12 +16,14 @@ export type PortraitViewRowProps = {collectionId: number, caseObj: IProcessedCas
 export const PortraitViewRow = (props: PortraitViewRowProps) => {
   const {paddingStyle, mapCellsFromValues, mapHeadersFromValues, showHeaders, precisions, attrTypes, attrVisibilities,
           getClassName, collectionId, caseObj, index, isParent, resizeCounter, parentLevel} = props;
-
-  const {children, values} = caseObj;
+  const {children, id, values} = caseObj;
+  const caseValuesWithId = {...values, id};
 
   if (!children.length) {
     return (
-        <tr>{mapCellsFromValues(collectionId, `row-${index}`, values, precisions, attrTypes, attrVisibilities)}</tr>
+      <tr>
+        {mapCellsFromValues(collectionId, `row-${index}`, caseValuesWithId, precisions, attrTypes, attrVisibilities)}
+      </tr>
     );
   } else {
     return (
@@ -35,8 +37,10 @@ export const PortraitViewRow = (props: PortraitViewRowProps) => {
           </tr>
         }
         <tr className={`${css[getClassName(caseObj)]} parent-row`}>
-          {mapCellsFromValues(collectionId, `parent-row-${index}`, values, precisions, attrTypes, attrVisibilities,
-                              isParent, resizeCounter, parentLevel)}
+          {mapCellsFromValues(
+            collectionId, `parent-row-${index}`, caseValuesWithId, precisions, attrTypes, attrVisibilities,
+            isParent, resizeCounter, parentLevel
+          )}
           <DroppableTableData collectionId={collectionId} style={paddingStyle}>
             <DraggableTableContainer collectionId={collectionId}>
               <table style={paddingStyle} className={`${css.subTable} ${css[getClassName(children[0])]}`}>
