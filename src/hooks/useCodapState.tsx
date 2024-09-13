@@ -42,7 +42,7 @@ export const useCodapState = () => {
   // const [selectedDataSet, setSelectedDataSet] = useState<IDataSet|null>(null);
   const [selectedDataSetName, setSelectedDataSetName] = useState<string>("");
   const [collections, setCollections] = useState<ICollections>([]);
-  const [items, setItems] = useState<any[]>([]);
+  const [cases, setCases] = useState<any[]>([]);
   const [interactiveState, setInteractiveState] = useState<InteractiveState>({
     view: null,
     dataSetName: null,
@@ -151,18 +151,17 @@ export const useCodapState = () => {
   }, [selectedDataSet]);
 
   useEffect(() => {
-    const fetchItems = async () => {
+    const fetchCases = async () => {
       if (selectedDataSet) {
-        const casesFetched = await getCases(selectedDataSet.name, collections[0].name);
-        const fetchedItems = casesFetched.map((item: any) => item.values);
-        setItems(fetchedItems);
+        const fetchedCases = await getCases(selectedDataSet.name, collections[0].name);
+        setCases(fetchedCases);
       }
     };
 
     if (collections.length === 1 && selectedDataSet) {
-      fetchItems();
+      fetchCases();
     } else {
-      setItems([]);
+      setCases([]);
     }
   }, [collections, selectedDataSet]);
 
@@ -270,7 +269,7 @@ export const useCodapState = () => {
     getCollectionNameFromId,
     updateInteractiveState,
     interactiveState,
-    items,
+    cases,
     connected,
     handleUpdateAttributePosition,
     handleAddCollection,
@@ -280,5 +279,6 @@ export const useCodapState = () => {
     selectCODAPCases,
     listenForSelectionChanges,
     handleCreateCollectionFromAttribute,
+    handleUpdateCollections: updateCollections
   };
 };

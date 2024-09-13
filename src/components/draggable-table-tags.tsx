@@ -6,6 +6,7 @@ import { useCodapState } from "../hooks/useCodapState";
 import { getAttribute } from "@concord-consortium/codap-plugin-api";
 import { getCollectionById } from "../utils/apiHelpers";
 import { PropsWithChildren } from "../types";
+import { EditableTableCell } from "./editable-table-cell";
 
 import AddIcon from "../assets/plus-level-1.svg";
 import DropdownIcon from "../assets/dropdown-arrow-icon.svg";
@@ -45,7 +46,7 @@ export const DraggagleTableHeader: React.FC<PropsWithChildren<DraggagleTableHead
     handleDragLeave, handleDragEnd} = useDraggableTableContext();
   const {handleSortAttribute} = useCodapState();
   const {id, style} = getIdAndStyle(collectionId, attrTitle, dragOverId, dragSide);
-  const headerRef = useRef<HTMLTableHeaderCellElement | null>(null);
+  const headerRef = useRef<HTMLTableCellElement | null>(null);
   const [showDropdownIcon, setShowDropdownIcon] = useState(false);
   const [showHeaderMenu, setShowHeaderMenu] = useState(false);
   const headerPos = headerRef.current?.getBoundingClientRect();
@@ -157,14 +158,18 @@ export const DroppableTableHeader: React.FC<PropsWithChildren<DroppableTableHead
 interface DraggagleTableDataProps {
   collectionId: number;
   attrTitle: string;
+  caseId: string;
   style?: React.CSSProperties;
   isParent?: boolean;
   resizeCounter?: number;
   parentLevel?: number;
+  selectedDataSetName: string;
+  handleUpdateCollections: () => void;
 }
 
 export const DraggagleTableData: React.FC<PropsWithChildren<DraggagleTableDataProps>> = (props) => {
-  const {collectionId, attrTitle, children, isParent, resizeCounter, parentLevel=0} = props;
+  const {collectionId, attrTitle, children, caseId, isParent, resizeCounter, parentLevel=0,
+         selectedDataSetName, handleUpdateCollections} = props;
   const {dragOverId, dragSide} = useDraggableTableContext();
   const {style} = getIdAndStyle(collectionId, attrTitle, dragOverId, dragSide);
   const {tableScrollTop, scrollY} = useTableTopScrollTopContext();
@@ -204,6 +209,18 @@ export const DraggagleTableData: React.FC<PropsWithChildren<DraggagleTableDataPr
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [tableScrollTop, isParent, scrollY, parentLevel, resizeCounter]);
 
+  const EditableCell = () => {
+    return (
+      <EditableTableCell
+        attrTitle={attrTitle}
+        handleUpdateCollections={handleUpdateCollections}
+        caseId={caseId}
+        selectedDataSetName={selectedDataSetName}
+      >
+        {children}
+      </EditableTableCell>
+    );
+  };
 
   const textStyle: React.CSSProperties = {top: cellTextTop};
   if (cellTextTop === 0) {
@@ -215,9 +232,11 @@ export const DraggagleTableData: React.FC<PropsWithChildren<DraggagleTableDataPr
       {isParent
         ? <>
             <span style={{opacity: 0}}>{children}</span>
-            <div style={textStyle} className={css.cellTextValue}>{children}</div>
+            <div style={textStyle} className={css.cellTextValue}>
+              <EditableCell />
+            </div>
           </>
-        : children
+        : <EditableCell />
       }
     </td>
   );

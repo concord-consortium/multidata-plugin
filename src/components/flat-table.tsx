@@ -1,16 +1,16 @@
 import React from "react";
-import { ITableProps, IValues } from "../types";
+import { CaseValuesWithId, ITableProps } from "../types";
 import { DraggableTableContainer, DraggagleTableHeader } from "./draggable-table-tags";
 import { getAttrPrecisions, getAttrTypes, getAttrVisibility } from "../utils/utils";
 
 import css from "./tables.scss";
 
 interface IFlatProps extends ITableProps {
-  items: Array<any>
+  cases: CaseValuesWithId[]
 }
 
 export const FlatTable = (props: IFlatProps) => {
-  const {selectedDataSet, collections, collectionClasses, items, mapCellsFromValues, showHeaders} = props;
+  const {selectedDataSet, collections, collectionClasses, cases, mapCellsFromValues, showHeaders } = props;
   const collection = collections[0];
   const {className} = collectionClasses[0];
   const attrVisibilities = getAttrVisibility(collections);
@@ -19,12 +19,12 @@ export const FlatTable = (props: IFlatProps) => {
   const titles = collectionAttrsToUse.map(attr => attr.title);
   const precisions = getAttrPrecisions(collections);
   const attrTypes = getAttrTypes(collections);
-  const orderedItems = items.map(item => {
-    const orderedItem: IValues = {};
+  const orderedCases = cases.map(c => {
+    const orderedCase: CaseValuesWithId = {id: c.id};
     titles.forEach(title => {
-      orderedItem[title] = item[title];
+      orderedCase[title] = c.values[title];
     });
-    return orderedItem;
+    return orderedCase;
   });
 
   return (
@@ -32,11 +32,11 @@ export const FlatTable = (props: IFlatProps) => {
       <table className={`${css.mainTable} ${css.flatTable} ${css[className]}}`}>
         <tbody>
           <tr className={css.mainHeader}>
-            <th colSpan={items.length}>{selectedDataSet.title}</th>
+            <th colSpan={cases.length}>{selectedDataSet.title}</th>
           </tr>
           {showHeaders &&
           <tr className={css[className]}>
-            <th colSpan={items.length}>{collections[0].title}</th>
+            <th colSpan={cases.length}>{collections[0].title}</th>
           </tr>}
           <tr>
             {collectionAttrsToUse.map((attr: any) =>
@@ -50,10 +50,10 @@ export const FlatTable = (props: IFlatProps) => {
                 {attr.title}
               </DraggagleTableHeader>)}
           </tr>
-          {orderedItems.map((item, index) => {
+          {orderedCases.map((c, index) => {
             return (
-              <tr key={`${index}-${item.id}`}>
-                {mapCellsFromValues(collection.id, `row-${index}`, item, precisions, attrTypes, attrVisibilities)}
+              <tr key={`${index}-${c.id}`}>
+                {mapCellsFromValues(collection.id, `row-${index}`, c, precisions, attrTypes, attrVisibilities )}
               </tr>
             );
           })}

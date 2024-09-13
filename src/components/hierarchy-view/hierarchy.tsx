@@ -16,7 +16,6 @@ interface IProps {
   selectedDataSet: any;
   dataSets: IDataSet[];
   collections: ICollections;
-  items: any[];
   interactiveState: InteractiveState
   handleSelectDataSet: (e: React.ChangeEvent<HTMLSelectElement>) => void
   updateInteractiveState: (update: Partial<InteractiveState>) => void

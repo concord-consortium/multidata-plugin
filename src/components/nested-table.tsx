@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useState } from "react";
 import { InteractiveState } from "../hooks/useCodapState";
-import { ICollection, IProcessedCaseObj, IValues, ICollectionClass, IDataSet, ICollections } from "../types";
+import { ICollection, IProcessedCaseObj, Values, ICollectionClass, IDataSet,
+         ICollections, CaseValuesWithId } from "../types";
 import { PortraitView } from "./portrait-view";
 import { Menu } from "./menu";
 import { LandscapeView } from "./landscape-view";
@@ -18,7 +19,7 @@ interface IProps {
   selectedDataSet: any;
   dataSets: IDataSet[];
   collections: ICollections;
-  items: any[];
+  cases: CaseValuesWithId[];
   interactiveState: InteractiveState
   handleSelectDataSet: (e: React.ChangeEvent<HTMLSelectElement>) => void
   updateInteractiveState: (update: Partial<InteractiveState>) => void
@@ -26,13 +27,14 @@ interface IProps {
   handleSetCollections: (collections: Array<ICollection>) => void
   handleUpdateAttributePosition: (collection: ICollection, attrName: string, newPosition: number) => void
   handleCreateCollectionFromAttribute: (collection: ICollection, attr: any, parent: number|string) => Promise<void>
+  handleUpdateCollections: () => void
 }
 
 export const NestedTable = (props: IProps) => {
-  const {selectedDataSet, dataSets, collections, items, interactiveState,
+  const {selectedDataSet, dataSets, collections, cases, interactiveState,
          handleSelectDataSet, updateInteractiveState, handleShowComponent,
          handleSetCollections, handleUpdateAttributePosition,
-         handleCreateCollectionFromAttribute} = props;
+         handleCreateCollectionFromAttribute, handleUpdateCollections} = props;
   const [collectionClasses, setCollectionClasses] = useState<Array<ICollectionClass>>([]);
   const [paddingStyle, setPaddingStyle] = useState<Record<string, string>>({padding: "0px"});
 
@@ -89,7 +91,7 @@ export const NestedTable = (props: IProps) => {
     updateInteractiveState({displayMode: e.target.value});
   }, [updateInteractiveState]);
 
-  const mapHeadersFromValues = (collectionId: number, rowKey: string, values: IValues,
+  const mapHeadersFromValues = (collectionId: number, rowKey: string, values: Values,
       attrVisibilities: Record<string, boolean>) => {
     return (
       <>
@@ -111,26 +113,28 @@ export const NestedTable = (props: IProps) => {
     );
   };
 
-  const mapCellsFromValues = (collectionId: number, rowKey: string, values: IValues,
+  const mapCellsFromValues = (collectionId: number, rowKey: string, aCase: Values,
       precisions: Record<string, number>, attrTypes: Record<string, string | undefined | null>,
       attrVisibilities: Record<string, boolean>, isParent?: boolean, resizeCounter?: number, parentLevel?: number) => {
-    return Object.keys(values).map((key, index) => {
-      const isWholeNumber = values[key] % 1 === 0;
+    return Object.keys(aCase).map((key, index) => {
+      if (key === "id") return null;
+
+      const isWholeNumber = aCase[key] % 1 === 0;
       const precision = precisions[key];
       // Numbers are sometimes passed in from CODAP as a string so we use the attribute type to
       // determine if it should be parsed as a number.
       // Numbers that are whole numbers are treated as integers, so we should ignore the precision.
       // Numeric cells that are empty should be treated as empty strings.
       const isNumericType = attrTypes[key] === "numeric";
-      const hasValue = values[key] !== "";
-      const parsedValue = parseFloat(values[key]);
+      const hasValue = aCase[key] !== "";
+      const parsedValue = parseFloat(aCase[key]);
       const isNumber = !isNaN(parsedValue);
       const hasPrecision = precision !== undefined;
-      const defaultValue = values[key];
-      const isNumberType = typeof values[key] === "number";
+      const defaultValue = aCase[key];
+      const isNumberType = typeof aCase[key] === "number";
       let val;
       if (isNumericType && hasValue && isNumber) {
-          val = isWholeNumber ? parseInt(values[key], 10)
+          val = isWholeNumber ? parseInt(aCase[key], 10)
                               : parsedValue.toFixed(hasPrecision ? precision : 2);
       } else if (!isNumericType && isNumberType && hasValue) {
           val = defaultValue.toFixed(hasPrecision ? precision : 2);
@@ -148,8 +152,11 @@ export const NestedTable = (props: IProps) => {
             attrTitle={key}
             key={`${rowKey}-${val}-${index}}`}
             isParent={isParent}
+            caseId={aCase.id}
             resizeCounter={resizeCounter}
             parentLevel={parentLevel}
+            selectedDataSetName={selectedDataSet.name}
+            handleUpdateCollections={handleUpdateCollections}
           >
             {val}
           </DraggagleTableData>
@@ -158,9 +165,9 @@ export const NestedTable = (props: IProps) => {
     });
   };
 
-  const getValueLength = (firstRow: Array<IValues>) => {
+  const getValueLength = (firstRow: Array<Values>) => {
     let valueCount = 0;
-    firstRow.forEach((values: IValues) => {
+    firstRow.forEach((values: Values) => {
       const valuesLength = Object.entries(values).length;
       valueCount += valuesLength;
     });
@@ -171,8 +178,8 @@ export const NestedTable = (props: IProps) => {
     const isNoHierarchy = collections.length === 1;
     const classesExist = collectionClasses.length > 0;
     const tableProps = {showHeaders: interactiveState.showHeaders, collectionClasses, collections, selectedDataSet,
-      getClassName, mapHeadersFromValues, mapCellsFromValues, getValueLength, paddingStyle};
-    const flatProps = {...tableProps, items};
+      getClassName, mapHeadersFromValues, mapCellsFromValues, getValueLength, paddingStyle, handleUpdateCollections};
+    const flatProps = {...tableProps, cases};
     if (isNoHierarchy && classesExist) {
       return <FlatTable {...flatProps}/>;
     } else {

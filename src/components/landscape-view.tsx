@@ -10,7 +10,10 @@ export const LandscapeView = (props: ITableProps) => {
     getClassName, selectedDataSet, collections, getValueLength, paddingStyle} = props;
 
   const renderNestedTable = (parentColl: ICollection) => {
-    const firstRowValues = parentColl.cases.map(caseObj => caseObj.values);
+    const headers = parentColl.cases.map((caseObj) => caseObj.values);
+    const firstRowValues = parentColl.cases.map(caseObj => {
+      return {...caseObj.values, id: caseObj.id};
+    });
     const valueCount = getValueLength(firstRowValues);
     const className = getClassName(parentColl.cases[0]);
     const precisions = getAttrPrecisions(collections);
@@ -23,11 +26,13 @@ export const LandscapeView = (props: ITableProps) => {
           <th colSpan={valueCount}>{parentColl.name}</th>
         </tr> }
         <tr className={css[className]}>
-          {firstRowValues.map(values => mapHeadersFromValues(parentColl.id, "first-row", values, attrVisibilities))}
+          {headers.map(values => mapHeadersFromValues(parentColl.id, "first-row", values, attrVisibilities))}
         </tr>
         <tr className={css[className]}>
           {firstRowValues.map(values =>
-            mapCellsFromValues(parentColl.id, "first-row", values, precisions, attrTypes, attrVisibilities))
+            mapCellsFromValues(
+              parentColl.id, "first-row", values, precisions, attrTypes, attrVisibilities
+            ))
           }
         </tr>
         <tr className={css[className]}>
@@ -50,7 +55,8 @@ export const LandscapeView = (props: ITableProps) => {
   };
 
   const renderColFromCaseObj = (collection: ICollection, caseObj: IProcessedCaseObj, index?: number) => {
-    const {children, values} = caseObj;
+    const {children, id, values} = caseObj;
+    const caseValuesWithId = {...values, id};
     const isFirstIndex = index === 0;
     const precisions = getAttrPrecisions(collections);
     const attrTypes = getAttrTypes(collections);
@@ -70,7 +76,12 @@ export const LandscapeView = (props: ITableProps) => {
               {mapHeadersFromValues(collection.id, `first-row-${index}`, values, attrVisibilities)}
             </tr>
           }
-          <tr>{mapCellsFromValues(collection.id, `row-${index}`, values, precisions, attrTypes, attrVisibilities)}</tr>
+          <tr>
+            {mapCellsFromValues(
+                collection.id, `row-${index}`, caseValuesWithId, precisions, attrTypes, attrVisibilities
+              )
+            }
+          </tr>
         </>
       );
     } else {
