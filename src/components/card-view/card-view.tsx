@@ -22,7 +22,7 @@ export const CardView = (props: ICardViewProps) => {
          handleSelectDataSet} = props;
 
   const rootCollection = useMemo(() => {
-    return collections.find((c:any) => !c.parent);
+    return collections.find((c: ICollection) => !c.parent);
   }, [collections]);
 
   const attrs = useMemo(() => {

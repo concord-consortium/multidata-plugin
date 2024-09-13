@@ -6,7 +6,7 @@ import { getAttrPrecisions, getAttrTypes, getAttrVisibility } from "../utils/uti
 import css from "./tables.scss";
 
 interface IFlatProps extends ITableProps {
-  cases: Array<any>
+  cases: CaseValuesWithId[]
 }
 
 export const FlatTable = (props: IFlatProps) => {

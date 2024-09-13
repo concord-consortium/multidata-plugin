@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useState } from "react";
 import { InteractiveState } from "../hooks/useCodapState";
-import { ICollection, IProcessedCaseObj, Values, ICollectionClass, IDataSet, ICollections } from "../types";
+import { ICollection, IProcessedCaseObj, Values, ICollectionClass, IDataSet,
+         ICollections, CaseValuesWithId } from "../types";
 import { PortraitView } from "./portrait-view";
 import { Menu } from "./menu";
 import { LandscapeView } from "./landscape-view";
@@ -18,7 +19,7 @@ interface IProps {
   selectedDataSet: any;
   dataSets: IDataSet[];
   collections: ICollections;
-  cases: any[];
+  cases: CaseValuesWithId[];
   interactiveState: InteractiveState
   handleSelectDataSet: (e: React.ChangeEvent<HTMLSelectElement>) => void
   updateInteractiveState: (update: Partial<InteractiveState>) => void
