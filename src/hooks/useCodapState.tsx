@@ -11,9 +11,12 @@ import {
   selectSelf,
   createCollectionFromAttribute,
   createNewCollection,
+  getAttribute,
+  updateAttribute,
   updateAttributePosition,
+  updateCaseById,
 } from "@concord-consortium/codap-plugin-api";
-import { getCases, getDataSetCollections, sortAttribute } from "../utils/apiHelpers";
+import { getCases, getCollectionById, getDataSetCollections, sortAttribute } from "../utils/apiHelpers";
 import { ICollections, ICollection, IDataSet } from "../types";
 
 const iFrameDescriptor = {
@@ -46,8 +49,8 @@ export const useCodapState = () => {
   const [interactiveState, setInteractiveState] = useState<InteractiveState>({
     view: null,
     dataSetName: null,
-    padding: false,
-    showHeaders: false,
+    padding: true,
+    showHeaders: true,
     displayMode: ""
   });
 
@@ -167,8 +170,8 @@ export const useCodapState = () => {
 
 
   const handleSelectDataSet = (name: string) => {
-    const selected = dataSets.find((d) => d.title === name);
-    return selected ? handleSetDataSet(selected.name) :  handleSetDataSet("");
+    const dataSetIdentifier = dataSets.find((d) => d.title === name || d.name === name)?.name;
+    return dataSetIdentifier ? handleSetDataSet(dataSetIdentifier) :  handleSetDataSet("");
   };
 
   const getCollectionNameFromId = (id: number) => {
@@ -258,6 +261,51 @@ export const useCodapState = () => {
     }
   }, [selectedDataSet]);
 
+  const handleUpdateInteractiveState = useCallback((update: Partial<InteractiveState>) => {
+    const newState = {...interactiveState, ...update};
+    if (JSON.stringify(newState) !== JSON.stringify(interactiveState)) {
+      updateInteractiveState(newState);
+    }
+  }, [interactiveState, updateInteractiveState]);
+
+  // const handleSelectDataSet = (name: string) => {
+  //   const selected = dataSets.find((d) => d.title === name);
+  //   if (selected) {
+  //     handleSetDataSet(selected.name);
+  //     handleUpdateInteractiveState({dataSetName: selected.name});
+  //   } else {
+  //     handleSetDataSet("");
+  //     handleUpdateInteractiveState({dataSetName: null});
+  //   }
+  // };
+
+  const editCaseValue = async (newValue: string, caseId: string, attrTitle: string) => {
+    try {
+      await updateCaseById(selectedDataSetName, caseId, {[attrTitle]: newValue});
+    } catch (e) {
+      console.error("Case not updated: ", e);
+    }
+  };
+
+  const addAttributeToCollection = async (collectionId: number, attrName: string) => {
+    try {
+      const collectionName = await getCollectionById(selectedDataSetName, collectionId);
+      await createNewAttribute(selectedDataSetName, collectionName, attrName);
+    } catch (e) {
+      console.error("Failed to add attribute to collection: ", e);
+    }
+  };
+
+  const renameAttribute = async (collectionName: string, attrId: number, oldName: string, newName: string) => {
+    const _attribute = await getAttribute(selectedDataSetName, collectionName, oldName);
+    const attribute = {..._attribute, name: oldName};
+    try {
+      await updateAttribute(selectedDataSetName, collectionName, oldName, attribute, {name: newName});
+    } catch (e) {
+      console.error("Failed to rename attribute: ", e);
+    }
+  };
+
   return {
     init,
     handleSelectSelf,
@@ -279,6 +327,10 @@ export const useCodapState = () => {
     selectCODAPCases,
     listenForSelectionChanges,
     handleCreateCollectionFromAttribute,
-    handleUpdateCollections: updateCollections
+    handleUpdateCollections: updateCollections,
+    editCaseValue,
+    addAttributeToCollection,
+    handleUpdateInteractiveState,
+    renameAttribute
   };
 };

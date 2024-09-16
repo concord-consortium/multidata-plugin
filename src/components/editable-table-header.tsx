@@ -1,22 +1,23 @@
 import React, { ReactNode, useState } from "react";
 import { Editable, EditablePreview, EditableInput } from "@chakra-ui/react";
-import { useCodapState } from "../hooks/useCodapState";
 
 import css from "./editable-table-cell.scss";
 
 interface IProps {
-  attrTitle: string;
-  caseId: string;
-  children: ReactNode;
-  selectedDataSetName: string;
+  attrId: number;
+  collectionName: string;
+  collectionId: number;
+  children?: ReactNode;
+  hasFocus?: boolean;
+  selectedDataSetName?: string;
+  renameAttribute: (collectionName: string, attrId: number, oldName: string, newName: string) => Promise<void>;
 }
 
-export const EditableTableCell = (props: IProps) => {
-  const { attrTitle, caseId, children } = props;
-  const { editCaseValue } = useCodapState();
-  const [displayValue, setDisplayValue] = useState(String(children));
+export const EditableTableHeader = (props: IProps) => {
+  const { attrId, collectionName, hasFocus, renameAttribute } = props;
+  const [displayValue, setDisplayValue] = useState(collectionName);
   const [editingValue, setEditingValue] = useState(displayValue);
-  const [isEditing, setIsEditing] = useState(false);
+  const [isEditing, setIsEditing] = useState(hasFocus);
 
   const handleChangeValue = (newValue: string) => {
     setEditingValue(newValue);
@@ -34,7 +35,7 @@ export const EditableTableCell = (props: IProps) => {
     }
 
     try {
-      await editCaseValue(newValue, caseId, attrTitle);
+      await renameAttribute(collectionName, attrId, displayValue, newValue);
       setDisplayValue(newValue);
       setEditingValue(newValue);
       setIsEditing(false);
@@ -51,6 +52,7 @@ export const EditableTableCell = (props: IProps) => {
         onChange={handleChangeValue}
         onEdit={() => setIsEditing(true)}
         onSubmit={handleSubmit}
+        startWithEditView={hasFocus}
         submitOnBlur={true}
         value={isEditing ? editingValue : displayValue}
       >

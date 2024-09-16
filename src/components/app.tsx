@@ -13,7 +13,7 @@ function App() {
          handleSelectDataSet: _handleSelectDataSet, handleUpdateAttributePosition,
          handleAddCollection, handleAddAttribute, handleSetCollections, handleSelectSelf,
          updateTitle, selectCODAPCases, listenForSelectionChanges,
-         handleCreateCollectionFromAttribute, handleUpdateCollections
+         handleCreateCollectionFromAttribute, renameAttribute
         } = useCodapState();
 
   useEffect(() => {
@@ -32,10 +32,14 @@ function App() {
     updateInteractiveState({view});
   }, [updateInteractiveState]);
 
-  const handleSelectDataSet = useCallback((e: React.ChangeEvent<HTMLSelectElement>) => {
+  const handleSelectDataSet = useCallback((e: React.ChangeEvent<HTMLSelectElement>, defaultDisplayMode?: string) => {
     const dataSetName = e.target.value;
     _handleSelectDataSet(dataSetName);
-    updateInteractiveState({dataSetName});
+    const update: Partial<InteractiveState> = {dataSetName};
+    if (defaultDisplayMode) {
+      update.displayMode = defaultDisplayMode;
+    }
+    updateInteractiveState(update);
   }, [_handleSelectDataSet, updateInteractiveState]);
 
   const handleShowComponent = () => {
@@ -104,7 +108,8 @@ function App() {
           handleUpdateAttributePosition={handleUpdateAttributePosition}
           handleSetCollections={handleSetCollections}
           handleCreateCollectionFromAttribute={handleCreateCollectionFromAttribute}
-          handleUpdateCollections={handleUpdateCollections}
+          handleAddAttribute={handleAddAttribute}
+          renameAttribute={renameAttribute}
         />
       );
 

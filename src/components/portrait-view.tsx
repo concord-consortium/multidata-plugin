@@ -1,8 +1,10 @@
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, { useRef } from "react";
 import { ICollection, IProcessedCaseObj, ITableProps } from "../types";
 import { DraggableTableContainer, DroppableTableData, DroppableTableHeader } from "./draggable-table-tags";
 import { TableScrollTopContext, useTableScrollTop } from "../hooks/useTableScrollTop";
 import { getAttrPrecisions, getAttrTypes, getAttrVisibility } from "../utils/utils";
+import { AddAttributeButton } from "./add-attribute-button";
+import { TableHeaders } from "./table-headers";
 
 import css from "./tables.scss";
 
@@ -10,12 +12,13 @@ export type PortraitViewRowProps = {collectionId: number, caseObj: IProcessedCas
                                     precisions: Record<string, number>,
                                     attrTypes: Record<string, string | undefined | null>,
                                     attrVisibilities: Record<string, boolean>,
-                                    isParent: boolean, resizeCounter: number, parentLevel?: number}
+                                    isParent: boolean, parentLevel?: number, dataSetName: string}
                                     & ITableProps;
 
 export const PortraitViewRow = (props: PortraitViewRowProps) => {
-  const {paddingStyle, mapCellsFromValues, mapHeadersFromValues, showHeaders, precisions, attrTypes, attrVisibilities,
-          getClassName, collectionId, caseObj, index, isParent, resizeCounter, parentLevel} = props;
+  const {paddingStyle, mapCellsFromValues, showHeaders, precisions, attrTypes, attrVisibilities,
+          getClassName, collectionId, caseObj, index, isParent, parentLevel, dataSetName,
+          handleAddAttribute, collections, renameAttribute} = props;
   const {children, id, values} = caseObj;
   const caseValuesWithId = {...values, id};
 
@@ -30,16 +33,34 @@ export const PortraitViewRow = (props: PortraitViewRowProps) => {
       <>
         {index === 0 &&
           <tr className={`${css[getClassName(caseObj)]}`}>
-            {mapHeadersFromValues(collectionId, `first-row-${index}`, values, attrVisibilities)}
+            <TableHeaders
+              collectionId={collectionId}
+              rowKey={`first-row-${index}`}
+              values={values}
+              attrVisibilities={attrVisibilities}
+              isParent={isParent}
+              attrId={id}
+              editableHasFocus={index === 0}
+              selectedDataSet={props.selectedDataSet}
+              renameAttribute={renameAttribute}
+            />
             {showHeaders ? (
-                <DroppableTableHeader collectionId={collectionId}>{children[0].collection.name}</DroppableTableHeader>
+                <DroppableTableHeader
+                  collectionId={collectionId}
+                  collections={collections}
+                  childCollectionId={caseObj.children[0].collection.id}
+                  dataSetName={dataSetName}
+                  handleAddAttribute={handleAddAttribute}
+                >
+                  {children[0].collection.name}
+                </DroppableTableHeader>
               ) : <th />}
           </tr>
         }
         <tr className={`${css[getClassName(caseObj)]} parent-row`}>
           {mapCellsFromValues(
             collectionId, `parent-row-${index}`, caseValuesWithId, precisions, attrTypes, attrVisibilities,
-            isParent, resizeCounter, parentLevel
+            isParent, parentLevel
           )}
           <DroppableTableData collectionId={collectionId} style={paddingStyle}>
             <DraggableTableContainer collectionId={collectionId}>
@@ -58,8 +79,17 @@ export const PortraitViewRow = (props: PortraitViewRowProps) => {
                       return (
                         <React.Fragment key={child.collection.id}>
                           <tr className={`${css[getClassName(child)]}`}>
-                            {mapHeadersFromValues(child.collection.id, `child-row-${index}-${i}`, child.values,
-                                attrVisibilities)}
+                            <TableHeaders
+                              collectionId={child.collection.id}
+                              rowKey={`child-row-${index}-${i}`}
+                              values={child.values}
+                              attrVisibilities={attrVisibilities}
+                              isParent={isParent}
+                              attrId={id}
+                              editableHasFocus={index === 0}
+                              selectedDataSet={props.selectedDataSet}
+                              renameAttribute={renameAttribute}
+                            />
                           </tr>
                           <PortraitViewRow {...nextProps} />
                         </React.Fragment>
@@ -79,35 +109,9 @@ export const PortraitViewRow = (props: PortraitViewRowProps) => {
 };
 
 export const PortraitView = (props: ITableProps) => {
-  const {collectionClasses, selectedDataSet, collections, getValueLength} = props;
+  const {collectionClasses, selectedDataSet, collections, getValueLength, dataSetName, handleAddAttribute} = props;
   const tableRef = useRef<HTMLTableElement | null>(null);
   const tableScrollTop = useTableScrollTop(tableRef);
-  const [resizeCounter, setResizeCounter] = useState(0);
-
-  const thresh = useMemo(() => {
-    const t: number[] = [];
-    for (let i = 0; i <= 100; i++) {
-      t.push(i/100);
-    }
-    return t;
-  }, []);
-
-
-  useEffect(() => {
-    const handleIntersection = (entries: IntersectionObserverEntry[], o: any) => {
-      setResizeCounter((prevState) => prevState + 1);
-    };
-    const observer = new IntersectionObserver(handleIntersection, {threshold: thresh});
-    document.querySelectorAll(`.parent-row`).forEach((row) => {
-      observer.observe(row);
-    });
-    return () => {
-      document.querySelectorAll(`.parent-row`).forEach((row) => {
-        observer.unobserve(row);
-      });
-    };
-
-  }, [thresh]);
 
   const renderTable = () => {
     const parentColl = collections.filter((coll: ICollection) => !coll.parent)[0];
@@ -126,7 +130,16 @@ export const PortraitView = (props: ITableProps) => {
               <th className={css.datasetNameHeader} colSpan={valueCount}>{selectedDataSet.name}</th>
             </tr>
             <tr className={css[className]}>
-              <th colSpan={valueCount}>{parentColl.name}</th>
+              <th colSpan={valueCount}>
+                <div className={css.parentCollHeader}>
+                  {parentColl.name}
+                  <AddAttributeButton
+                    collectionId={parentColl.id}
+                    collections={collections}
+                    handleAddAttribute={handleAddAttribute}
+                  />
+                </div>
+              </th>
             </tr>
             {parentColl.cases.map((caseObj, index) => (
               <PortraitViewRow
@@ -139,8 +152,8 @@ export const PortraitView = (props: ITableProps) => {
                 attrTypes={attrTypes}
                 attrVisibilities={attrVisibilities}
                 isParent={true}
-                resizeCounter={resizeCounter}
                 parentLevel={0}
+                dataSetName={dataSetName}
               />
             ))}
           </tbody>

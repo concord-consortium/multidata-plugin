@@ -5,8 +5,10 @@ import { useTableTopScrollTopContext } from "../hooks/useTableScrollTop";
 import { useCodapState } from "../hooks/useCodapState";
 import { getAttribute } from "@concord-consortium/codap-plugin-api";
 import { getCollectionById } from "../utils/apiHelpers";
-import { PropsWithChildren } from "../types";
+import { ICollection, ICollections, PropsWithChildren } from "../types";
 import { EditableTableCell } from "./editable-table-cell";
+import { AddAttributeButton } from "./add-attribute-button";
+import { EditableTableHeader } from "./editable-table-header";
 
 import AddIcon from "../assets/plus-level-1.svg";
 import DropdownIcon from "../assets/dropdown-arrow-icon.svg";
@@ -38,10 +40,14 @@ interface DraggagleTableHeaderProps {
   colSpan?: number;
   dataSetName: string;
   dataSetTitle: string;
+  editableHasFocus?: boolean;
+  isParent?: boolean;
+  attrId?: number;
+  renameAttribute: (collectionName: string, attrId: number, oldName: string, newName: string) => Promise<void>;
 }
 
 export const DraggagleTableHeader: React.FC<PropsWithChildren<DraggagleTableHeaderProps>> = (props) => {
-  const {collectionId, attrTitle, dataSetName, children} = props;
+  const {collectionId, attrTitle, dataSetName, editableHasFocus, children, isParent, attrId, renameAttribute} = props;
   const {dragOverId, dragSide, handleDragStart, handleDragOver, handleOnDrop, handleDragEnter,
     handleDragLeave, handleDragEnd} = useDraggableTableContext();
   const {handleSortAttribute} = useCodapState();
@@ -69,8 +75,7 @@ export const DraggagleTableHeader: React.FC<PropsWithChildren<DraggagleTableHead
     };
   }, [showHeaderMenu, tableContainer]);
 
-
-  const handleShowHeaderMenu = (e: React.MouseEvent<HTMLTableHeaderCellElement>) => {
+  const handleShowHeaderMenu = (e: React.MouseEvent<HTMLTableCellElement | HTMLButtonElement>) => {
     e.preventDefault();
     e.stopPropagation();
     setShowHeaderMenu(!showHeaderMenu);
@@ -83,6 +88,7 @@ export const DraggagleTableHeader: React.FC<PropsWithChildren<DraggagleTableHead
     handleSortAttribute(dataSetName, attribute.id, isDescending);
     setShowHeaderMenu(false);
   };
+
   return (
     <>
       <th
@@ -97,19 +103,27 @@ export const DraggagleTableHeader: React.FC<PropsWithChildren<DraggagleTableHead
         onDragEnter={handleDragEnter}
         onDragLeave={handleDragLeave}
         onDragEnd={handleDragEnd}
-        onMouseEnter={() => setShowDropdownIcon(true)}
-        onMouseLeave={() => setShowDropdownIcon(false)}
-        onClick={handleShowHeaderMenu}
       >
-        <div className={css.thChildContainer}>
-          <div>{children}</div>
-          {showDropdownIcon &&
-            <div className={css.dropdownIcon}>
-              <DropdownIcon
-                onClick={handleShowHeaderMenu}
-                className={css.dropdownIcon}
-              />
-            </div>
+        <div className={`${css.thChildContainer} ${isParent ? css.isParent : ""}`}>
+          <button
+            onMouseEnter={() => setShowDropdownIcon(true)}
+            onMouseLeave={() => setShowDropdownIcon(false)}
+            onClick={handleShowHeaderMenu}
+          >
+            {String(children).match(/^newAttr/) && attrId
+               ? <EditableTableHeader
+                    attrId={attrId}
+                    collectionName={String(children)}
+                    collectionId={collectionId}
+                    hasFocus={editableHasFocus}
+                    renameAttribute={renameAttribute}
+                 />
+               : children}
+          </button>
+          {
+            <button className={css.dropdownIcon} onClick={handleShowHeaderMenu}>
+              {showDropdownIcon && <DropdownIcon className={css.dropdownIcon} />}
+            </button>
           }
         </div>
       </th>
@@ -130,14 +144,16 @@ export const DraggagleTableHeader: React.FC<PropsWithChildren<DraggagleTableHead
 };
 
 interface DroppableTableHeaderProps {
+  collections: ICollections;
+  childCollectionId: number;
   collectionId: number;
+  dataSetName: string;
+  handleAddAttribute?: (collection: ICollection, attrName: string) => Promise<void>;
 }
 
 export const DroppableTableHeader: React.FC<PropsWithChildren<DroppableTableHeaderProps>> = (props) => {
-  const {collectionId, children} = props;
-  const {dragOverId, handleDragOver, handleOnDrop, handleDragEnter,
-    handleDragLeave} = useDraggableTableContext();
-
+  const {childCollectionId, collectionId, collections, children, handleAddAttribute} = props;
+  const {dragOverId, handleDragOver, handleOnDrop, handleDragEnter, handleDragLeave} = useDraggableTableContext();
   const id = `${collectionId}`;
   const style = getStyle(id, dragOverId, "left");
 
@@ -150,7 +166,14 @@ export const DroppableTableHeader: React.FC<PropsWithChildren<DroppableTableHead
       onDragEnter={handleDragEnter}
       onDragLeave={handleDragLeave}
     >
-      {children}
+      <div className={css.parentCollHeader}>
+        {children}
+        <AddAttributeButton
+          collectionId={childCollectionId}
+          collections={collections}
+          handleAddAttribute={handleAddAttribute}
+        />
+      </div>
     </th>
   );
 };
@@ -161,15 +184,12 @@ interface DraggagleTableDataProps {
   caseId: string;
   style?: React.CSSProperties;
   isParent?: boolean;
-  resizeCounter?: number;
   parentLevel?: number;
   selectedDataSetName: string;
-  handleUpdateCollections: () => void;
 }
 
 export const DraggagleTableData: React.FC<PropsWithChildren<DraggagleTableDataProps>> = (props) => {
-  const {collectionId, attrTitle, children, caseId, isParent, resizeCounter, parentLevel=0,
-         selectedDataSetName, handleUpdateCollections} = props;
+  const {collectionId, attrTitle, children, caseId, isParent, parentLevel=0, selectedDataSetName} = props;
   const {dragOverId, dragSide} = useDraggableTableContext();
   const {style} = getIdAndStyle(collectionId, attrTitle, dragOverId, dragSide);
   const {tableScrollTop, scrollY} = useTableTopScrollTopContext();
@@ -205,15 +225,13 @@ export const DraggagleTableData: React.FC<PropsWithChildren<DraggagleTableDataPr
       }
       return newTop;
     }
-  // resizeCounter is a hack to force rerender of text positioning when window is resized
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [tableScrollTop, isParent, scrollY, parentLevel, resizeCounter]);
+  }, [tableScrollTop, isParent, scrollY, parentLevel]);
 
   const EditableCell = () => {
     return (
       <EditableTableCell
         attrTitle={attrTitle}
-        handleUpdateCollections={handleUpdateCollections}
         caseId={caseId}
         selectedDataSetName={selectedDataSetName}
       >

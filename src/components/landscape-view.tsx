@@ -2,12 +2,13 @@ import React from "react";
 import { ICollection, IProcessedCaseObj, ITableProps } from "../types";
 import { DraggagleTableHeader } from "./draggable-table-tags";
 import { getAttrPrecisions, getAttrTypes, getAttrVisibility } from "../utils/utils";
+import { TableHeaders } from "./table-headers";
 
 import css from "./tables.scss";
 
 export const LandscapeView = (props: ITableProps) => {
-  const {mapCellsFromValues, mapHeadersFromValues, showHeaders, collectionClasses,
-    getClassName, selectedDataSet, collections, getValueLength, paddingStyle} = props;
+  const {mapCellsFromValues, showHeaders, collectionClasses,
+    getClassName, selectedDataSet, collections, getValueLength, paddingStyle, renameAttribute} = props;
 
   const renderNestedTable = (parentColl: ICollection) => {
     const headers = parentColl.cases.map((caseObj) => caseObj.values);
@@ -26,7 +27,19 @@ export const LandscapeView = (props: ITableProps) => {
           <th colSpan={valueCount}>{parentColl.name}</th>
         </tr> }
         <tr className={css[className]}>
-          {headers.map(values => mapHeadersFromValues(parentColl.id, "first-row", values, attrVisibilities))}
+          {headers.map(values => {
+            return (
+              <TableHeaders
+                collectionId={parentColl.id}
+                key={`first-row-${values.id}`}
+                rowKey={`first-row`}
+                values={values}
+                attrVisibilities={attrVisibilities}
+                selectedDataSet={props.selectedDataSet}
+                renameAttribute={renameAttribute}
+              />
+            );
+          })}
         </tr>
         <tr className={css[className]}>
           {firstRowValues.map(values =>
@@ -73,7 +86,14 @@ export const LandscapeView = (props: ITableProps) => {
           }
           {isFirstIndex &&
             <tr className={css[className]}>
-              {mapHeadersFromValues(collection.id, `first-row-${index}`, values, attrVisibilities)}
+              <TableHeaders
+                collectionId={collection.id}
+                rowKey={`first-row-${index}`}
+                values={values}
+                attrVisibilities={attrVisibilities}
+                selectedDataSet={props.selectedDataSet}
+                renameAttribute={renameAttribute}
+              />
             </tr>
           }
           <tr>
@@ -120,6 +140,7 @@ export const LandscapeView = (props: ITableProps) => {
             colSpan={getValueLength(firstRowValues)}
             dataSetName={selectedDataSet.name}
             dataSetTitle={selectedDataSet.title}
+            renameAttribute={renameAttribute}
           >
             {selectedDataSet.name}
           </DraggagleTableHeader>

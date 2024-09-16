@@ -120,9 +120,19 @@ table {
     border-spacing: 0;
 
     .datasetNameHeader {
+      font-size: 13px;
+      padding: 3px 0;
       position: sticky;
       top: 0;
       z-index: 10;
+    }
+
+    .parentCollHeader {
+      align-items: center;
+      display: flex;
+      font-size: 12px;
+      justify-content: center;
+      padding: 3px 0;
     }
 
     &.collection0, .collection0, &.collection0>tbody>tr>td {
@@ -254,7 +264,7 @@ table.draggableTableContainer {
   position: relative;
   .cellTextValue{
     position: absolute;
-    width: fit-content;
+    width: 100%; // fit-content;
     display: flex;
     flex-wrap: wrap;
     // align-content: center;
@@ -263,8 +273,8 @@ table.draggableTableContainer {
 }
 
 .draggable {
-  padding-right: 17px;
-  padding-left: 15px;
+  // padding-right: 17px;
+  // padding-left: 15px;
 }
 
 .headerMenu {
@@ -284,6 +294,12 @@ table.draggableTableContainer {
   height: 15px;
   width: 100%;
   gap: 5px;
+
+  button {
+    all: unset;
+    cursor: pointer;
+  }
+
   .dropdownIcon {
     &:hover {
       cursor: pointer;
@@ -291,6 +307,17 @@ table.draggableTableContainer {
     svg {
       width: 10px;
     }
+  }
+
+  .spacer {
+    flex-grow: 1;
+  }
+  button:nth-child(4) {
+    height: 16px;
+    margin-top: 1px;
+    margin-left: 5px;
+    margin-left: 5px;
+    width: 16px;
   }
 }
 

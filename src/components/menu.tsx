@@ -1,20 +1,22 @@
 import React from "react";
 import { IDataSet } from "../types";
+
 import css from "./menu.scss";
 
 interface IProps {
   selectedDataSet: any,
-  handleSelectDataSet: (e: React.ChangeEvent<HTMLSelectElement>) => void,
+  handleSelectDataSet: (e: React.ChangeEvent<HTMLSelectElement>, defaultDisplayMode?: string) => void,
   dataSets: Array<IDataSet>,
 
   // these are optional and only used by the nested table view
-  handleSelectDisplayMode?: (e: React.ChangeEvent<HTMLSelectElement>) => void,
+  handleSelectDisplayMode?: (mode: string) => void,
   togglePadding?: () => void,
   toggleShowHeaders?: () => void,
   showHeaders?: boolean,
   padding?: boolean;
   displayMode?: string;
   showDisplayMode?: boolean;
+  defaultDisplayMode?: string;
 }
 
 const portrait = "Portrait";
@@ -22,18 +24,29 @@ const landscape = "Landscape";
 const none = "";
 
 export const Menu = (props: IProps) => {
-  const {handleSelectDataSet, dataSets, handleSelectDisplayMode, togglePadding,
-    showHeaders, padding, toggleShowHeaders, displayMode, selectedDataSet, showDisplayMode} = props;
+  const { handleSelectDataSet, dataSets, handleSelectDisplayMode, togglePadding, showHeaders,
+          padding, toggleShowHeaders, displayMode, selectedDataSet, showDisplayMode, defaultDisplayMode} = props;
+
+  console.log("Menu prop displayMode: ", displayMode);
+
+  const handleDataSetSelection = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    if (handleSelectDisplayMode && defaultDisplayMode) {
+      console.log("update display mode: ", defaultDisplayMode);
+      handleSelectDisplayMode(defaultDisplayMode);
+    }
+    handleSelectDataSet(e, defaultDisplayMode);
+  };
 
   const displayModes = [none, portrait, landscape];
   return (
     <div className={css.menu}>
       <div className={css.option}>
         <span>Select a Dataset:</span>
-        <select value={selectedDataSet?.name} onChange={handleSelectDataSet}>
-          <option></option>
+        <select value={selectedDataSet?.name} onChange={handleDataSetSelection}>
+          <option key="dataset-option--noDataset"></option>
           {dataSets?.length && dataSets.map((set) => {
-            return (<option key={set.title}>{set.title}</option>);
+            const dataSetIdentifier = set.title || set.name;
+            return (<option key={`dataset-option--${dataSetIdentifier}`}>{dataSetIdentifier}</option>);
           })}
         </select>
       </div>
@@ -41,10 +54,10 @@ export const Menu = (props: IProps) => {
       {showDisplayMode && handleSelectDisplayMode &&
         <div className={css.option}>
           <span>Display mode:</span>
-          <select value={displayMode} onChange={handleSelectDisplayMode}>
+          <select onChange={(e) => handleSelectDisplayMode(e.currentTarget.value)} defaultValue={displayMode}>
             {displayModes.map((mode) => {
               return (
-                <option key={mode} disabled={!mode.length} value={mode}>
+                <option key={`mode-option--${mode}`} disabled={!mode.length} value={mode}>
                   {mode.length ? mode : "--select--"}
                 </option>
               );

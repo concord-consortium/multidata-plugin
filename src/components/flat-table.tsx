@@ -10,7 +10,8 @@ interface IFlatProps extends ITableProps {
 }
 
 export const FlatTable = (props: IFlatProps) => {
-  const {selectedDataSet, collections, collectionClasses, cases, mapCellsFromValues, showHeaders } = props;
+  const {selectedDataSet, collections, collectionClasses, cases, mapCellsFromValues,
+         showHeaders, renameAttribute } = props;
   const collection = collections[0];
   const {className} = collectionClasses[0];
   const attrVisibilities = getAttrVisibility(collections);
@@ -46,6 +47,7 @@ export const FlatTable = (props: IFlatProps) => {
                 attrTitle={attr.title}
                 dataSetName={selectedDataSet.name}
                 dataSetTitle={selectedDataSet.title}
+                renameAttribute={renameAttribute}
               >
                 {attr.title}
               </DraggagleTableHeader>)}
