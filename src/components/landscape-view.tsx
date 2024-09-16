@@ -1,18 +1,22 @@
 import React from "react";
-import { ICollection, IProcessedCaseObj, ITableProps } from "../types";
+import { ICollection, INestedTableProps, IProcessedCaseObj, ITableProps, Values } from "../types";
 import { DraggagleTableHeader } from "./draggable-table-tags";
 import { getAttrPrecisions, getAttrTypes, getAttrVisibility } from "../utils/utils";
+import { TableHeaders } from "./table-headers";
+import { TableCell } from "./table-cell";
+import { useCodapContext } from "./CodapContext";
 
 import css from "./tables.scss";
 
-export const LandscapeView = (props: ITableProps) => {
-  const {mapCellsFromValues, mapHeadersFromValues, showHeaders, collectionClasses,
-    getClassName, selectedDataSet, collections, getValueLength, paddingStyle} = props;
+
+export const LandscapeView = (props: INestedTableProps) => {
+  const {collectionClasses, getClassName, getValueLength, paddingStyle} = props;
+  const {collections, selectedDataSet, interactiveState} = useCodapContext();
 
   const renderNestedTable = (parentColl: ICollection) => {
     const headers = parentColl.cases.map((caseObj) => caseObj.values);
     const firstRowValues = parentColl.cases.map(caseObj => {
-      return {...caseObj.values, id: caseObj.id};
+      return {...caseObj.values, id: caseObj.id} as Values;
     });
     const valueCount = getValueLength(firstRowValues);
     const className = getClassName(parentColl.cases[0]);
@@ -21,19 +25,43 @@ export const LandscapeView = (props: ITableProps) => {
     const attrVisibilities = getAttrVisibility(collections);
     return (
       <>
-        {showHeaders &&
+        {interactiveState?.showHeaders &&
         <tr className={css[className]}>
           <th colSpan={valueCount}>{parentColl.name}</th>
         </tr> }
         <tr className={css[className]}>
-          {headers.map(values => mapHeadersFromValues(parentColl.id, "first-row", values, attrVisibilities))}
+          {headers.map((headerValues) => {
+            return (
+              <TableHeaders
+                key={`hr-${headerValues.id}`}
+                collectionId={parentColl.id}
+                rowKey="first-row"
+                values={headerValues}
+                attrVisibilities={attrVisibilities}
+              />
+            )
+          })}
         </tr>
         <tr className={css[className]}>
-          {firstRowValues.map(values =>
-            mapCellsFromValues(
-              parentColl.id, "first-row", values, precisions, attrTypes, attrVisibilities
-            ))
+          {firstRowValues.map((values) => {
+            return Object.keys(values).map((key, i) => {
+              return (
+                <TableCell
+                  key={key}
+                  index={i}
+                  rowKey="first-row"
+                  attributeName={key}
+                  caseId={values.id}
+                  collectionId={parentColl.id}
+                  cellValue={values[key]}
+                  attrType={attrTypes[key]}
+                  precision={precisions[key]}
+                  isHidden={attrVisibilities[key]}
+                />
+              );
+            });
           }
+          )}
         </tr>
         <tr className={css[className]}>
           {parentColl.cases.map((caseObj) => {
@@ -56,7 +84,7 @@ export const LandscapeView = (props: ITableProps) => {
 
   const renderColFromCaseObj = (collection: ICollection, caseObj: IProcessedCaseObj, index?: number) => {
     const {children, id, values} = caseObj;
-    const caseValuesWithId = {...values, id};
+    const caseValuesWithId: Values = {...values, id};
     const isFirstIndex = index === 0;
     const precisions = getAttrPrecisions(collections);
     const attrTypes = getAttrTypes(collections);
@@ -66,21 +94,38 @@ export const LandscapeView = (props: ITableProps) => {
       const className = getClassName(caseObj);
       return (
         <>
-          {showHeaders && isFirstIndex &&
+          {interactiveState?.showHeaders && isFirstIndex &&
             <tr className={css[className]}>
               <th colSpan={Object.keys(values).length}>{caseObj.collection.name}</th>
             </tr>
           }
           {isFirstIndex &&
             <tr className={css[className]}>
-              {mapHeadersFromValues(collection.id, `first-row-${index}`, values, attrVisibilities)}
+              <TableHeaders
+                collectionId={collection.id}
+                rowKey={`first-row-${index}`}
+                values={caseValuesWithId}
+                attrVisibilities={attrVisibilities}
+              />
             </tr>
           }
           <tr>
-            {mapCellsFromValues(
-                collection.id, `row-${index}`, caseValuesWithId, precisions, attrTypes, attrVisibilities
+            {Object.keys(caseValuesWithId).map((key, i) => {
+              return (
+                <TableCell
+                  key={`${caseValuesWithId}-${i}`}
+                  index={i}
+                  caseId={`${caseValuesWithId.id}`}
+                  attributeName={key}
+                  rowKey={`row-${index}`}
+                  collectionId={collection.id}
+                  cellValue={caseValuesWithId[key]}
+                  attrType={attrTypes[key]}
+                  precision={precisions[key]}
+                  isHidden={attrVisibilities[key]}
+                />
               )
-            }
+            })}
           </tr>
         </>
       );
@@ -107,7 +152,7 @@ export const LandscapeView = (props: ITableProps) => {
 
   const renderTable = () => {
     const parentColl = collections.filter((coll: ICollection) => !coll.parent);
-    const firstRowValues = parentColl[0].cases.map(caseObj => caseObj.values);
+    const firstRowValues = parentColl[0].cases.map((caseObj: IProcessedCaseObj )=> caseObj.values);
     const {className} = collectionClasses[0];
 
     return (

@@ -1,6 +1,7 @@
 import React, { ReactNode, useState } from "react";
 import { Editable, EditablePreview, EditableInput } from "@chakra-ui/react";
 import { updateCaseById } from "@concord-consortium/codap-plugin-api";
+import { useCodapContext } from "./CodapContext";
 
 import css from "./editable-table-cell.scss";
 
@@ -8,12 +9,12 @@ interface IProps {
   attrTitle: string;
   caseId: string;
   children: ReactNode;
-  handleUpdateCollections: () => void;
-  selectedDataSetName: string;
 }
 
 export const EditableTableCell = (props: IProps) => {
-  const { attrTitle, caseId, children, handleUpdateCollections, selectedDataSetName } = props;
+  const { attrTitle, caseId, children } = props;
+  const { selectedDataSet } = useCodapContext();
+
   const displayValue = String(children);
   const [editingValue, setEditingValue] = useState(displayValue);
   const [isEditing, setIsEditing] = useState(false);
@@ -29,10 +30,9 @@ export const EditableTableCell = (props: IProps) => {
 
   const handleSubmit = async (newValue: string) => {
     try {
-      await updateCaseById(selectedDataSetName, caseId, {[attrTitle]: newValue});
+      await updateCaseById(selectedDataSet.name, caseId, {[attrTitle]: newValue});
       setEditingValue(newValue);
       setIsEditing(false);
-      handleUpdateCollections();
     } catch (e) {
       console.error("Case not updated: ", e);
     }
@@ -50,7 +50,7 @@ export const EditableTableCell = (props: IProps) => {
         value={isEditing ? editingValue : displayValue}
       >
         {!isEditing && <EditablePreview />}
-        <EditableInput />
+        <EditableInput/>
       </Editable>
     </div>
   );

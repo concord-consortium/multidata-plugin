@@ -2,20 +2,18 @@ import React from "react";
 import { CaseValuesWithId, ITableProps } from "../types";
 import { DraggableTableContainer, DraggagleTableHeader } from "./draggable-table-tags";
 import { getAttrPrecisions, getAttrTypes, getAttrVisibility } from "../utils/utils";
+import { TableCell } from "./table-cell";
+import { useCodapContext } from "./CodapContext";
 
 import css from "./tables.scss";
 
-interface IFlatProps extends ITableProps {
-  cases: CaseValuesWithId[]
-}
-
-export const FlatTable = (props: IFlatProps) => {
-  const {selectedDataSet, collections, collectionClasses, cases, mapCellsFromValues, showHeaders } = props;
+export const FlatTable = (props: ITableProps) => {
+  const { cases, collections, interactiveState, selectedDataSet } = useCodapContext();
+  const showHeaders = interactiveState?.showHeaders;
   const collection = collections[0];
-  const {className} = collectionClasses[0];
+  const className = "collections0";
   const attrVisibilities = getAttrVisibility(collections);
   const collectionAttrsToUse = collection.attrs.filter(attr => !attrVisibilities[attr.title]);
-
   const titles = collectionAttrsToUse.map(attr => attr.title);
   const precisions = getAttrPrecisions(collections);
   const attrTypes = getAttrTypes(collections);
@@ -27,12 +25,14 @@ export const FlatTable = (props: IFlatProps) => {
     return orderedCase;
   });
 
+  console.log("I am the FlatTable rendering");
+
   return (
     <DraggableTableContainer collectionId="root">
       <table className={`${css.mainTable} ${css.flatTable} ${css[className]}}`}>
         <tbody>
           <tr className={css.mainHeader}>
-            <th colSpan={cases.length}>{selectedDataSet.title}</th>
+            <th colSpan={cases.length}>{selectedDataSet?.title}</th>
           </tr>
           {showHeaders &&
           <tr className={css[className]}>
@@ -44,8 +44,8 @@ export const FlatTable = (props: IFlatProps) => {
                 key={attr.title}
                 collectionId={collection.id}
                 attrTitle={attr.title}
-                dataSetName={selectedDataSet.name}
-                dataSetTitle={selectedDataSet.title}
+                dataSetName={selectedDataSet?.name}
+                dataSetTitle={selectedDataSet?.title}
               >
                 {attr.title}
               </DraggagleTableHeader>)}
@@ -53,7 +53,24 @@ export const FlatTable = (props: IFlatProps) => {
           {orderedCases.map((c, index) => {
             return (
               <tr key={`${index}-${c.id}`}>
-                {mapCellsFromValues(collection.id, `row-${index}`, c, precisions, attrTypes, attrVisibilities )}
+                {Object.keys(c).map((key, i) => {
+                  return (
+                    <TableCell
+                      key={`${i}-${c.id}-${key}`}
+                      collectionId={collection.id}
+                      rowKey={`${index}-${c.id}`}
+                      index={i}
+                      caseId={`${c.id}`}
+                      attributeName={key}
+                      cellValue={c[key]}
+                      precision={precisions[key]}
+                      attrType={attrTypes[key]}
+                      isHidden={attrVisibilities[key]}
+                      isParent={false}
+                    />
+                  )
+
+                })}
               </tr>
             );
           })}

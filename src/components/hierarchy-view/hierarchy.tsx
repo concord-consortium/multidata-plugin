@@ -1,10 +1,9 @@
 import React from "react";
-import { InteractiveState } from "../../hooks/useCodapState";
+import { useCodapState } from "../../hooks/useCodapState";
 import { useWindowResized } from "../../hooks/useWindowResized";
 import { useDragging } from "../../hooks/useDragging";
 import { DndContext, DragOverlay, DropAnimation, closestCorners,
   defaultDropAnimation } from "@dnd-kit/core";
-import { IDataSet, ICollections, ICollection } from "../../types";
 import { Collection } from "./collection";
 import { Menu } from "../menu";
 
@@ -13,22 +12,13 @@ import css from "./hierarchy.scss";
 const CollectionGap = 23;
 
 interface IProps {
-  selectedDataSet: any;
-  dataSets: IDataSet[];
-  collections: ICollections;
-  interactiveState: InteractiveState
-  handleSelectDataSet: (e: React.ChangeEvent<HTMLSelectElement>) => void
-  updateInteractiveState: (update: Partial<InteractiveState>) => void
-  handleUpdateAttributePosition: (collection: ICollection, attrName: string, newPosition: number) => void,
-  handleAddCollection: (newCollectionName: string) => void
-  handleAddAttribute: (collection: ICollection, newAttrName: string) => void,
-  handleSetCollections: (collections: Array<ICollection>) => void
-  handleShowComponent: () => void
+  onSelectDataSet: (e: React.ChangeEvent<HTMLSelectElement>) => void
 }
 
 export const Hierarchy = (props: IProps) => {
-  const {selectedDataSet, dataSets, collections, handleSelectDataSet, handleSetCollections,
-    handleUpdateAttributePosition, handleAddCollection, handleAddAttribute, handleShowComponent} = props;
+  const { onSelectDataSet } = props;
+  const { dataSets, selectedDataSet, collections, handleSetCollections, handleAddCollection,
+    handleAddAttribute, handleUpdateAttributePosition, handleSelectSelf } = useCodapState();
 
   const {activeAttr, handleDragStart, handleDragOver, handleDragEnd} = useDragging({collections,
     handleSetCollections, handleUpdateAttributePosition});
@@ -44,7 +34,7 @@ export const Hierarchy = (props: IProps) => {
     };
 
     return (
-      <div className={css.hierarchyWrapper} onClick={handleShowComponent}>
+      <div className={css.hierarchyWrapper} onClick={handleSelectSelf}>
         <div className={css.hierarchy} style={{gap: CollectionGap}}>
         <DndContext
           collisionDetection={closestCorners}
@@ -83,9 +73,7 @@ export const Hierarchy = (props: IProps) => {
   return (
     <div>
       <Menu
-        dataSets={dataSets}
-        selectedDataSet={selectedDataSet}
-        handleSelectDataSet={handleSelectDataSet}
+        onSelectDataSet={onSelectDataSet}
       />
       {selectedDataSet && renderHeirarchy()}
     </div>

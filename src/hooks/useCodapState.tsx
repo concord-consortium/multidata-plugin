@@ -165,12 +165,6 @@ export const useCodapState = () => {
     }
   }, [collections, selectedDataSet]);
 
-
-  const handleSelectDataSet = (name: string) => {
-    const selected = dataSets.find((d) => d.title === name);
-    return selected ? handleSetDataSet(selected.name) :  handleSetDataSet("");
-  };
-
   const getCollectionNameFromId = (id: number) => {
     return collections.find((c: ICollection) => c.id === id)?.name;
   };
@@ -230,6 +224,13 @@ export const useCodapState = () => {
     setInteractiveState(newState);
   }, [interactiveState, setInteractiveState]);
 
+  const handleUpdateInteractiveState = useCallback((update: Partial<InteractiveState>) => {
+    const newState = {...interactiveState, ...update};
+    if (JSON.stringify(newState) !== JSON.stringify(interactiveState)) {
+      updateInteractiveState(newState);
+    }
+  }, [interactiveState, updateInteractiveState]);
+
   const handleSelectSelf = async () => {
     selectSelf();
   };
@@ -258,6 +259,17 @@ export const useCodapState = () => {
     }
   }, [selectedDataSet]);
 
+  const handleSelectDataSet = (name: string) => {
+    const selected = dataSets.find((d) => d.title === name);
+    if (selected) {
+      handleSetDataSet(selected.name);
+      handleUpdateInteractiveState({dataSetName: selected.name});
+    } else {
+      handleSetDataSet("");
+      handleUpdateInteractiveState({dataSetName: null});
+    }
+  };
+
   return {
     init,
     handleSelectSelf,
@@ -267,7 +279,7 @@ export const useCodapState = () => {
     handleSetCollections: setCollections,
     handleSelectDataSet,
     getCollectionNameFromId,
-    updateInteractiveState,
+    handleUpdateInteractiveState,
     interactiveState,
     cases,
     connected,

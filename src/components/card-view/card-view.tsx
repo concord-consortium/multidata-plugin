@@ -1,25 +1,21 @@
-import React, { useEffect, useMemo } from "react";
-import { InteractiveState } from "../../hooks/useCodapState";
-import { IDataSet, ICollections, ICaseObjCommon, ICollection } from "../../types";
+import React, { useEffect, useMemo, useRef, useState } from "react";
+import { useCodapState } from "../../hooks/useCodapState";
+import { ICaseObjCommon, ICollection } from "../../types";
 import { Menu } from "../menu";
 import { CaseView } from "./case-view";
 
 import css from "./card-view.scss";
 
 interface ICardViewProps {
-  selectedDataSet: any;
-  dataSets: IDataSet[];
-  collections: ICollections;
-  interactiveState: InteractiveState
-  handleSelectDataSet: (e: React.ChangeEvent<HTMLSelectElement>) => void
-  updateTitle: (title: string) => Promise<void>
-  selectCases: (caseIds: number[]) => Promise<void>
-  codapSelectedCase: ICaseObjCommon|undefined;
+  onSelectDataSet: (e: React.ChangeEvent<HTMLSelectElement>) => void
 }
 
 export const CardView = (props: ICardViewProps) => {
-  const {collections, dataSets, selectedDataSet, updateTitle, selectCases, codapSelectedCase,
-         handleSelectDataSet} = props;
+  const { onSelectDataSet } = props;
+  const { dataSets, selectedDataSet, collections, selectCODAPCases, listenForSelectionChanges,
+    updateTitle } = useCodapState();
+  const listeningToDataSetId = useRef(0);
+  const [codapSelectedCase, setCodapSelectedCase] = useState<ICaseObjCommon|undefined>(undefined);
 
   const rootCollection = useMemo(() => {
     return collections.find((c: ICollection) => !c.parent);
@@ -40,6 +36,20 @@ export const CardView = (props: ICardViewProps) => {
       updateTitle(`${selectedDataSet.title} Data`);
     }
   }, [selectedDataSet, updateTitle]);
+
+  useEffect(() => {
+    if (selectedDataSet && listeningToDataSetId.current !== selectedDataSet.id) {
+      listenForSelectionChanges((notification) => {
+        const result = notification?.values?.result;
+        let newCase: ICaseObjCommon|undefined = undefined;
+        if (result?.success && result.cases?.length >= 0) {
+          newCase = result.cases[0];
+        }
+        setCodapSelectedCase(newCase);
+      });
+      listeningToDataSetId.current = selectedDataSet.id;
+    }
+  }, [selectedDataSet, listenForSelectionChanges, setCodapSelectedCase]);
 
   // array of case ids from root collection down to selected case
   const codapSelectedCaseLineage = useMemo<number[]>(() => {
@@ -69,9 +79,7 @@ export const CardView = (props: ICardViewProps) => {
   if (!selectedDataSet || !rootCollection) {
     return (
       <Menu
-        dataSets={dataSets}
-        selectedDataSet={selectedDataSet}
-        handleSelectDataSet={handleSelectDataSet}
+        onSelectDataSet={onSelectDataSet}
       />
     );
   }
@@ -83,7 +91,7 @@ export const CardView = (props: ICardViewProps) => {
         cases={rootCollection.cases}
         attrs={attrs}
         level={0}
-        selectCases={selectCases}
+        selectCases={selectCODAPCases}
         codapSelectedCaseLineage={codapSelectedCaseLineage}
       />
     </div>

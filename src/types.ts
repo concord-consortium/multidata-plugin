@@ -58,20 +58,13 @@ export interface ICollectionClass {
 }
 
 export interface ITableProps {
-  showHeaders: boolean,
-  collectionClasses: Array<ICollectionClass>,
-  getClassName: (caseObj: IProcessedCaseObj) => string,
-  selectedDataSet: IDataSet,
-  collections: Array<ICollection>,
-  mapCellsFromValues: (collectionId: number, rowKey: string, caseValuesWithId: Values,
-      precisions: Record<string, number>, attrTypes: Record<string, string | undefined | null>,
-      attrVisibilities: Record<string, boolean>, isParent?: boolean, resizeCounter?: number,
-      parentLevel?: number) => ReactNode | ReactNode[],
-  mapHeadersFromValues: (collectionId: number, rowKey: string, values: Values,
-      attrVisibilities: Record<string, boolean>) => ReactNode | ReactNode[],
   getValueLength: (firstRow: Array<Values>) => number
   paddingStyle: Record<string, string>
-  handleUpdateCollections: () => void
+}
+
+export interface INestedTableProps extends ITableProps {
+  collectionClasses: Array<ICollectionClass>
+  getClassName: (caseObj: IProcessedCaseObj) => string
 }
 
 export interface IBoundingBox {

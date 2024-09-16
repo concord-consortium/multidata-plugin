@@ -163,13 +163,10 @@ interface DraggagleTableDataProps {
   isParent?: boolean;
   resizeCounter?: number;
   parentLevel?: number;
-  selectedDataSetName: string;
-  handleUpdateCollections: () => void;
 }
 
 export const DraggagleTableData: React.FC<PropsWithChildren<DraggagleTableDataProps>> = (props) => {
-  const {collectionId, attrTitle, children, caseId, isParent, resizeCounter, parentLevel=0,
-         selectedDataSetName, handleUpdateCollections} = props;
+  const {collectionId, attrTitle, children, caseId, isParent, resizeCounter, parentLevel=0} = props;
   const {dragOverId, dragSide} = useDraggableTableContext();
   const {style} = getIdAndStyle(collectionId, attrTitle, dragOverId, dragSide);
   const {tableScrollTop, scrollY} = useTableTopScrollTopContext();
@@ -213,9 +210,7 @@ export const DraggagleTableData: React.FC<PropsWithChildren<DraggagleTableDataPr
     return (
       <EditableTableCell
         attrTitle={attrTitle}
-        handleUpdateCollections={handleUpdateCollections}
         caseId={caseId}
-        selectedDataSetName={selectedDataSetName}
       >
         {children}
       </EditableTableCell>

@@ -1,13 +1,12 @@
 import React, { useCallback, useEffect, useState } from "react";
 import { InteractiveState } from "../hooks/useCodapState";
-import { ICollection, IProcessedCaseObj, Values, ICollectionClass, IDataSet,
-         ICollections, CaseValuesWithId } from "../types";
-import { PortraitView } from "./portrait-view";
+import { ICollection, ICollectionClass, IProcessedCaseObj, Values } from "../types";
 import { Menu } from "./menu";
+import { PortraitView } from "./portrait-view";
 import { LandscapeView } from "./landscape-view";
 import { FlatTable } from "./flat-table";
 import { DraggableTableContext, useDraggableTable } from "../hooks/useDraggableTable";
-import { DraggagleTableData, DraggagleTableHeader } from "./draggable-table-tags";
+import { useCodapContext } from "./CodapContext";
 
 import css from "./nested-table.scss";
 
@@ -16,25 +15,14 @@ const landscape = "Landscape";
 const none = "";
 
 interface IProps {
-  selectedDataSet: any;
-  dataSets: IDataSet[];
-  collections: ICollections;
-  cases: CaseValuesWithId[];
-  interactiveState: InteractiveState
-  handleSelectDataSet: (e: React.ChangeEvent<HTMLSelectElement>) => void
-  updateInteractiveState: (update: Partial<InteractiveState>) => void
-  handleShowComponent: () => void
-  handleSetCollections: (collections: Array<ICollection>) => void
-  handleUpdateAttributePosition: (collection: ICollection, attrName: string, newPosition: number) => void
-  handleCreateCollectionFromAttribute: (collection: ICollection, attr: any, parent: number|string) => Promise<void>
-  handleUpdateCollections: () => void
+  selectedDataSet: string;
+  onSelectDataSet: (e: React.ChangeEvent<HTMLSelectElement>) => void;
 }
 
 export const NestedTable = (props: IProps) => {
-  const {selectedDataSet, dataSets, collections, cases, interactiveState,
-         handleSelectDataSet, updateInteractiveState, handleShowComponent,
-         handleSetCollections, handleUpdateAttributePosition,
-         handleCreateCollectionFromAttribute, handleUpdateCollections} = props;
+  const { selectedDataSet, onSelectDataSet} = props;
+  const { collections, interactiveState, handleSetCollections, handleUpdateAttributePosition,
+    handleCreateCollectionFromAttribute, handleSelectSelf, handleUpdateInteractiveState } = useCodapContext();
   const [collectionClasses, setCollectionClasses] = useState<Array<ICollectionClass>>([]);
   const [paddingStyle, setPaddingStyle] = useState<Record<string, string>>({padding: "0px"});
 
@@ -46,7 +34,7 @@ export const NestedTable = (props: IProps) => {
   });
 
   useEffect(() => {
-    if (collections.length) {
+    if (collections?.length) {
       const classes = collections.map((coll: ICollection, idx: number) => {
         return {
           collectionName: coll.name,
@@ -60,15 +48,15 @@ export const NestedTable = (props: IProps) => {
   }, [collections]);
 
   useEffect(() => {
-    if (!interactiveState.dataSetName) {
-      updateInteractiveState({displayMode: none});
+    if (!interactiveState?.dataSetName) {
+      handleUpdateInteractiveState({displayMode: none});
     }
-  }, [interactiveState.dataSetName, updateInteractiveState]);
+  }, [interactiveState?.dataSetName, handleUpdateInteractiveState]);
 
   useEffect(() => {
-    const style =  interactiveState.padding ? {padding: "3px"} : {padding: "0px"};
+    const style =  interactiveState?.padding ? {padding: "3px"} : {padding: "0px"};
     setPaddingStyle(style);
-  }, [interactiveState.padding]);
+  }, [interactiveState?.padding]);
 
   const getClassName = (caseObj: IProcessedCaseObj) => {
     const {collection} = caseObj;
@@ -80,90 +68,16 @@ export const NestedTable = (props: IProps) => {
   };
 
   const togglePadding = useCallback(() => {
-    updateInteractiveState({padding: !interactiveState.padding});
-  }, [interactiveState, updateInteractiveState]);
+    handleUpdateInteractiveState({padding: !interactiveState?.padding});
+  }, [interactiveState, handleUpdateInteractiveState]);
 
   const toggleShowHeaders = useCallback(() => {
-    updateInteractiveState({showHeaders: !interactiveState.showHeaders});
-  }, [interactiveState, updateInteractiveState]);
+    handleUpdateInteractiveState({showHeaders: !interactiveState?.showHeaders});
+  }, [interactiveState, handleUpdateInteractiveState]);
 
   const handleSelectDisplayMode = useCallback((e: React.ChangeEvent<HTMLSelectElement>) => {
-    updateInteractiveState({displayMode: e.target.value});
-  }, [updateInteractiveState]);
-
-  const mapHeadersFromValues = (collectionId: number, rowKey: string, values: Values,
-      attrVisibilities: Record<string, boolean>) => {
-    return (
-      <>
-        {(Object.keys(values)).map((key, index) => {
-          if (!attrVisibilities[key] && (typeof values[key] === "string" || typeof values[key] === "number")) {
-            return (
-              <DraggagleTableHeader
-                key={`${collectionId}-${rowKey}-${key}-${index}`}
-                collectionId={collectionId}
-                attrTitle={key}
-                dataSetName={selectedDataSet.name}
-                dataSetTitle={selectedDataSet.title}
-              >{key}
-              </DraggagleTableHeader>
-            );
-          }
-        })}
-      </>
-    );
-  };
-
-  const mapCellsFromValues = (collectionId: number, rowKey: string, aCase: Values,
-      precisions: Record<string, number>, attrTypes: Record<string, string | undefined | null>,
-      attrVisibilities: Record<string, boolean>, isParent?: boolean, resizeCounter?: number, parentLevel?: number) => {
-    return Object.keys(aCase).map((key, index) => {
-      if (key === "id") return null;
-
-      const isWholeNumber = aCase[key] % 1 === 0;
-      const precision = precisions[key];
-      // Numbers are sometimes passed in from CODAP as a string so we use the attribute type to
-      // determine if it should be parsed as a number.
-      // Numbers that are whole numbers are treated as integers, so we should ignore the precision.
-      // Numeric cells that are empty should be treated as empty strings.
-      const isNumericType = attrTypes[key] === "numeric";
-      const hasValue = aCase[key] !== "";
-      const parsedValue = parseFloat(aCase[key]);
-      const isNumber = !isNaN(parsedValue);
-      const hasPrecision = precision !== undefined;
-      const defaultValue = aCase[key];
-      const isNumberType = typeof aCase[key] === "number";
-      let val;
-      if (isNumericType && hasValue && isNumber) {
-          val = isWholeNumber ? parseInt(aCase[key], 10)
-                              : parsedValue.toFixed(hasPrecision ? precision : 2);
-      } else if (!isNumericType && isNumberType && hasValue) {
-          val = defaultValue.toFixed(hasPrecision ? precision : 2);
-      } else {
-          val = defaultValue;
-      }
-
-      if (attrVisibilities[key]) {
-        return null;
-      }
-      if (typeof val === "string" || typeof val === "number") {
-        return (
-          <DraggagleTableData
-            collectionId={collectionId}
-            attrTitle={key}
-            key={`${rowKey}-${val}-${index}}`}
-            isParent={isParent}
-            caseId={aCase.id}
-            resizeCounter={resizeCounter}
-            parentLevel={parentLevel}
-            selectedDataSetName={selectedDataSet.name}
-            handleUpdateCollections={handleUpdateCollections}
-          >
-            {val}
-          </DraggagleTableData>
-        );
-      }
-    });
-  };
+    handleUpdateInteractiveState({displayMode: e.target.value});
+  }, [handleUpdateInteractiveState]);
 
   const getValueLength = (firstRow: Array<Values>) => {
     let valueCount = 0;
@@ -176,12 +90,20 @@ export const NestedTable = (props: IProps) => {
 
   const renderTable = () => {
     const isNoHierarchy = collections.length === 1;
-    const classesExist = collectionClasses.length > 0;
-    const tableProps = {showHeaders: interactiveState.showHeaders, collectionClasses, collections, selectedDataSet,
-      getClassName, mapHeadersFromValues, mapCellsFromValues, getValueLength, paddingStyle, handleUpdateCollections};
-    const flatProps = {...tableProps, cases};
-    if (isNoHierarchy && classesExist) {
-      return <FlatTable {...flatProps}/>;
+    // const classesExist = collectionClasses.length > 0;
+    const tableProps = {
+        getValueLength,
+        collectionClasses,
+        getClassName,
+        paddingStyle
+    };
+    if (isNoHierarchy) {
+      return (
+        <FlatTable
+          getValueLength={getValueLength}
+          paddingStyle={paddingStyle}
+        />
+      )
     } else {
       return (
         interactiveState.displayMode === portrait ?
@@ -193,24 +115,22 @@ export const NestedTable = (props: IProps) => {
     }
   };
 
-  const showDisplayMode = collections.length > 1 && selectedDataSet;
+  const showDisplayMode = !!(collections?.length > 1 && selectedDataSet);
 
   return (
-    <div className={css.nestedTableWrapper} onClick={handleShowComponent}>
+    <div className={css.nestedTableWrapper} onClick={handleSelectSelf}>
       <Menu
-        dataSets={dataSets}
-        selectedDataSet={selectedDataSet}
-        handleSelectDataSet={handleSelectDataSet}
-        handleSelectDisplayMode={handleSelectDisplayMode}
+        onSelectDataSet={onSelectDataSet}
+        onSelectDisplayMode={handleSelectDisplayMode}
         togglePadding={togglePadding}
         toggleShowHeaders={toggleShowHeaders}
-        showHeaders={interactiveState.showHeaders}
-        padding={interactiveState.padding}
-        displayMode={interactiveState.displayMode}
+        displayMode={interactiveState?.displayMode}
         showDisplayMode={showDisplayMode}
       />
       <DraggableTableContext.Provider value={draggableTable}>
-        {selectedDataSet && renderTable()}
+        {/* <FocusProvider> */}
+          {selectedDataSet && renderTable()}
+        {/* </FocusProvider> */}
       </DraggableTableContext.Provider>
     </div>
   );

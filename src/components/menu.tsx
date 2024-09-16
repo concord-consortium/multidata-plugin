@@ -1,14 +1,12 @@
 import React from "react";
-import { IDataSet } from "../types";
 import css from "./menu.scss";
+import { useCodapContext } from "./CodapContext";
 
 interface IProps {
-  selectedDataSet: any,
-  handleSelectDataSet: (e: React.ChangeEvent<HTMLSelectElement>) => void,
-  dataSets: Array<IDataSet>,
+  onSelectDataSet: (e: React.ChangeEvent<HTMLSelectElement>) => void,
 
   // these are optional and only used by the nested table view
-  handleSelectDisplayMode?: (e: React.ChangeEvent<HTMLSelectElement>) => void,
+  onSelectDisplayMode?: (e: React.ChangeEvent<HTMLSelectElement>) => void,
   togglePadding?: () => void,
   toggleShowHeaders?: () => void,
   showHeaders?: boolean,
@@ -22,10 +20,11 @@ const landscape = "Landscape";
 const none = "";
 
 export const Menu = (props: IProps) => {
-  const {handleSelectDataSet, dataSets, handleSelectDisplayMode, togglePadding,
-    showHeaders, padding, toggleShowHeaders, displayMode, selectedDataSet, showDisplayMode} = props;
-
+  const {onSelectDataSet: handleSelectDataSet, onSelectDisplayMode: handleSelectDisplayMode, togglePadding,
+    showHeaders, padding, toggleShowHeaders, displayMode, showDisplayMode} = props;
+  const { dataSets, selectedDataSet } = useCodapContext();
   const displayModes = [none, portrait, landscape];
+
   return (
     <div className={css.menu}>
       <div className={css.option}>

@@ -1,46 +1,27 @@
-import React, { useCallback, useEffect, useRef, useState } from "react";
-import { InteractiveState, useCodapState } from "../hooks/useCodapState";
+import React, { useCallback, useEffect, useState } from "react";
+import { InteractiveState } from "../hooks/useCodapState";
 import { NestedTable } from "./nested-table";
 import { Hierarchy } from "./hierarchy-view/hierarchy";
 import { CardView } from "./card-view/card-view";
-import { ICaseObjCommon } from "../types";
+import { useCodapContext } from "./CodapContext";
 
 import css from "./app.scss";
 
 function App() {
-  const {connected, selectedDataSet, dataSets, collections, cases, interactiveState,
-         updateInteractiveState: _updateInteractiveState, init,
-         handleSelectDataSet: _handleSelectDataSet, handleUpdateAttributePosition,
-         handleAddCollection, handleAddAttribute, handleSetCollections, handleSelectSelf,
-         updateTitle, selectCODAPCases, listenForSelectionChanges,
-         handleCreateCollectionFromAttribute, handleUpdateCollections
-        } = useCodapState();
+  const { handleUpdateInteractiveState, handleSelectDataSet, interactiveState, selectedDataSet, dataSets,
+    connected, handleSelectSelf } = useCodapContext();
 
-  useEffect(() => {
-    init();
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  const [view, setView] = useState<InteractiveState["view"]>(null);
 
-  const updateInteractiveState = useCallback((update: Partial<InteractiveState>) => {
-    const newState = {...interactiveState, ...update};
-    if (JSON.stringify(newState) !== JSON.stringify(interactiveState)) {
-      _updateInteractiveState(newState);
-    }
-  }, [interactiveState, _updateInteractiveState]);
+  const handleSetView = useCallback((newView: InteractiveState["view"]) => {
+    setView(newView);
+    handleUpdateInteractiveState({view: newView});
+  }, [handleUpdateInteractiveState]);
 
-  const handleSetView = useCallback((view: InteractiveState["view"]) => {
-    updateInteractiveState({view});
-  }, [updateInteractiveState]);
-
-  const handleSelectDataSet = useCallback((e: React.ChangeEvent<HTMLSelectElement>) => {
-    const dataSetName = e.target.value;
-    _handleSelectDataSet(dataSetName);
-    updateInteractiveState({dataSetName});
-  }, [_handleSelectDataSet, updateInteractiveState]);
-
-  const handleShowComponent = () => {
-    handleSelectSelf();
-  };
+  const onSelectDataSet = useCallback((e: React.ChangeEvent<HTMLSelectElement>) => {
+    const name = e.target.value;
+    handleSelectDataSet(name);
+  }, [handleSelectDataSet]);
 
   const renderSelectView = () => {
     return (
@@ -58,91 +39,48 @@ function App() {
   // select the saved dataset on startup
   useEffect(() => {
     if (interactiveState?.dataSetName && !selectedDataSet) {
-      _handleSelectDataSet(interactiveState.dataSetName);
+      handleSelectDataSet(interactiveState.dataSetName);
     }
-  }, [interactiveState, selectedDataSet, _handleSelectDataSet]);
+  }, [interactiveState, selectedDataSet, handleSelectDataSet]);
 
   // unselect the dataset if it is deleted
   useEffect(() => {
     if (selectedDataSet && !dataSets.find(ds => ds.id === selectedDataSet.id)) {
-      _handleSelectDataSet("");
+      handleSelectDataSet("");
     }
-  }, [interactiveState, dataSets, selectedDataSet, _handleSelectDataSet]);
-
-  const listeningToDataSetId = useRef(0);
-  const [codapSelectedCase, setCodapSelectedCase] = useState<ICaseObjCommon|undefined>(undefined);
-  useEffect(() => {
-    if (selectedDataSet && listeningToDataSetId.current !== selectedDataSet.id) {
-      listenForSelectionChanges((notification) => {
-        const result = notification?.values?.result;
-        let newCase: ICaseObjCommon|undefined = undefined;
-        if (result?.success && result.cases?.length >= 0) {
-          newCase = result.cases[0];
-        }
-        setCodapSelectedCase(newCase);
-      });
-      listeningToDataSetId.current = selectedDataSet.id;
-    }
-  }, [selectedDataSet, listenForSelectionChanges, setCodapSelectedCase]);
+  }, [interactiveState, dataSets, selectedDataSet, handleSelectDataSet]);
 
   if (!connected) {
     return <div className={css.loading}>Loading...</div>;
   }
 
-  switch (interactiveState.view) {
+  switch (view) {
     case "nested-table":
       return (
         <NestedTable
+          onSelectDataSet={onSelectDataSet}
           selectedDataSet={selectedDataSet}
-          dataSets={dataSets}
-          collections={collections}
-          cases={cases}
-          interactiveState={interactiveState}
-          handleSelectDataSet={handleSelectDataSet}
-          updateInteractiveState={updateInteractiveState}
-          handleShowComponent={handleShowComponent}
-          handleUpdateAttributePosition={handleUpdateAttributePosition}
-          handleSetCollections={handleSetCollections}
-          handleCreateCollectionFromAttribute={handleCreateCollectionFromAttribute}
-          handleUpdateCollections={handleUpdateCollections}
         />
       );
 
     case "hierarchy":
       return (
         <Hierarchy
-          selectedDataSet={selectedDataSet}
-          dataSets={dataSets}
-          collections={collections}
-          interactiveState={interactiveState}
-          handleSelectDataSet={handleSelectDataSet}
-          handleUpdateAttributePosition={handleUpdateAttributePosition}
-          updateInteractiveState={updateInteractiveState}
-          handleAddCollection={handleAddCollection}
-          handleAddAttribute={handleAddAttribute}
-          handleSetCollections={handleSetCollections}
-          handleShowComponent={handleShowComponent}
+          onSelectDataSet={onSelectDataSet}
         />
       );
 
     case "card-view":
       return (
         <CardView
-          selectedDataSet={selectedDataSet}
-          dataSets={dataSets}
-          collections={collections}
-          interactiveState={interactiveState}
-          handleSelectDataSet={handleSelectDataSet}
-          updateTitle={updateTitle}
-          selectCases={selectCODAPCases}
-          codapSelectedCase={codapSelectedCase}
+          onSelectDataSet={onSelectDataSet}
         />
       );
 
     default:
       return (
-        <div onClick={handleShowComponent}>
-          {renderSelectView()}
+        <div onClick={handleSelectSelf}>
+          { dataSets.length === 0 ? <p>No datasets available</p> :  renderSelectView() }
         </div>
       );
   }
