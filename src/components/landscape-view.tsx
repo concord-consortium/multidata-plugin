@@ -1,5 +1,5 @@
 import React from "react";
-import { ICollection, INestedTableProps, IProcessedCaseObj, ITableProps, Values } from "../types";
+import { ICollection, INestedTableProps, IProcessedCaseObj, Values } from "../types";
 import { DraggagleTableHeader } from "./draggable-table-tags";
 import { getAttrPrecisions, getAttrTypes, getAttrVisibility } from "../utils/utils";
 import { TableHeaders } from "./table-headers";
@@ -7,7 +7,6 @@ import { TableCell } from "./table-cell";
 import { useCodapContext } from "./CodapContext";
 
 import css from "./tables.scss";
-
 
 export const LandscapeView = (props: INestedTableProps) => {
   const {collectionClasses, getClassName, getValueLength, paddingStyle} = props;
@@ -39,7 +38,7 @@ export const LandscapeView = (props: INestedTableProps) => {
                 values={headerValues}
                 attrVisibilities={attrVisibilities}
               />
-            )
+            );
           })}
         </tr>
         <tr className={css[className]}>
@@ -124,7 +123,7 @@ export const LandscapeView = (props: INestedTableProps) => {
                   precision={precisions[key]}
                   isHidden={attrVisibilities[key]}
                 />
-              )
+              );
             })}
           </tr>
         </>

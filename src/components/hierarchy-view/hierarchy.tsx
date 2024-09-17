@@ -17,7 +17,7 @@ interface IProps {
 
 export const Hierarchy = (props: IProps) => {
   const { onSelectDataSet } = props;
-  const { dataSets, selectedDataSet, collections, handleSetCollections, handleAddCollection,
+  const { selectedDataSet, collections, handleSetCollections, handleAddCollection,
     handleAddAttribute, handleUpdateAttributePosition, handleSelectSelf } = useCodapState();
 
   const {activeAttr, handleDragStart, handleDragOver, handleDragEnd} = useDragging({collections,

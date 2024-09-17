@@ -1,9 +1,9 @@
 import React, { useCallback, useEffect, useState } from "react";
-import { InteractiveState } from "../hooks/useCodapState";
+import { useCodapContext } from "./CodapContext";
+import { InteractiveState } from "../types";
 import { NestedTable } from "./nested-table";
 import { Hierarchy } from "./hierarchy-view/hierarchy";
 import { CardView } from "./card-view/card-view";
-import { useCodapContext } from "./CodapContext";
 
 import css from "./app.scss";
 

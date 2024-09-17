@@ -14,7 +14,7 @@ import {
   updateAttributePosition,
 } from "@concord-consortium/codap-plugin-api";
 import { getCases, getDataSetCollections, sortAttribute } from "../utils/apiHelpers";
-import { ICollections, ICollection, IDataSet } from "../types";
+import { ICollections, ICollection, IDataSet, InteractiveState } from "../types";
 
 const iFrameDescriptor = {
   version: "0.5.0",
@@ -25,14 +25,6 @@ const iFrameDescriptor = {
     height: 400
   }
 };
-
-export interface InteractiveState {
-  view: "nested-table" | "hierarchy" | "card-view" | null
-  dataSetName: string|null;
-  padding: boolean;
-  showHeaders: boolean;
-  displayMode: string;
-}
 
 export const useCodapState = () => {
   const [connected, setConnected] = useState(false);

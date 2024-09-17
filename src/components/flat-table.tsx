@@ -68,8 +68,7 @@ export const FlatTable = (props: ITableProps) => {
                       isHidden={attrVisibilities[key]}
                       isParent={false}
                     />
-                  )
-
+                  );
                 })}
               </tr>
             );

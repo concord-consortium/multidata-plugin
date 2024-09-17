@@ -21,7 +21,6 @@ export const TableHeaders: React.FC<MapHeadersFromValuesProps> = ({
     <>
       {Object.keys(values).map((key, index) => {
         if (!attrVisibilities[key] && (typeof values[key] === "string" || typeof values[key] === "number")) {
-          console.log("Rendering header for key:", key); // Debugging log
           return (
             <DraggagleTableHeader
               key={`${collectionId}-${rowKey}-${key}-${index}`}
@@ -34,7 +33,7 @@ export const TableHeaders: React.FC<MapHeadersFromValuesProps> = ({
             </DraggagleTableHeader>
           );
         }
-        return null; // Return null if the condition is not met
+        return null;
       })}
     </>
   );

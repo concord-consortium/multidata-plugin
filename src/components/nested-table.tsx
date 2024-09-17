@@ -1,5 +1,4 @@
 import React, { useCallback, useEffect, useState } from "react";
-import { InteractiveState } from "../hooks/useCodapState";
 import { ICollection, ICollectionClass, IProcessedCaseObj, Values } from "../types";
 import { Menu } from "./menu";
 import { PortraitView } from "./portrait-view";
@@ -90,26 +89,21 @@ export const NestedTable = (props: IProps) => {
 
   const renderTable = () => {
     const isNoHierarchy = collections.length === 1;
-    // const classesExist = collectionClasses.length > 0;
-    const tableProps = {
-        getValueLength,
-        collectionClasses,
-        getClassName,
-        paddingStyle
-    };
+    const flatProps = {getValueLength, paddingStyle};
+    const nestedTableProps = {...flatProps, collectionClasses, getClassName};
     if (isNoHierarchy) {
       return (
         <FlatTable
           getValueLength={getValueLength}
           paddingStyle={paddingStyle}
         />
-      )
+      );
     } else {
       return (
         interactiveState.displayMode === portrait ?
-          <PortraitView {...tableProps} /> :
+          <PortraitView {...nestedTableProps} /> :
           interactiveState.displayMode === landscape ?
-          <LandscapeView {...tableProps} /> :
+          <LandscapeView {...nestedTableProps} /> :
           <div/>
       );
     }
@@ -126,6 +120,8 @@ export const NestedTable = (props: IProps) => {
         toggleShowHeaders={toggleShowHeaders}
         displayMode={interactiveState?.displayMode}
         showDisplayMode={showDisplayMode}
+        padding={interactiveState?.padding}
+        showHeaders={interactiveState?.showHeaders}
       />
       <DraggableTableContext.Provider value={draggableTable}>
         {/* <FocusProvider> */}

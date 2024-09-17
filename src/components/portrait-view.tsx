@@ -1,13 +1,13 @@
-import React, { useRef, useState } from "react";
+import React, { useRef } from "react";
 import { ICollection, INestedTableProps, IProcessedCaseObj, Values } from "../types";
 import { DraggableTableContainer, DroppableTableData, DroppableTableHeader } from "./draggable-table-tags";
 import { TableScrollTopContext, useTableScrollTop } from "../hooks/useTableScrollTop";
 import { getAttrPrecisions, getAttrTypes, getAttrVisibility } from "../utils/utils";
-
-import css from "./tables.scss";
 import { TableHeaders } from "./table-headers";
 import { useCodapContext } from "./CodapContext";
 import { TableCell } from "./table-cell";
+
+import css from "./tables.scss";
 
 interface IPortraitViewRowProps extends INestedTableProps {
   collectionId: number;
@@ -46,7 +46,7 @@ export const PortraitViewRow = (props: IPortraitViewRowProps) => {
               precision={precisions[key]}
               isHidden={attrVisibilities[key]}
             />
-          )
+          );
         })}
       </tr>
     );
@@ -79,6 +79,7 @@ export const PortraitViewRow = (props: IPortraitViewRowProps) => {
               attrType={attrTypes[i]}
               precision={precisions[i]}
               isHidden={attrVisibilities[key]}
+              isParent={isParent}
             />
           ))}
           <DroppableTableData collectionId={collectionId} style={paddingStyle}>
@@ -130,7 +131,7 @@ export const PortraitView = (props: INestedTableProps) => {
 
   const renderTable = () => {
     const parentColl = collections.filter((coll: ICollection) => !coll.parent)[0];
-    const className = "collections0";
+    const className = `collection0`;
     const firstRowValues = parentColl.cases.map(caseObj => caseObj.values);
     const valueCount = getValueLength(firstRowValues);
     const precisions = getAttrPrecisions(collections);
@@ -139,8 +140,8 @@ export const PortraitView = (props: INestedTableProps) => {
 
     return (
       <DraggableTableContainer>
-        <table className={`${css.mainTable} ${css.portraitTable} ${css[className]}`} ref={tableRef}>
-          <tbody className={`table-body ${css[className]}`}>
+        <table className={`${css.mainTable} ${css.portraitTable} ${`tables-${className}`}`} ref={tableRef}>
+          <tbody className={`table-body ${className}`}>
             <tr className={css.mainHeader}>
               <th className={css.datasetNameHeader} colSpan={valueCount}>{selectedDataSet.name}</th>
             </tr>

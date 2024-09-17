@@ -12,7 +12,7 @@ interface ICardViewProps {
 
 export const CardView = (props: ICardViewProps) => {
   const { onSelectDataSet } = props;
-  const { dataSets, selectedDataSet, collections, selectCODAPCases, listenForSelectionChanges,
+  const { selectedDataSet, collections, selectCODAPCases, listenForSelectionChanges,
     updateTitle } = useCodapState();
   const listeningToDataSetId = useRef(0);
   const [codapSelectedCase, setCodapSelectedCase] = useState<ICaseObjCommon|undefined>(undefined);

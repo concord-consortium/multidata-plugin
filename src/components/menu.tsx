@@ -1,6 +1,7 @@
 import React from "react";
-import css from "./menu.scss";
 import { useCodapContext } from "./CodapContext";
+
+import css from "./menu.scss";
 
 interface IProps {
   onSelectDataSet: (e: React.ChangeEvent<HTMLSelectElement>) => void,
