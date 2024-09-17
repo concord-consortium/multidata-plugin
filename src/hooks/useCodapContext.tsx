@@ -1,6 +1,6 @@
 import React, { createContext, ReactNode, useContext, useEffect } from "react";
 import { CodapState } from "../types";
-import { useCodapState } from "../hooks/useCodapState";
+import { useCodapState } from "./useCodapState";
 
 const CodapContext = createContext({} as CodapState);
 

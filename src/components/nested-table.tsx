@@ -5,7 +5,7 @@ import { PortraitView } from "./portrait-view";
 import { LandscapeView } from "./landscape-view";
 import { FlatTable } from "./flat-table";
 import { DraggableTableContext, useDraggableTable } from "../hooks/useDraggableTable";
-import { useCodapContext } from "./CodapContext";
+import { useCodapContext } from "../hooks/useCodapContext";
 
 import css from "./nested-table.scss";
 

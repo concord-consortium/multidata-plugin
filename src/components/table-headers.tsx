@@ -1,7 +1,7 @@
 import React from "react";
 import { DraggagleTableHeader } from "./draggable-table-tags";
 import { Values } from "../types";
-import { useCodapContext } from "./CodapContext";
+import { useCodapContext } from "../hooks/useCodapContext";
 
 interface MapHeadersFromValuesProps {
   collectionId: number;

@@ -1,5 +1,5 @@
 import React from "react";
-import { useCodapContext } from "./CodapContext";
+import { useCodapContext } from "../hooks/useCodapContext";
 
 import css from "./menu.scss";
 

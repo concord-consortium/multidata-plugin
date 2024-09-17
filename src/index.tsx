@@ -1,6 +1,6 @@
 import React from "react";
 import { createRoot } from "react-dom/client";
-import { CodapProvider } from "./components/CodapContext";
+import { CodapProvider } from "./hooks/useCodapContext";
 import App from "./components/app";
 
 import "./index.css";

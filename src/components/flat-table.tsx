@@ -3,7 +3,7 @@ import { CaseValuesWithId, ITableProps } from "../types";
 import { DraggableTableContainer, DraggagleTableHeader } from "./draggable-table-tags";
 import { getAttrPrecisions, getAttrTypes, getAttrVisibility } from "../utils/utils";
 import { TableCell } from "./table-cell";
-import { useCodapContext } from "./CodapContext";
+import { useCodapContext } from "../hooks/useCodapContext";
 
 import css from "./tables.scss";
 

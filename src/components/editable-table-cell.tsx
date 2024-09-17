@@ -1,7 +1,7 @@
 import React, { ReactNode, useState } from "react";
 import { Editable, EditablePreview, EditableInput } from "@chakra-ui/react";
 import { updateCaseById } from "@concord-consortium/codap-plugin-api";
-import { useCodapContext } from "./CodapContext";
+import { useCodapContext } from "../hooks/useCodapContext";
 
 import css from "./editable-table-cell.scss";
 

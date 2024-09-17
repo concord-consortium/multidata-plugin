@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useState } from "react";
-import { useCodapContext } from "./CodapContext";
+import { useCodapContext } from "../hooks/useCodapContext";
 import { InteractiveState } from "../types";
 import { NestedTable } from "./nested-table";
 import { Hierarchy } from "./hierarchy-view/hierarchy";

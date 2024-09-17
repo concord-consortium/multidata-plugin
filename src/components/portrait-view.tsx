@@ -4,7 +4,7 @@ import { DraggableTableContainer, DroppableTableData, DroppableTableHeader } fro
 import { TableScrollTopContext, useTableScrollTop } from "../hooks/useTableScrollTop";
 import { getAttrPrecisions, getAttrTypes, getAttrVisibility } from "../utils/utils";
 import { TableHeaders } from "./table-headers";
-import { useCodapContext } from "./CodapContext";
+import { useCodapContext } from "../hooks/useCodapContext";
 import { TableCell } from "./table-cell";
 
 import css from "./tables.scss";

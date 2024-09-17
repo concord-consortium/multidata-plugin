@@ -4,7 +4,7 @@ import { DraggagleTableHeader } from "./draggable-table-tags";
 import { getAttrPrecisions, getAttrTypes, getAttrVisibility } from "../utils/utils";
 import { TableHeaders } from "./table-headers";
 import { TableCell } from "./table-cell";
-import { useCodapContext } from "./CodapContext";
+import { useCodapContext } from "../hooks/useCodapContext";
 
 import css from "./tables.scss";
 
