@@ -59,7 +59,7 @@ export const CardView = (props: ICardViewProps) => {
       result.unshift(id);
 
       const collection = collectionsById[caseItem.collection.id];
-      const parentCollection = collection ? collectionsById[collection.parent] : undefined;
+      const parentCollection = collection?.parent ? collectionsById[collection.parent] : undefined;
       caseItem = parentCollection?.cases.find(c => c.id === parent) as ICaseObjCommon;
     }
 

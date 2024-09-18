@@ -13,8 +13,11 @@ import {
   createNewCollection,
   updateAttributePosition,
 } from "@concord-consortium/codap-plugin-api";
+import { getSnapshot } from "mobx-state-tree";
 import { getCases, getDataSetCollections, sortAttribute } from "../utils/apiHelpers";
-import { ICollections, ICollection, IDataSet } from "../types";
+import { ICollection, IDataSet } from "../types";
+import { DataSetModel, DataSetModelType, DataSetsModel } from "../models/datasets";
+import { CollectionModel } from "../models/collections";
 
 const iFrameDescriptor = {
   version: "0.5.0",
@@ -36,12 +39,12 @@ export interface InteractiveState {
 
 export const useCodapState = () => {
   const [connected, setConnected] = useState(false);
-  const [dataSets, setDataSets] = useState<IDataSet[]>([]);
+  const [dataSets, setDataSets] = useState<DataSetModelType[]>([]);
   const [selectedDataSet, setSelectedDataSet] = useState<any>(null);
 
   // const [selectedDataSet, setSelectedDataSet] = useState<IDataSet|null>(null);
   const [selectedDataSetName, setSelectedDataSetName] = useState<string>("");
-  const [collections, setCollections] = useState<ICollections>([]);
+  const [collections, setCollections] = useState<ICollection[]>([]);
   const [cases, setCases] = useState<any[]>([]);
   const [interactiveState, setInteractiveState] = useState<InteractiveState>({
     view: null,
@@ -55,7 +58,14 @@ export const useCodapState = () => {
 
   const getDataSets = async () => {
     const sets = await getListOfDataContexts();
-    setDataSets(sets.values);
+    const dataSetModels = sets.values.map((d: IDataSet) => {
+      const { guid, id, name, title } = d;
+      const dataSetModel = DataSetModel.create({guid, id, name, title});
+      return dataSetModel;
+    });
+    const dataSetsModel = DataSetsModel.create({dataSets: dataSetModels});
+    const _dataSets = getSnapshot(dataSetsModel);
+    setDataSets(_dataSets.dataSets);
   };
 
   const handleSetDataSet = async (name: string|null) => {
@@ -138,7 +148,17 @@ export const useCodapState = () => {
 
   const updateCollections = useCallback(async () => {
     const colls = await getDataSetCollections(selectedDataSetName);
-    setCollections(colls);
+    const collectionModels = colls.map((coll: ICollection) => {
+      const { areParentChildLinksConfigured, attrs, caseName, cases: _cases, childAttrName,
+              collapseChildren, guid, id, name, parent, title, type } = coll;
+      return CollectionModel.create({
+        areParentChildLinksConfigured, attrs, caseName, cases: _cases, childAttrName,
+        collapseChildren, guid, id, name, parent, title, type
+      });
+    });
+    const _collections: ICollection[] = collectionModels.map(model => getSnapshot(model));
+    setCollections(_collections);
+    //setCollections(colls);
   }, [selectedDataSetName]);
 
   useEffect(() => {
@@ -185,9 +205,10 @@ export const useCodapState = () => {
     updateCollections();
   };
 
-  const handleCreateCollectionFromAttribute = async (collection: ICollection, attr: any, parent: number|string) => {
-    await createCollectionFromAttribute(selectedDataSet.name, collection.name, attr, parent);
-  };
+  const handleCreateCollectionFromAttribute =
+    async (collection: ICollection, attr: any, parent: number|string) => {
+      await createCollectionFromAttribute(selectedDataSet.name, collection.name, attr, parent);
+    };
 
   const handleSortAttribute = async (context: string, attrId: number, isDescending: boolean) => {
     sortAttribute(context, attrId, isDescending);

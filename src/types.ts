@@ -2,6 +2,18 @@ import { ReactNode } from "react";
 
 export type PropsWithChildren<P> = P & { children?: ReactNode | ReactNode[] };
 
+interface IAttribute {
+  cid: string;
+  deletable?: boolean;
+  editable: boolean;
+  guid: number;
+  hidden: boolean;
+  id: number;
+  name: string;
+  renamable?: boolean;
+  title: string;
+  type:string;
+}
 export interface IDataSet {
   guid: number,
   id: number,
@@ -11,17 +23,17 @@ export interface IDataSet {
 
 export interface ICollection {
   areParentChildLinksConfigured: boolean,
-  attrs: Array<any>,
-  caseName: string,
-  cases: Array<IProcessedCaseObj>,
-  childAttrName: string,
-  collapseChildren: boolean,
-  defaults: any,
+  attrs: IAttribute[],
+  caseName?: string,
+  cases: IProcessedCaseObj[],
+  childAttrName?: string,
+  collapseChildren?: boolean,
+  defaults?: any,
   guid: number,
   id: number,
-  labels: any,
+  labels?: any,
   name: string,
-  parent: number,
+  parent?: number,
   title: string,
   type: string
 }
@@ -34,7 +46,7 @@ export interface ICaseObjCommon {
     id: number
   },
   id: number,
-  parent: number,
+  parent?: number,
   values: Values
 }
 
@@ -62,7 +74,7 @@ export interface ITableProps {
   collectionClasses: Array<ICollectionClass>,
   getClassName: (caseObj: IProcessedCaseObj) => string,
   selectedDataSet: IDataSet,
-  collections: Array<ICollection>,
+  collections: ICollection[],
   mapCellsFromValues: (collectionId: number, rowKey: string, caseValuesWithId: Values,
       precisions: Record<string, number>, attrTypes: Record<string, string | undefined | null>,
       attrVisibilities: Record<string, boolean>, isParent?: boolean, resizeCounter?: number,
