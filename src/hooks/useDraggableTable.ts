@@ -30,7 +30,6 @@ export const DraggableTableContext = createContext<DraggableTableContextType>({
 
 interface IUseDraggableTableOptions {
   collections: Array<ICollection>,
-  handleSetCollections: (collections: Array<ICollection>) => void,
   handleUpdateAttributePosition: (collection: ICollection, attrName: string, newPosition: number) => void,
   handleCreateCollectionFromAttribute: (collection: ICollection, attr: any, parent: number|string) => Promise<void>
 }

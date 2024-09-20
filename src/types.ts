@@ -15,27 +15,27 @@ interface IAttribute {
   type:string;
 }
 export interface IDataSet {
-  guid: number,
-  id: number,
-  name: string,
-  title: string
+  guid: number;
+  id: number;
+  name: string;
+  title: string;
 }
 
 export interface ICollection {
-  areParentChildLinksConfigured: boolean,
-  attrs: IAttribute[],
-  caseName?: string,
-  cases: IProcessedCaseObj[],
-  childAttrName?: string,
-  collapseChildren?: boolean,
-  defaults?: any,
-  guid: number,
-  id: number,
-  labels?: any,
-  name: string,
-  parent?: number,
-  title: string,
-  type: string
+  areParentChildLinksConfigured: boolean;
+  attrs: IAttribute[];
+  caseName?: string;
+  cases: IProcessedCaseObj[];
+  childAttrName?: string;
+  collapseChildren?: boolean;
+  defaults?: any;
+  guid: number;
+  id: number;
+  labels?: any;
+  name: string;
+  parent?: number;
+  title: string;
+  type: string;
 }
 
 export type ICollections = Array<ICollection>;
@@ -44,24 +44,20 @@ export interface ICaseObjCommon {
   collection: {
     name: string,
     id: number
-  },
-  id: number,
-  parent?: number,
-  values: Values
+  };
+  id: number;
+  parent?: number;
+  values: Values;
 }
 
-export type Values = Record<string, any>;
-
-export type CaseValuesWithId = Values & {
-  id: number
-};
+export type Values = Map<string|number, any>;
 
 export interface ICaseObj extends ICaseObjCommon {
-  children: Array<number>
+  children: Array<number>;
 }
 
 export interface IProcessedCaseObj extends ICaseObjCommon {
-  children: Array<IProcessedCaseObj>
+  children: Array<IProcessedCaseObj>;
 }
 
 export interface ICollectionClass {
@@ -70,20 +66,20 @@ export interface ICollectionClass {
 }
 
 export interface ITableProps {
-  showHeaders: boolean,
-  collectionClasses: Array<ICollectionClass>,
-  getClassName: (caseObj: IProcessedCaseObj) => string,
-  selectedDataSet: IDataSet,
-  collections: ICollection[],
-  mapCellsFromValues: (collectionId: number, rowKey: string, caseValuesWithId: Values,
+  showHeaders: boolean;
+  collectionClasses: Array<ICollectionClass>;
+  getClassName: (caseObj: IProcessedCaseObj) => string;
+  selectedDataSet: IDataSet;
+  collections: ICollection[];
+  mapCellsFromValues: (collectionId: number, rowKey: string, caseObj: IProcessedCaseObj,
       precisions: Record<string, number>, attrTypes: Record<string, string | undefined | null>,
       attrVisibilities: Record<string, boolean>, isParent?: boolean, resizeCounter?: number,
-      parentLevel?: number) => ReactNode | ReactNode[],
+      parentLevel?: number) => ReactNode | ReactNode[];
   mapHeadersFromValues: (collectionId: number, rowKey: string, values: Values,
-      attrVisibilities: Record<string, boolean>) => ReactNode | ReactNode[],
-  getValueLength: (firstRow: Array<Values>) => number
-  paddingStyle: Record<string, string>
-  handleUpdateCollections: () => void
+      attrVisibilities: Record<string, boolean>) => ReactNode | ReactNode[];
+  getValueLength: (firstRow: Array<Values>) => number;
+  paddingStyle: Record<string, string>;
+  handleSortAttribute: (context: string, attrId: number, isDescending: boolean) => void;
 }
 
 export interface IBoundingBox {

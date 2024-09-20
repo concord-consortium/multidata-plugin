@@ -10,7 +10,7 @@ export const CollectionModel = types.model("CollectionModel", {
   childAttrName: types.maybe(types.string),
   collapseChildren: types.maybe(types.boolean),
   guid: types.number,
-  id: types.number,
+  id: types.identifierNumber,
   name: types.string,
   parent: types.maybe(types.number),
   title: types.string,
@@ -19,8 +19,6 @@ export const CollectionModel = types.model("CollectionModel", {
 
 export type CollectionModelType = Instance<typeof CollectionModel>;
 
-export const CollectionsModel = types.model("CollectionsModel", {
-  collections: types.array(CollectionModel)
-});
+export const CollectionsModel = types.array(CollectionModel);
 
 export type CollectionsModelType = Instance<typeof CollectionsModel>;

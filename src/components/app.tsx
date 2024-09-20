@@ -11,10 +11,10 @@ function App() {
   const {connected, selectedDataSet, dataSets, collections, cases, interactiveState,
          updateInteractiveState: _updateInteractiveState, init,
          handleSelectDataSet: _handleSelectDataSet, handleUpdateAttributePosition,
-         handleAddCollection, handleAddAttribute, handleSetCollections, handleSelectSelf,
+         handleAddCollection, handleAddAttribute, handleSelectSelf,
          updateTitle, selectCODAPCases, listenForSelectionChanges,
-         handleCreateCollectionFromAttribute, handleUpdateCollections
-        } = useCodapState();
+         handleCreateCollectionFromAttribute, handleSetCollections,
+         handleSortAttribute, editCaseValue } = useCodapState();
 
   useEffect(() => {
     init();
@@ -102,9 +102,9 @@ function App() {
           updateInteractiveState={updateInteractiveState}
           handleShowComponent={handleShowComponent}
           handleUpdateAttributePosition={handleUpdateAttributePosition}
-          handleSetCollections={handleSetCollections}
           handleCreateCollectionFromAttribute={handleCreateCollectionFromAttribute}
-          handleUpdateCollections={handleUpdateCollections}
+          editCaseValue={editCaseValue}
+          handleSortAttribute={handleSortAttribute}
         />
       );
 
@@ -120,8 +120,8 @@ function App() {
           updateInteractiveState={updateInteractiveState}
           handleAddCollection={handleAddCollection}
           handleAddAttribute={handleAddAttribute}
-          handleSetCollections={handleSetCollections}
           handleShowComponent={handleShowComponent}
+          handleSetCollections={handleSetCollections}
         />
       );
 

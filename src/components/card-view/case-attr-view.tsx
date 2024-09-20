@@ -1,4 +1,5 @@
 import React from "react";
+import { observer } from "mobx-react-lite";
 
 import css from "./card-view.scss";
 
@@ -8,7 +9,7 @@ interface ICaseAttrViewProps {
   attr: any;
 }
 
-export const CaseAttrView = ({name, value, attr}: ICaseAttrViewProps) => {
+export const CaseAttrView = observer(function CaseAttrView({name, value, attr}: ICaseAttrViewProps) {
   const unit = attr.unit ? ` (${attr.unit})` : "";
 
   return (
@@ -17,4 +18,4 @@ export const CaseAttrView = ({name, value, attr}: ICaseAttrViewProps) => {
       <td className={css.value}>{value}</td>
     </tr>
   );
-};
+});

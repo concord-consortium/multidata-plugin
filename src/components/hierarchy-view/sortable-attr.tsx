@@ -1,9 +1,10 @@
 import React from "react";
 import { CSS } from "@dnd-kit/utilities";
 import { useSortable } from "@dnd-kit/sortable";
+import { observer } from "mobx-react-lite";
 import {Attr} from "./attr";
 
-export const SortableAttr = ({attr}: {attr: any}) => {
+export const SortableAttr = observer(function SortableAttr({attr}: {attr: any}) {
   const {attributes, listeners, setNodeRef, transform, transition, isDragging} = useSortable({id: attr.cid});
   const style = {
     transform: CSS.Transform.toString(transform),
@@ -17,4 +18,4 @@ export const SortableAttr = ({attr}: {attr: any}) => {
       <Attr attr={attr}/>
     </div>
   );
-};
+});

@@ -12,12 +12,13 @@ import {
   createCollectionFromAttribute,
   createNewCollection,
   updateAttributePosition,
+  updateCaseById,
 } from "@concord-consortium/codap-plugin-api";
-import { getSnapshot } from "mobx-state-tree";
+import { applySnapshot, unprotect } from "mobx-state-tree";
 import { getCases, getDataSetCollections, sortAttribute } from "../utils/apiHelpers";
-import { ICollection, IDataSet } from "../types";
-import { DataSetModel, DataSetModelType, DataSetsModel } from "../models/datasets";
-import { CollectionModel } from "../models/collections";
+import { ICollection, IDataSet, IProcessedCaseObj } from "../types";
+import { DataSetsModel, DataSetsModelType } from "../models/datasets";
+import { CollectionsModel, CollectionsModelType } from "../models/collections";
 
 const iFrameDescriptor = {
   version: "0.5.0",
@@ -39,13 +40,20 @@ export interface InteractiveState {
 
 export const useCodapState = () => {
   const [connected, setConnected] = useState(false);
-  const [dataSets, setDataSets] = useState<DataSetModelType[]>([]);
-  const [selectedDataSet, setSelectedDataSet] = useState<any>(null);
-
-  // const [selectedDataSet, setSelectedDataSet] = useState<IDataSet|null>(null);
+  const [dataSets] = useState<DataSetsModelType>(() => {
+    const newDataSets = DataSetsModel.create();
+    unprotect(newDataSets);
+    return newDataSets;
+  });
+  const [selectedDataSet, setSelectedDataSet] = useState<IDataSet|null>(null);
   const [selectedDataSetName, setSelectedDataSetName] = useState<string>("");
-  const [collections, setCollections] = useState<ICollection[]>([]);
-  const [cases, setCases] = useState<any[]>([]);
+  const [collections] = useState<CollectionsModelType>(() => {
+    const newCollectionsModel = CollectionsModel.create();
+    unprotect(newCollectionsModel);
+    return newCollectionsModel;
+  });
+
+  const [cases, setCases] = useState<IProcessedCaseObj[]>([]);
   const [interactiveState, setInteractiveState] = useState<InteractiveState>({
     view: null,
     dataSetName: null,
@@ -54,19 +62,13 @@ export const useCodapState = () => {
     displayMode: ""
   });
 
-  const handleDocumentChangeNotice = useCallback(() => getDataSets(), []);
+  const getDataSets = useCallback(async () => {
+    const dataContexts = await getListOfDataContexts();
+    const datasets: IDataSet[] = dataContexts.values;
+    applySnapshot(dataSets, datasets);
+  }, [dataSets]);
 
-  const getDataSets = async () => {
-    const sets = await getListOfDataContexts();
-    const dataSetModels = sets.values.map((d: IDataSet) => {
-      const { guid, id, name, title } = d;
-      const dataSetModel = DataSetModel.create({guid, id, name, title});
-      return dataSetModel;
-    });
-    const dataSetsModel = DataSetsModel.create({dataSets: dataSetModels});
-    const _dataSets = getSnapshot(dataSetsModel);
-    setDataSets(_dataSets.dataSets);
-  };
+  const handleDocumentChangeNotice = useCallback(() => getDataSets(), [getDataSets]);
 
   const handleSetDataSet = async (name: string|null) => {
     let dataSetInfo = null;
@@ -89,7 +91,6 @@ export const useCodapState = () => {
     }
     setConnected(true);
   };
-
 
   useEffect(() => {
     const handleDataContextChangeNotice = (iMessage: any) => {
@@ -133,7 +134,9 @@ export const useCodapState = () => {
     };
 
     const setUpNotifications = () => {
-      addDataContextChangeListener(selectedDataSet.name, handleDataContextChangeNotice);
+      if (selectedDataSet) {
+        addDataContextChangeListener(selectedDataSet.name, handleDataContextChangeNotice);
+      }
     };
 
     if (selectedDataSet) {
@@ -151,21 +154,19 @@ export const useCodapState = () => {
     const collectionModels = colls.map((coll: ICollection) => {
       const { areParentChildLinksConfigured, attrs, caseName, cases: _cases, childAttrName,
               collapseChildren, guid, id, name, parent, title, type } = coll;
-      return CollectionModel.create({
+      return {
         areParentChildLinksConfigured, attrs, caseName, cases: _cases, childAttrName,
         collapseChildren, guid, id, name, parent, title, type
-      });
+      };
     });
-    const _collections: ICollection[] = collectionModels.map(model => getSnapshot(model));
-    setCollections(_collections);
-    //setCollections(colls);
-  }, [selectedDataSetName]);
+    applySnapshot(collections, collectionModels);
+  }, [collections, selectedDataSetName]);
 
   useEffect(() => {
     if (selectedDataSet) {
       updateCollections();
     } else {
-      setCollections([]);
+      collections.clear();
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedDataSet]);
@@ -187,27 +188,34 @@ export const useCodapState = () => {
 
 
   const handleSelectDataSet = (name: string) => {
-    const selected = dataSets.find((d) => d.title === name);
-    return selected ? handleSetDataSet(selected.name) :  handleSetDataSet("");
+    handleSetDataSet(name);
   };
 
   const getCollectionNameFromId = (id: number) => {
-    return collections.find((c: ICollection) => c.id === id)?.name;
+    return collections.find(c => c.id === id)?.name;
   };
 
   const handleUpdateAttributePosition = async (coll: ICollection, attrName: string, position: number) => {
-    await updateAttributePosition(selectedDataSet.name, coll.name, attrName, position);
+    if (selectedDataSet) {
+      await updateAttributePosition(selectedDataSet.name, coll.name, attrName, position);
+      // update collections because CODAP does not send dataContextChangeNotice
+      updateCollections();
+    }
   };
 
   const handleAddCollection = async (newCollectionName: string) => {
-    await createNewCollection(selectedDataSet.name, newCollectionName, [{"name": "newAttr"}]);
-    // update collections because CODAP does not send dataContextChangeNotice
-    updateCollections();
+    if (selectedDataSet) {
+      await createNewCollection(selectedDataSet.name, newCollectionName, [{"name": "newAttr"}]);
+      // update collections because CODAP does not send dataContextChangeNotice
+      updateCollections();
+    }
   };
 
   const handleCreateCollectionFromAttribute =
     async (collection: ICollection, attr: any, parent: number|string) => {
-      await createCollectionFromAttribute(selectedDataSet.name, collection.name, attr, parent);
+      if (selectedDataSet) {
+        await createCollectionFromAttribute(selectedDataSet.name, collection.name, attr, parent);
+      }
     };
 
   const handleSortAttribute = async (context: string, attrId: number, isDescending: boolean) => {
@@ -215,6 +223,8 @@ export const useCodapState = () => {
   };
 
   const handleAddAttribute = async (collection: ICollection, attrName: string) => {
+    if (!selectedDataSet) return;
+
     const proposedName = attrName.length ? attrName : "newAttr";
     let newAttributeName;
     const allAttributes: Array<any> = [];
@@ -279,13 +289,40 @@ export const useCodapState = () => {
     }
   }, [selectedDataSet]);
 
+  const editCaseValue = async (newValue: string, caseObj: IProcessedCaseObj, attrTitle: string) => {
+    let request;
+
+    try {
+      request = await updateCaseById(selectedDataSetName, caseObj.id, {[attrTitle]: newValue});
+      if (request.success) {
+        caseObj.values.set(attrTitle, newValue);
+      }
+    } catch (e) {
+      console.error("Case not updated: ", e);
+    }
+
+    return request;
+  };
+
+  const handleSetCollections = (colls: ICollection[]) => {
+    const newCollectionModels = colls.map((coll: ICollection) => {
+      const { areParentChildLinksConfigured, attrs, caseName, cases: _cases, childAttrName,
+              collapseChildren, guid, id, name, parent, title, type } = coll;
+      return {
+        areParentChildLinksConfigured, attrs, caseName, cases: _cases, childAttrName,
+        collapseChildren, guid, id, name, parent, title, type
+      };
+    });
+    applySnapshot(collections, newCollectionModels);
+  };
+
   return {
     init,
     handleSelectSelf,
     dataSets,
     selectedDataSet,
     collections,
-    handleSetCollections: setCollections,
+    handleSetCollections,
     handleSelectDataSet,
     getCollectionNameFromId,
     updateInteractiveState,
@@ -300,6 +337,7 @@ export const useCodapState = () => {
     selectCODAPCases,
     listenForSelectionChanges,
     handleCreateCollectionFromAttribute,
-    handleUpdateCollections: updateCollections
+    handleUpdateCollections: updateCollections,
+    editCaseValue
   };
 };

@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo } from "react";
+import { observer } from "mobx-react-lite";
 import { InteractiveState } from "../../hooks/useCodapState";
 import { IDataSet, ICollections, ICaseObjCommon, ICollection } from "../../types";
 import { Menu } from "../menu";
@@ -7,7 +8,7 @@ import { CaseView } from "./case-view";
 import css from "./card-view.scss";
 
 interface ICardViewProps {
-  selectedDataSet: any;
+  selectedDataSet: IDataSet | null;
   dataSets: IDataSet[];
   collections: ICollections;
   interactiveState: InteractiveState
@@ -17,13 +18,14 @@ interface ICardViewProps {
   codapSelectedCase: ICaseObjCommon|undefined;
 }
 
-export const CardView = (props: ICardViewProps) => {
+export const CardView = observer(function CardView(props: ICardViewProps) {
   const {collections, dataSets, selectedDataSet, updateTitle, selectCases, codapSelectedCase,
          handleSelectDataSet} = props;
 
   const rootCollection = useMemo(() => {
     return collections.find((c: ICollection) => !c.parent);
-  }, [collections]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [collections, collections.length]);
 
   const attrs = useMemo(() => {
     const result: Record<string, any> = {};
@@ -33,7 +35,8 @@ export const CardView = (props: ICardViewProps) => {
       });
     });
     return result;
-  }, [collections]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [collections, collections.length]);
 
   useEffect(() => {
     if (selectedDataSet?.title) {
@@ -88,5 +91,4 @@ export const CardView = (props: ICardViewProps) => {
       />
     </div>
   );
-};
-
+});

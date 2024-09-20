@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
+import { observer } from "mobx-react-lite";
 import { IBoundingBox, ICollection } from "../../types";
 import { SortableContext, rectSwappingStrategy } from "@dnd-kit/sortable";
 import { SortableAttr } from "./sortable-attr";
@@ -19,7 +20,7 @@ interface ICollectionProps {
 const AttrsGap = 10;
 const CollectionOffset = 15;
 
-export const Collection = (props: ICollectionProps) => {
+export const Collection = observer(function Collection(props: ICollectionProps) {
   const {collection, index, isLast, handleAddAttribute} = props;
   const style: React.CSSProperties = {marginTop: index * CollectionOffset, gap: AttrsGap};
   const levelRef = useRef<HTMLDivElement>(null);
@@ -52,4 +53,4 @@ export const Collection = (props: ICollectionProps) => {
       {!isLast && <LevelArrow levelBBox={levelBBox} key={`level-arrow-${index}-${collection.id}`}/>}
     </div>
   );
-};
+});

@@ -1,4 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
+import { observer } from "mobx-react-lite";
 import { IProcessedCaseObj } from "../../types";
 import { CaseAttrsView } from "./case-attrs-view";
 import Arrow from "../../assets/arrow.svg";
@@ -22,7 +23,7 @@ interface ICaseViewProps {
   codapSelectedCaseLineage: number[];
 }
 
-export const CaseView = (props: ICaseViewProps) => {
+export const CaseView = observer(function CaseView(props: ICaseViewProps) {
   const {cases, attrs, level, selectCases, codapSelectedCaseLineage} = props;
 
   // default to the first case
@@ -84,4 +85,4 @@ export const CaseView = (props: ICaseViewProps) => {
       }
     </div>
   );
-};
+});
