@@ -14,6 +14,7 @@ import {
   updateAttributePosition,
   updateCaseById,
 } from "@concord-consortium/codap-plugin-api";
+import { runInAction } from "mobx";
 import { applySnapshot, unprotect } from "mobx-state-tree";
 import { getCases, getDataSetCollections, sortAttribute } from "../utils/apiHelpers";
 import { ICollection, IDataSet, IProcessedCaseObj } from "../types";
@@ -166,7 +167,7 @@ export const useCodapState = () => {
     if (selectedDataSet) {
       updateCollections();
     } else {
-      collections.clear();
+      runInAction(() => collections.clear());
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedDataSet]);
@@ -295,7 +296,7 @@ export const useCodapState = () => {
     try {
       request = await updateCaseById(selectedDataSetName, caseObj.id, {[attrTitle]: newValue});
       if (request.success) {
-        caseObj.values.set(attrTitle, newValue);
+        runInAction(() => caseObj.values.set(attrTitle, newValue));
       }
     } catch (e) {
       console.error("Case not updated: ", e);
