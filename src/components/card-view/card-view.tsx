@@ -1,16 +1,17 @@
 import React, { useEffect, useMemo } from "react";
 import { observer } from "mobx-react-lite";
 import { InteractiveState } from "../../hooks/useCodapState";
-import { IDataSet, ICollections, ICaseObjCommon, ICollection } from "../../types";
+import { IDataSet, ICaseObjCommon, ICollection } from "../../types";
 import { Menu } from "../menu";
 import { CaseView } from "./case-view";
+import { CollectionsModelType } from "../../models/collections";
 
 import css from "./card-view.scss";
 
 interface ICardViewProps {
   selectedDataSet: IDataSet | null;
   dataSets: IDataSet[];
-  collections: ICollections;
+  collectionsModel: CollectionsModelType;
   interactiveState: InteractiveState
   handleSelectDataSet: (e: React.ChangeEvent<HTMLSelectElement>) => void
   updateTitle: (title: string) => Promise<void>
@@ -19,24 +20,12 @@ interface ICardViewProps {
 }
 
 export const CardView = observer(function CardView(props: ICardViewProps) {
-  const {collections, dataSets, selectedDataSet, updateTitle, selectCases, codapSelectedCase,
+  const {collectionsModel, dataSets, selectedDataSet, updateTitle, selectCases, codapSelectedCase,
          handleSelectDataSet} = props;
 
-  const rootCollection = useMemo(() => {
-    return collections.find((c: ICollection) => !c.parent);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [collections, collections.length]);
-
-  const attrs = useMemo(() => {
-    const result: Record<string, any> = {};
-    collections.forEach(collection => {
-      collection.attrs.forEach(attr => {
-        result[attr.name] = attr;
-      });
-    });
-    return result;
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [collections, collections.length]);
+  const collections = collectionsModel.collections;
+  const rootCollection = collectionsModel.rootCollection;
+  const attrs = collectionsModel.attrs;
 
   useEffect(() => {
     if (selectedDataSet?.title) {

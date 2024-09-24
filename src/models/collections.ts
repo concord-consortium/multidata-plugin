@@ -19,6 +19,22 @@ export const CollectionModel = types.model("CollectionModel", {
 
 export type CollectionModelType = Instance<typeof CollectionModel>;
 
-export const CollectionsModel = types.array(CollectionModel);
+export const CollectionsModel = types.model("CollectionsModel", {
+  collections: types.array(CollectionModel)
+})
+.views(self => ({
+  get rootCollection() {
+    return self.collections.find(c => !c.parent);
+  },
+  get attrs() {
+    const result: Record<string, any> = {};
+    self.collections.forEach(collection => {
+      collection.attrs.forEach(attr => {
+        result[attr.name] = attr;
+      });
+    });
+    return result;
+  }
+}));
 
 export type CollectionsModelType = Instance<typeof CollectionsModel>;

@@ -8,13 +8,14 @@ import { ICaseObjCommon } from "../types";
 import css from "./app.scss";
 
 function App() {
-  const {connected, selectedDataSet, dataSets, collections, cases, interactiveState,
+  const {connected, selectedDataSet, dataSets, collectionsModel, cases, interactiveState,
          updateInteractiveState: _updateInteractiveState, init,
          handleSelectDataSet: _handleSelectDataSet, handleUpdateAttributePosition,
          handleAddCollection, handleAddAttribute, handleSelectSelf,
          updateTitle, selectCODAPCases, listenForSelectionChanges,
          handleCreateCollectionFromAttribute, handleSetCollections,
          handleSortAttribute, editCaseValue } = useCodapState();
+  const collections = collectionsModel.collections;
 
   useEffect(() => {
     init();
@@ -130,7 +131,7 @@ function App() {
         <CardView
           selectedDataSet={selectedDataSet}
           dataSets={dataSets}
-          collections={collections}
+          collectionsModel={collectionsModel}
           interactiveState={interactiveState}
           handleSelectDataSet={handleSelectDataSet}
           updateTitle={updateTitle}

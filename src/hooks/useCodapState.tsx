@@ -48,7 +48,7 @@ export const useCodapState = () => {
   });
   const [selectedDataSet, setSelectedDataSet] = useState<IDataSet|null>(null);
   const [selectedDataSetName, setSelectedDataSetName] = useState<string>("");
-  const [collections] = useState<CollectionsModelType>(() => {
+  const [collectionsModel] = useState<CollectionsModelType>(() => {
     const newCollectionsModel = CollectionsModel.create();
     unprotect(newCollectionsModel);
     return newCollectionsModel;
@@ -159,8 +159,8 @@ export const useCodapState = () => {
         collapseChildren, guid, id, name, parent, title, type
       };
     });
-    applySnapshot(collections, newCollectionModels);
-  }, [collections]);
+    applySnapshot(collectionsModel, {collections: newCollectionModels});
+  }, [collectionsModel]);
 
   const updateCollections = useCallback(async () => {
     const colls = await getDataSetCollections(selectedDataSetName);
@@ -171,7 +171,7 @@ export const useCodapState = () => {
     if (selectedDataSet) {
       updateCollections();
     } else {
-      runInAction(() => collections.clear());
+      runInAction(() => collectionsModel.collections.clear());
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedDataSet]);
@@ -179,17 +179,17 @@ export const useCodapState = () => {
   useEffect(() => {
     const fetchCases = async () => {
       if (selectedDataSet) {
-        const fetchedCases = await getCases(selectedDataSet.name, collections[0].name);
+        const fetchedCases = await getCases(selectedDataSet.name, collectionsModel.collections[0].name);
         setCases(fetchedCases);
       }
     };
 
-    if (collections.length === 1 && selectedDataSet) {
+    if (collectionsModel.collections.length === 1 && selectedDataSet) {
       fetchCases();
     } else {
       setCases([]);
     }
-  }, [collections, selectedDataSet]);
+  }, [collectionsModel, selectedDataSet]);
 
 
   const handleSelectDataSet = (name: string) => {
@@ -197,7 +197,7 @@ export const useCodapState = () => {
   };
 
   const getCollectionNameFromId = (id: number) => {
-    return collections.find(c => c.id === id)?.name;
+    return collectionsModel.collections.find(c => c.id === id)?.name;
   };
 
   const handleUpdateAttributePosition = async (coll: ICollection, attrName: string, position: number) => {
@@ -233,7 +233,7 @@ export const useCodapState = () => {
     const proposedName = attrName.length ? attrName : "newAttr";
     let newAttributeName;
     const allAttributes: Array<any> = [];
-    collections.map((coll) => coll.attrs.map((attr) => allAttributes.push(attr)));
+    collectionsModel.collections.map((coll) => coll.attrs.map((attr) => allAttributes.push(attr)));
     const attrNameAlreadyUsed = allAttributes.find((attr) => attr.name === proposedName);
     if (!attrNameAlreadyUsed) {
       newAttributeName = proposedName;
@@ -314,7 +314,7 @@ export const useCodapState = () => {
     handleSelectSelf,
     dataSets,
     selectedDataSet,
-    collections,
+    collectionsModel,
     handleSetCollections,
     handleSelectDataSet,
     getCollectionNameFromId,
