@@ -150,9 +150,8 @@ export const useCodapState = () => {
     updateCollections();
   };
 
-  const updateCollections = useCallback(async () => {
-    const colls = await getDataSetCollections(selectedDataSetName);
-    const collectionModels = colls.map((coll: ICollection) => {
+  const handleSetCollections = useCallback((colls: ICollection[]) => {
+    const newCollectionModels = colls.map((coll: ICollection) => {
       const { areParentChildLinksConfigured, attrs, caseName, cases: _cases, childAttrName,
               collapseChildren, guid, id, name, parent, title, type } = coll;
       return {
@@ -160,8 +159,13 @@ export const useCodapState = () => {
         collapseChildren, guid, id, name, parent, title, type
       };
     });
-    applySnapshot(collections, collectionModels);
-  }, [collections, selectedDataSetName]);
+    applySnapshot(collections, newCollectionModels);
+  }, [collections]);
+
+  const updateCollections = useCallback(async () => {
+    const colls = await getDataSetCollections(selectedDataSetName);
+    handleSetCollections(colls);
+  }, [handleSetCollections, selectedDataSetName]);
 
   useEffect(() => {
     if (selectedDataSet) {
@@ -303,18 +307,6 @@ export const useCodapState = () => {
     }
 
     return request;
-  };
-
-  const handleSetCollections = (colls: ICollection[]) => {
-    const newCollectionModels = colls.map((coll: ICollection) => {
-      const { areParentChildLinksConfigured, attrs, caseName, cases: _cases, childAttrName,
-              collapseChildren, guid, id, name, parent, title, type } = coll;
-      return {
-        areParentChildLinksConfigured, attrs, caseName, cases: _cases, childAttrName,
-        collapseChildren, guid, id, name, parent, title, type
-      };
-    });
-    applySnapshot(collections, newCollectionModels);
   };
 
   return {
