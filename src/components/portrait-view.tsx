@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
+import { observer } from "mobx-react-lite";
 import { ICollection, IProcessedCaseObj, ITableProps } from "../types";
 import { DraggableTableContainer, DroppableTableData, DroppableTableHeader } from "./draggable-table-tags";
 import { TableScrollTopContext, useTableScrollTop } from "../hooks/useTableScrollTop";
@@ -13,16 +14,15 @@ export type PortraitViewRowProps = {collectionId: number, caseObj: IProcessedCas
                                     isParent: boolean, resizeCounter: number, parentLevel?: number}
                                     & ITableProps;
 
-export const PortraitViewRow = (props: PortraitViewRowProps) => {
+export const PortraitViewRow = observer(function PortraitViewRow(props: PortraitViewRowProps) {
   const {paddingStyle, mapCellsFromValues, mapHeadersFromValues, showHeaders, precisions, attrTypes, attrVisibilities,
           getClassName, collectionId, caseObj, index, isParent, resizeCounter, parentLevel} = props;
-  const {children, id, values} = caseObj;
-  const caseValuesWithId = {...values, id};
+  const {children, values} = caseObj;
 
   if (!children.length) {
     return (
       <tr>
-        {mapCellsFromValues(collectionId, `row-${index}`, caseValuesWithId, precisions, attrTypes, attrVisibilities)}
+        {mapCellsFromValues(collectionId, `row-${index}`, caseObj, precisions, attrTypes, attrVisibilities)}
       </tr>
     );
   } else {
@@ -38,7 +38,7 @@ export const PortraitViewRow = (props: PortraitViewRowProps) => {
         }
         <tr className={`${css[getClassName(caseObj)]} parent-row`}>
           {mapCellsFromValues(
-            collectionId, `parent-row-${index}`, caseValuesWithId, precisions, attrTypes, attrVisibilities,
+            collectionId, `parent-row-${index}`, caseObj, precisions, attrTypes, attrVisibilities,
             isParent, resizeCounter, parentLevel
           )}
           <DroppableTableData collectionId={collectionId} style={paddingStyle}>
@@ -76,9 +76,9 @@ export const PortraitViewRow = (props: PortraitViewRowProps) => {
       </>
     );
   }
-};
+});
 
-export const PortraitView = (props: ITableProps) => {
+export const PortraitView = observer(function PortraitView(props: ITableProps) {
   const {collectionClasses, selectedDataSet, collections, getValueLength} = props;
   const tableRef = useRef<HTMLTableElement | null>(null);
   const tableScrollTop = useTableScrollTop(tableRef);
@@ -92,18 +92,17 @@ export const PortraitView = (props: ITableProps) => {
     return t;
   }, []);
 
-
   useEffect(() => {
     const handleIntersection = (entries: IntersectionObserverEntry[], o: any) => {
       setResizeCounter((prevState) => prevState + 1);
     };
-    const observer = new IntersectionObserver(handleIntersection, {threshold: thresh});
+    const intersectionObserver = new IntersectionObserver(handleIntersection, {threshold: thresh});
     document.querySelectorAll(`.parent-row`).forEach((row) => {
-      observer.observe(row);
+      intersectionObserver.observe(row);
     });
     return () => {
       document.querySelectorAll(`.parent-row`).forEach((row) => {
-        observer.unobserve(row);
+        intersectionObserver.unobserve(row);
       });
     };
 
@@ -156,4 +155,4 @@ export const PortraitView = (props: ITableProps) => {
       </div>
     </TableScrollTopContext.Provider>
   );
-};
+});

@@ -1,19 +1,22 @@
 import React from "react";
+import { observer } from "mobx-react-lite";
 import { ICollection, IProcessedCaseObj, ITableProps } from "../types";
-import { DraggagleTableHeader } from "./draggable-table-tags";
+import { DraggableTableHeader } from "./draggable-table-tags";
 import { getAttrPrecisions, getAttrTypes, getAttrVisibility } from "../utils/utils";
 
 import css from "./tables.scss";
 
-export const LandscapeView = (props: ITableProps) => {
+export const LandscapeView = observer(function LandscapeView(props: ITableProps) {
   const {mapCellsFromValues, mapHeadersFromValues, showHeaders, collectionClasses,
-    getClassName, selectedDataSet, collections, getValueLength, paddingStyle} = props;
+    getClassName, selectedDataSet, collections, getValueLength, paddingStyle, handleSortAttribute} = props;
 
   const renderNestedTable = (parentColl: ICollection) => {
     const headers = parentColl.cases.map((caseObj) => caseObj.values);
     const firstRowValues = parentColl.cases.map(caseObj => {
       return {...caseObj.values, id: caseObj.id};
     });
+
+    const parentCase = parentColl.cases[0];
     const valueCount = getValueLength(firstRowValues);
     const className = getClassName(parentColl.cases[0]);
     const precisions = getAttrPrecisions(collections);
@@ -31,7 +34,7 @@ export const LandscapeView = (props: ITableProps) => {
         <tr className={css[className]}>
           {firstRowValues.map(values =>
             mapCellsFromValues(
-              parentColl.id, "first-row", values, precisions, attrTypes, attrVisibilities
+              parentColl.id, "first-row", parentCase, precisions, attrTypes, attrVisibilities
             ))
           }
         </tr>
@@ -55,8 +58,7 @@ export const LandscapeView = (props: ITableProps) => {
   };
 
   const renderColFromCaseObj = (collection: ICollection, caseObj: IProcessedCaseObj, index?: number) => {
-    const {children, id, values} = caseObj;
-    const caseValuesWithId = {...values, id};
+    const {children, values} = caseObj;
     const isFirstIndex = index === 0;
     const precisions = getAttrPrecisions(collections);
     const attrTypes = getAttrTypes(collections);
@@ -78,7 +80,7 @@ export const LandscapeView = (props: ITableProps) => {
           }
           <tr>
             {mapCellsFromValues(
-                collection.id, `row-${index}`, caseValuesWithId, precisions, attrTypes, attrVisibilities
+                collection.id, `row-${index}`, caseObj, precisions, attrTypes, attrVisibilities
               )
             }
           </tr>
@@ -114,15 +116,16 @@ export const LandscapeView = (props: ITableProps) => {
       <table className={`${css.mainTable} ${css.landscapeTable} ${css.landscape} ${css[className]}`}>
         <tbody>
         <tr className={css.mainHeader}>
-          <DraggagleTableHeader
+          <DraggableTableHeader
             collectionId={parentColl[0].id}
             attrTitle={selectedDataSet.name}
             colSpan={getValueLength(firstRowValues)}
             dataSetName={selectedDataSet.name}
             dataSetTitle={selectedDataSet.title}
+            handleSortAttribute={handleSortAttribute}
           >
             {selectedDataSet.name}
-          </DraggagleTableHeader>
+          </DraggableTableHeader>
         </tr>
           {renderNestedTable(parentColl[0])}
         </tbody>
@@ -135,4 +138,4 @@ export const LandscapeView = (props: ITableProps) => {
       {collections.length && collectionClasses.length && renderTable()}
     </div>
   );
-};
+});

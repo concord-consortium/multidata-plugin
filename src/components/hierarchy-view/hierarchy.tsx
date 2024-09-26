@@ -1,9 +1,10 @@
 import React from "react";
+import { observer } from "mobx-react-lite";
+import { DndContext, DragOverlay, DropAnimation, closestCorners,
+         defaultDropAnimation } from "@dnd-kit/core";
 import { InteractiveState } from "../../hooks/useCodapState";
 import { useWindowResized } from "../../hooks/useWindowResized";
 import { useDragging } from "../../hooks/useDragging";
-import { DndContext, DragOverlay, DropAnimation, closestCorners,
-  defaultDropAnimation } from "@dnd-kit/core";
 import { IDataSet, ICollections, ICollection } from "../../types";
 import { Collection } from "./collection";
 import { Menu } from "../menu";
@@ -13,7 +14,7 @@ import css from "./hierarchy.scss";
 const CollectionGap = 23;
 
 interface IProps {
-  selectedDataSet: any;
+  selectedDataSet: IDataSet | null;
   dataSets: IDataSet[];
   collections: ICollections;
   interactiveState: InteractiveState
@@ -26,7 +27,7 @@ interface IProps {
   handleShowComponent: () => void
 }
 
-export const Hierarchy = (props: IProps) => {
+export const Hierarchy = observer(function Hierarchy(props: IProps) {
   const {selectedDataSet, dataSets, collections, handleSelectDataSet, handleSetCollections,
     handleUpdateAttributePosition, handleAddCollection, handleAddAttribute, handleShowComponent} = props;
 
@@ -90,6 +91,6 @@ export const Hierarchy = (props: IProps) => {
       {selectedDataSet && renderHeirarchy()}
     </div>
   );
-};
+});
 
 export default Hierarchy;

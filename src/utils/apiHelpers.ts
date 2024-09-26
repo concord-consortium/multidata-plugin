@@ -6,7 +6,7 @@ import {
   getCaseByID,
   codapInterface
 } from "@concord-consortium/codap-plugin-api";
-import { ICollection, ICollections } from "../types";
+import { ICollection, ICollections, IProcessedCaseObj } from "../types";
 
 export const getCases = async (selectedDataSetName: string, collName: string) => {
   const processCase = async (caseObj: any) => {
@@ -31,7 +31,7 @@ export const getCases = async (selectedDataSetName: string, collName: string) =>
   for (let i = 0; i < caseCount; i++) {
     const caseByIndex = await getCaseByIndex(selectedDataSetName, collName, i);
     const caseObj = caseByIndex.values.case;
-    const processedCase = await processCase(caseObj);
+    const processedCase: IProcessedCaseObj = await processCase(caseObj);
     cases.push(processedCase);
   }
   return cases;

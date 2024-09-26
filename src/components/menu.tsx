@@ -1,4 +1,5 @@
 import React from "react";
+import { observer } from "mobx-react-lite";
 import { IDataSet } from "../types";
 import css from "./menu.scss";
 
@@ -21,7 +22,7 @@ const portrait = "Portrait";
 const landscape = "Landscape";
 const none = "";
 
-export const Menu = (props: IProps) => {
+export const Menu = observer(function Menu(props: IProps) {
   const {handleSelectDataSet, dataSets, handleSelectDisplayMode, togglePadding,
     showHeaders, padding, toggleShowHeaders, displayMode, selectedDataSet, showDisplayMode} = props;
 
@@ -31,9 +32,10 @@ export const Menu = (props: IProps) => {
       <div className={css.option}>
         <span>Select a Dataset:</span>
         <select value={selectedDataSet?.name} onChange={handleSelectDataSet}>
-          <option></option>
+          <option key="dataset-option--noDataset"></option>
           {dataSets?.length && dataSets.map((set) => {
-            return (<option key={set.title}>{set.title}</option>);
+            const dataSetIdentifier = set.title || set.name;
+            return <option key={`dataset-option--${dataSetIdentifier}`}>{dataSetIdentifier}</option>;
           })}
         </select>
       </div>
@@ -41,10 +43,10 @@ export const Menu = (props: IProps) => {
       {showDisplayMode && handleSelectDisplayMode &&
         <div className={css.option}>
           <span>Display mode:</span>
-          <select value={displayMode} onChange={handleSelectDisplayMode}>
+          <select onChange={handleSelectDisplayMode} defaultValue={displayMode}>
             {displayModes.map((mode) => {
               return (
-                <option key={mode} disabled={!mode.length} value={mode}>
+                <option key={`mode-option--${mode}`} disabled={!mode.length} value={mode}>
                   {mode.length ? mode : "--select--"}
                 </option>
               );
@@ -66,4 +68,4 @@ export const Menu = (props: IProps) => {
       }
     </div>
   );
-};
+});

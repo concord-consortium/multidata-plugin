@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
+import { observer } from "mobx-react-lite";
 import { IBoundingBox, ICollection } from "../../types";
 import AddIcon from "../../assets/add-icon.svg";
 
@@ -9,7 +10,7 @@ interface IProps {
   handleAddAttribute: (coll: ICollection, newAttrName: string) => void
 }
 
-export const AddAttribute = ({collection, handleAddAttribute}: IProps) => {
+export const AddAttribute = observer(function AddAttribute({collection, handleAddAttribute}: IProps) {
   const [showInput, setShowInput] = useState<boolean>(false);
   const [newAttrName, setNewAttrName] = useState<string>("newAttr");
   const ref = useRef<HTMLDivElement>(null);
@@ -72,7 +73,7 @@ export const AddAttribute = ({collection, handleAddAttribute}: IProps) => {
       <AddIcon />
     </div>
   );
-};
+});
 
 interface IAddCollectionProps {
   levelBBox: IBoundingBox,
@@ -80,7 +81,8 @@ interface IAddCollectionProps {
   collections: Array<ICollection>
 }
 
-export const AddCollection = ({levelBBox, handleAddCollection, collections}: IAddCollectionProps) => {
+export const AddCollection =
+observer(function AddCollection({levelBBox, handleAddCollection, collections}: IAddCollectionProps) {
   const {top, left, width} = levelBBox;
   const style: React.CSSProperties = {left: left + width, top, position: "absolute"};
 
@@ -131,4 +133,4 @@ export const AddCollection = ({levelBBox, handleAddCollection, collections}: IAd
       {showTitleBox ? renderTitleBox() : renderAddButon()}
     </div>
   );
-};
+});

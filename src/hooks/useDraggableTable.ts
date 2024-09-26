@@ -30,7 +30,6 @@ export const DraggableTableContext = createContext<DraggableTableContextType>({
 
 interface IUseDraggableTableOptions {
   collections: Array<ICollection>,
-  handleSetCollections: (collections: Array<ICollection>) => void,
   handleUpdateAttributePosition: (collection: ICollection, attrName: string, newPosition: number) => void,
   handleCreateCollectionFromAttribute: (collection: ICollection, attr: any, parent: number|string) => Promise<void>
 }
@@ -92,9 +91,9 @@ export const useDraggableTable = (options: IUseDraggableTableOptions) => {
       e.dataTransfer.effectAllowed = "copy";
       // IE only allows text or URL for the argument type and throws an error for other types
       try {
-        e.dataTransfer.setData("text", attId);
-        e.dataTransfer.setData("text/html", attId);
-        e.dataTransfer.setData(`application/x-codap-attr-${attId}`, attId);
+        e.dataTransfer.setData("text", String(attId));
+        e.dataTransfer.setData("text/html", String(attId));
+        e.dataTransfer.setData(`application/x-codap-attr-${attId}`, String(attId));
       } catch (ex) {
         // to make linter happy with empty block
       }
@@ -140,15 +139,15 @@ export const useDraggableTable = (options: IUseDraggableTableOptions) => {
           handleCreateCollectionFromAttribute(source.collection, source.attr, collectionId);
         }
       } else if (source && target && (source.collection !== target.collection || source.attr !== target.attr)) {
-        const sourceIndex = source.collection.attrs.indexOf(source.attr);
+        const sourceIndex = source.attr && source.collection.attrs.indexOf(source.attr);
         const targetIndex = target.attr ? target.collection.attrs.indexOf(target.attr) : target.collection.attrs.length;
         const newIndex = dragSide === "left" ? targetIndex : targetIndex + 1;
 
         if (target.collection.id === source.collection.id) {
-          if (sourceIndex !== newIndex) {
+          if (source.attr && sourceIndex !== newIndex) {
             handleUpdateAttributePosition(source.collection, source.attr.name, newIndex);
           }
-        } else {
+        } else if (source.attr) {
           handleUpdateAttributePosition(target.collection, source.attr.name, newIndex);
         }
       }

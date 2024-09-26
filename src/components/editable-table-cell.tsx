@@ -1,20 +1,20 @@
-import React, { ReactNode, useState } from "react";
+import React, { useState } from "react";
+import { observer } from "mobx-react-lite";
 import { Editable, EditablePreview, EditableInput } from "@chakra-ui/react";
-import { updateCaseById } from "@concord-consortium/codap-plugin-api";
+import { IResult } from "@concord-consortium/codap-plugin-api";
+import { IProcessedCaseObj } from "../types";
 
 import css from "./editable-table-cell.scss";
 
 interface IProps {
   attrTitle: string;
-  caseId: string;
-  children: ReactNode;
-  handleUpdateCollections: () => void;
-  selectedDataSetName: string;
+  case: IProcessedCaseObj;
+  editCaseValue: (newValue: string, cCase: IProcessedCaseObj, attrTitle: string) => Promise<IResult | undefined>;
 }
 
-export const EditableTableCell = (props: IProps) => {
-  const { attrTitle, caseId, children, handleUpdateCollections, selectedDataSetName } = props;
-  const displayValue = String(children);
+export const EditableTableCell = observer(function EditableTableCell(props: IProps) {
+  const { attrTitle, case: cCase, editCaseValue } = props;
+  const displayValue = cCase.values.get(attrTitle);
   const [editingValue, setEditingValue] = useState(displayValue);
   const [isEditing, setIsEditing] = useState(false);
 
@@ -28,11 +28,14 @@ export const EditableTableCell = (props: IProps) => {
   };
 
   const handleSubmit = async (newValue: string) => {
-    try {
-      await updateCaseById(selectedDataSetName, caseId, {[attrTitle]: newValue});
-      setEditingValue(newValue);
+    if (newValue === displayValue) {
       setIsEditing(false);
-      handleUpdateCollections();
+      return;
+    }
+
+    try {
+      await editCaseValue(newValue, cCase, attrTitle);
+      setIsEditing(false);
     } catch (e) {
       console.error("Case not updated: ", e);
     }
@@ -54,4 +57,4 @@ export const EditableTableCell = (props: IProps) => {
       </Editable>
     </div>
   );
-};
+});

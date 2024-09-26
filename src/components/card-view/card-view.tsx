@@ -1,15 +1,17 @@
 import React, { useEffect, useMemo } from "react";
+import { observer } from "mobx-react-lite";
 import { InteractiveState } from "../../hooks/useCodapState";
-import { IDataSet, ICollections, ICaseObjCommon, ICollection } from "../../types";
+import { IDataSet, ICaseObjCommon, ICollection } from "../../types";
 import { Menu } from "../menu";
 import { CaseView } from "./case-view";
+import { CollectionsModelType } from "../../models/collections";
 
 import css from "./card-view.scss";
 
 interface ICardViewProps {
-  selectedDataSet: any;
+  selectedDataSet: IDataSet | null;
   dataSets: IDataSet[];
-  collections: ICollections;
+  collectionsModel: CollectionsModelType;
   interactiveState: InteractiveState
   handleSelectDataSet: (e: React.ChangeEvent<HTMLSelectElement>) => void
   updateTitle: (title: string) => Promise<void>
@@ -17,23 +19,13 @@ interface ICardViewProps {
   codapSelectedCase: ICaseObjCommon|undefined;
 }
 
-export const CardView = (props: ICardViewProps) => {
-  const {collections, dataSets, selectedDataSet, updateTitle, selectCases, codapSelectedCase,
+export const CardView = observer(function CardView(props: ICardViewProps) {
+  const {collectionsModel, dataSets, selectedDataSet, updateTitle, selectCases, codapSelectedCase,
          handleSelectDataSet} = props;
 
-  const rootCollection = useMemo(() => {
-    return collections.find((c: ICollection) => !c.parent);
-  }, [collections]);
-
-  const attrs = useMemo(() => {
-    const result: Record<string, any> = {};
-    collections.forEach(collection => {
-      collection.attrs.forEach(attr => {
-        result[attr.name] = attr;
-      });
-    });
-    return result;
-  }, [collections]);
+  const collections = collectionsModel.collections;
+  const rootCollection = collectionsModel.rootCollection;
+  const attrs = collectionsModel.attrs;
 
   useEffect(() => {
     if (selectedDataSet?.title) {
@@ -59,7 +51,7 @@ export const CardView = (props: ICardViewProps) => {
       result.unshift(id);
 
       const collection = collectionsById[caseItem.collection.id];
-      const parentCollection = collection ? collectionsById[collection.parent] : undefined;
+      const parentCollection = collection?.parent ? collectionsById[collection.parent] : undefined;
       caseItem = parentCollection?.cases.find(c => c.id === parent) as ICaseObjCommon;
     }
 
@@ -88,5 +80,4 @@ export const CardView = (props: ICardViewProps) => {
       />
     </div>
   );
-};
-
+});

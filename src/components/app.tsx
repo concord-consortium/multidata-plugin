@@ -8,13 +8,14 @@ import { ICaseObjCommon } from "../types";
 import css from "./app.scss";
 
 function App() {
-  const {connected, selectedDataSet, dataSets, collections, cases, interactiveState,
+  const {connected, selectedDataSet, dataSets, collectionsModel, cases, interactiveState,
          updateInteractiveState: _updateInteractiveState, init,
          handleSelectDataSet: _handleSelectDataSet, handleUpdateAttributePosition,
-         handleAddCollection, handleAddAttribute, handleSetCollections, handleSelectSelf,
+         handleAddCollection, handleAddAttribute, handleSelectSelf,
          updateTitle, selectCODAPCases, listenForSelectionChanges,
-         handleCreateCollectionFromAttribute, handleUpdateCollections
-        } = useCodapState();
+         handleCreateCollectionFromAttribute, handleSetCollections,
+         handleSortAttribute, editCaseValue } = useCodapState();
+  const collections = collectionsModel.collections;
 
   useEffect(() => {
     init();
@@ -102,9 +103,9 @@ function App() {
           updateInteractiveState={updateInteractiveState}
           handleShowComponent={handleShowComponent}
           handleUpdateAttributePosition={handleUpdateAttributePosition}
-          handleSetCollections={handleSetCollections}
           handleCreateCollectionFromAttribute={handleCreateCollectionFromAttribute}
-          handleUpdateCollections={handleUpdateCollections}
+          editCaseValue={editCaseValue}
+          handleSortAttribute={handleSortAttribute}
         />
       );
 
@@ -120,8 +121,8 @@ function App() {
           updateInteractiveState={updateInteractiveState}
           handleAddCollection={handleAddCollection}
           handleAddAttribute={handleAddAttribute}
-          handleSetCollections={handleSetCollections}
           handleShowComponent={handleShowComponent}
+          handleSetCollections={handleSetCollections}
         />
       );
 
@@ -130,7 +131,7 @@ function App() {
         <CardView
           selectedDataSet={selectedDataSet}
           dataSets={dataSets}
-          collections={collections}
+          collectionsModel={collectionsModel}
           interactiveState={interactiveState}
           handleSelectDataSet={handleSelectDataSet}
           updateTitle={updateTitle}
