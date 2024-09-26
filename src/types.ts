@@ -2,7 +2,7 @@ import { ReactNode } from "react";
 
 export type PropsWithChildren<P> = P & { children?: ReactNode | ReactNode[] };
 
-interface IAttribute {
+export interface IAttribute {
   cid: string;
   deletable?: boolean;
   editable: boolean;
@@ -66,6 +66,7 @@ export interface ICollectionClass {
 }
 
 export interface ITableProps {
+  dataSetName: string;
   showHeaders: boolean;
   collectionClasses: Array<ICollectionClass>;
   getClassName: (caseObj: IProcessedCaseObj) => string;
@@ -75,11 +76,11 @@ export interface ITableProps {
       precisions: Record<string, number>, attrTypes: Record<string, string | undefined | null>,
       attrVisibilities: Record<string, boolean>, isParent?: boolean, resizeCounter?: number,
       parentLevel?: number) => ReactNode | ReactNode[];
-  mapHeadersFromValues: (collectionId: number, rowKey: string, values: Values,
-      attrVisibilities: Record<string, boolean>) => ReactNode | ReactNode[];
   getValueLength: (firstRow: Array<Values>) => number;
   paddingStyle: Record<string, string>;
   handleSortAttribute: (context: string, attrId: number, isDescending: boolean) => void;
+  handleAddAttribute: (collection: ICollection, attrName: string) => Promise<void>;
+  renameAttribute: (collectionName: string, attrId: number, oldName: string, newName: string) => Promise<void>;
 }
 
 export interface IBoundingBox {
@@ -88,3 +89,37 @@ export interface IBoundingBox {
   width: number;
   height: number;
 }
+
+export interface InteractiveState {
+  dataSetName: string | null;
+  displayMode: string;
+  padding: boolean;
+  showHeaders: boolean;
+  view: "nested-table" | "hierarchy" | "card-view" | null;
+}
+
+export type CodapState = {
+  addAttributeToCollection: (collectionId: number, attrName: string) => Promise<void>;
+  cases: IProcessedCaseObj[];
+  collections: ICollections;
+  connected: boolean;
+  dataSets: IDataSet[];
+  getCollectionNameFromId: (id: number) => string | undefined;
+  handleAddAttribute: (collection: ICollection, attrName: string) => Promise<void>;
+  handleAddCollection: (newCollectionName: string) => Promise<void>;
+  handleCreateCollectionFromAttribute: (collection: ICollection, attr: any, parent: number|string) => Promise<void>;
+  handleSelectDataSet: (name: string) => void;
+  handleSelectSelf: () => Promise<void>;
+  handleSetCollections: (collections: ICollections) => void;
+  handleSortAttribute: (context: string, attrId: number, isDescending: boolean) => Promise<void>;
+  handleUpdateAttributePosition: (coll: ICollection, attrName: string, position: number) => Promise<void>;
+  handleUpdateCollections: () => Promise<void>;
+  init: () => Promise<void>;
+  interactiveState: InteractiveState;
+  listenForSelectionChanges: (callback: (notification: any) => void) => void;
+  renameAttribute: (collectionName: string, attrId: number, oldName: string, newName: string) => Promise<void>;
+  selectCODAPCases: (caseIds: number[]) => Promise<void>;
+  selectedDataSet: IDataSet | null;
+  updateInteractiveState: (update: Partial<InteractiveState>) => void;
+  updateTitle: (title: string) => Promise<void>;
+};

@@ -1,4 +1,4 @@
-import { ICollections } from "../types";
+import { IAttribute, ICollections } from "../types";
 
 const getAllAttributesFromCollections = (collections: ICollections[]) => {
   const attrArray: any[] = [];
@@ -36,4 +36,11 @@ export const getAttrVisibility = (collections: any) => {
     return acc;
   }, {});
   return attrVisibilities;
+};
+
+export const newAttributeSlug = "newAttr";
+
+export const isNewAttribute = (name: string|number, index: number, attrs: (string|number|IAttribute)[]) => {
+  const newAttrRegex = new RegExp(`^${newAttributeSlug}`);
+  return !!(String(name).match(newAttrRegex) && index === attrs.length - 1);
 };

@@ -8,7 +8,7 @@ import { Menu } from "./menu";
 import { LandscapeView } from "./landscape-view";
 import { FlatTable } from "./flat-table";
 import { DraggableTableContext, useDraggableTable } from "../hooks/useDraggableTable";
-import { DraggagleTableData, DraggableTableHeader } from "./draggable-table-tags";
+import { DraggagleTableData } from "./draggable-table-tags";
 
 import css from "./nested-table.scss";
 
@@ -21,21 +21,23 @@ interface IProps {
   dataSets: IDataSet[];
   collections: ICollections;
   cases: IProcessedCaseObj[];
-  interactiveState: InteractiveState
-  handleSelectDataSet: (e: React.ChangeEvent<HTMLSelectElement>) => void
-  updateInteractiveState: (update: Partial<InteractiveState>) => void
-  handleShowComponent: () => void
+  interactiveState: InteractiveState;
+  handleSelectDataSet: (e: React.ChangeEvent<HTMLSelectElement>, defaultDisplayMode?: string) => void;
+  updateInteractiveState: (update: Partial<InteractiveState>) => void;
+  handleShowComponent: () => void;
   handleUpdateAttributePosition: (collection: ICollection, attrName: string, newPosition: number) => void
   handleCreateCollectionFromAttribute: (collection: ICollection, attr: any, parent: number|string) => Promise<void>
   handleSortAttribute: (context: string, attrId: number, isDescending: boolean) => void;
   editCaseValue: (newValue: string, caseObj: IProcessedCaseObj, attrTitle: string) => Promise<IResult | undefined>;
+  handleAddAttribute: (collection: ICollection, attrName: string) => Promise<void>;
+  renameAttribute: (collectionName: string, attrId: number, oldName: string, newName: string) => Promise<void>;
 }
 
 export const NestedTable = observer(function NestedTable(props: IProps) {
   const {selectedDataSet, dataSets, collections, cases, interactiveState,
          handleSelectDataSet, updateInteractiveState, handleShowComponent,
          handleUpdateAttributePosition, handleCreateCollectionFromAttribute,
-         handleSortAttribute, editCaseValue} = props;
+         handleSortAttribute, editCaseValue, renameAttribute, handleAddAttribute} = props;
   const [collectionClasses, setCollectionClasses] = useState<ICollectionClass[]>([]);
   const [paddingStyle, setPaddingStyle] = useState<Record<string, string>>({padding: "0px"});
 
@@ -87,39 +89,13 @@ export const NestedTable = observer(function NestedTable(props: IProps) {
     updateInteractiveState({showHeaders: !interactiveState.showHeaders});
   }, [interactiveState, updateInteractiveState]);
 
-  const handleSelectDisplayMode = useCallback((e: React.ChangeEvent<HTMLSelectElement>) => {
-    updateInteractiveState({displayMode: e.target.value});
+  const handleSelectDisplayMode = useCallback((mode: string) => {
+    updateInteractiveState({displayMode: mode});
   }, [updateInteractiveState]);
-
-  const mapHeadersFromValues = (collectionId: number, rowKey: string, values: Values,
-      attrVisibilities: Record<string, boolean>) => {
-    if (!selectedDataSet) return null;
-
-    const caseValuesKeys = [...values.keys()];
-    return (
-      <>
-        {caseValuesKeys.map((key, index) => {
-          if (!attrVisibilities[key] && (typeof values.get(key) === "string" || typeof values.get(key) === "number")) {
-            return (
-              <DraggableTableHeader
-                key={`${collectionId}-${rowKey}-${key}-${index}`}
-                collectionId={collectionId}
-                attrTitle={String(key)}
-                dataSetName={selectedDataSet.name}
-                dataSetTitle={selectedDataSet.title}
-                handleSortAttribute={handleSortAttribute}
-              >{key}
-              </DraggableTableHeader>
-            );
-          }
-        })}
-      </>
-    );
-  };
 
   const mapCellsFromValues = (collectionId: number, rowKey: string, cCase: IProcessedCaseObj,
       precisions: Record<string, number>, attrTypes: Record<string, string | undefined | null>,
-      attrVisibilities: Record<string, boolean>, isParent?: boolean, resizeCounter?: number, parentLevel?: number) => {
+      attrVisibilities: Record<string, boolean>, isParent?: boolean, parentLevel?: number) => {
     if (!selectedDataSet) return null;
 
     const aCase = cCase.values;
@@ -160,7 +136,6 @@ export const NestedTable = observer(function NestedTable(props: IProps) {
             key={`${rowKey}-${val}-${index}}`}
             isParent={isParent}
             caseObj={cCase}
-            resizeCounter={resizeCounter}
             parentLevel={parentLevel}
             selectedDataSetName={selectedDataSet.name}
             editCaseValue={editCaseValue}
@@ -187,8 +162,8 @@ export const NestedTable = observer(function NestedTable(props: IProps) {
     const isNoHierarchy = collections.length === 1;
     const classesExist = collectionClasses.length > 0;
     const tableProps = {showHeaders: interactiveState.showHeaders, collectionClasses, collections, selectedDataSet,
-      getClassName, mapHeadersFromValues, mapCellsFromValues, getValueLength, paddingStyle, editCaseValue,
-      handleSortAttribute};
+      getClassName, mapCellsFromValues, getValueLength, paddingStyle, editCaseValue, handleSortAttribute,
+      dataSetName: selectedDataSet.name, renameAttribute, handleAddAttribute};
     const flatProps = {...tableProps, cases};
     if (isNoHierarchy && classesExist) {
       return <FlatTable {...flatProps}/>;
@@ -218,6 +193,7 @@ export const NestedTable = observer(function NestedTable(props: IProps) {
         padding={interactiveState.padding}
         displayMode={interactiveState.displayMode}
         showDisplayMode={showDisplayMode}
+        defaultDisplayMode="Portrait"
       />
       <DraggableTableContext.Provider value={draggableTable}>
         {selectedDataSet && renderTable()}

@@ -3,8 +3,9 @@ import { observer } from "mobx-react-lite";
 import { IResult } from "@concord-consortium/codap-plugin-api";
 import { IProcessedCaseObj, ITableProps } from "../types";
 import { DraggableTableContainer, DraggableTableHeader } from "./draggable-table-tags";
-import { getAttrPrecisions, getAttrTypes, getAttrVisibility } from "../utils/utils";
+import { isNewAttribute, getAttrPrecisions, getAttrTypes, getAttrVisibility } from "../utils/utils";
 import { TableCell } from "./table-cell";
+import { AddAttributeButton } from "./add-attribute-button";
 
 import css from "./tables.scss";
 
@@ -15,7 +16,8 @@ interface IFlatProps extends ITableProps {
 }
 
 export const FlatTable = observer(function FlatTable(props: IFlatProps) {
-  const {selectedDataSet, collections, collectionClasses, handleSortAttribute, showHeaders, editCaseValue } = props;
+  const {selectedDataSet, collections, collectionClasses, handleSortAttribute, showHeaders,
+         editCaseValue, renameAttribute, handleAddAttribute } = props;
   const collection = collections[0];
   const {className} = collectionClasses[0];
   const attrVisibilities = getAttrVisibility(collections);
@@ -33,20 +35,32 @@ export const FlatTable = observer(function FlatTable(props: IFlatProps) {
           </tr>
           {showHeaders &&
           <tr className={css[className]}>
-            <th colSpan={collection.cases.length}>{collections[0].title}</th>
+            <th colSpan={collection.cases.length}>
+              {collections[0].title}
+              <AddAttributeButton
+                collectionId={collection.id}
+                collections={collections}
+                handleAddAttribute={handleAddAttribute}
+              />
+            </th>
           </tr>}
           <tr>
-            {collectionAttrsToUse.map((attr: any) =>
-              <DraggableTableHeader
-                key={attr.title}
-                collectionId={collection.id}
-                attrTitle={attr.title}
-                dataSetName={selectedDataSet.name}
-                dataSetTitle={selectedDataSet.title}
-                handleSortAttribute={handleSortAttribute}
-              >
-                {attr.title}
-              </DraggableTableHeader>)}
+            {collectionAttrsToUse.map((attr, index) => {
+              const isEditable = isNewAttribute(attr.name, index, collectionAttrsToUse);
+              return <DraggableTableHeader
+                       key={attr.title}
+                       collectionId={collection.id}
+                       attrTitle={attr.title}
+                       attrId={attr.id}
+                       dataSetName={selectedDataSet.name}
+                       dataSetTitle={selectedDataSet.title}
+                       editableHasFocus={isEditable}
+                       handleSortAttribute={handleSortAttribute}
+                       renameAttribute={renameAttribute}
+                     >
+                      {attr.title}
+                     </DraggableTableHeader>;
+            })}
           </tr>
           {collection.cases.map((c, index) => {
             const caseValuesKeys = [...c.values.keys()];

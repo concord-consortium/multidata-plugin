@@ -1,21 +1,23 @@
 import React from "react";
 import { observer } from "mobx-react-lite";
 import { IDataSet } from "../types";
+
 import css from "./menu.scss";
 
 interface IProps {
   selectedDataSet: any,
-  handleSelectDataSet: (e: React.ChangeEvent<HTMLSelectElement>) => void,
+  handleSelectDataSet: (e: React.ChangeEvent<HTMLSelectElement>, defaultDisplayMode?: string) => void,
   dataSets: Array<IDataSet>,
 
   // these are optional and only used by the nested table view
-  handleSelectDisplayMode?: (e: React.ChangeEvent<HTMLSelectElement>) => void,
+  handleSelectDisplayMode?: (mode: string) => void,
   togglePadding?: () => void,
   toggleShowHeaders?: () => void,
   showHeaders?: boolean,
   padding?: boolean;
   displayMode?: string;
   showDisplayMode?: boolean;
+  defaultDisplayMode?: string;
 }
 
 const portrait = "Portrait";
@@ -24,14 +26,22 @@ const none = "";
 
 export const Menu = observer(function Menu(props: IProps) {
   const {handleSelectDataSet, dataSets, handleSelectDisplayMode, togglePadding,
-    showHeaders, padding, toggleShowHeaders, displayMode, selectedDataSet, showDisplayMode} = props;
-
+         showHeaders, padding, toggleShowHeaders, displayMode, selectedDataSet,
+         showDisplayMode, defaultDisplayMode} = props;
   const displayModes = [none, portrait, landscape];
+
+  const handleDataSetSelection = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    if (handleSelectDisplayMode && defaultDisplayMode) {
+      handleSelectDisplayMode(defaultDisplayMode);
+    }
+    handleSelectDataSet(e, defaultDisplayMode);
+  };
+
   return (
     <div className={css.menu}>
       <div className={css.option}>
         <span>Select a Dataset:</span>
-        <select value={selectedDataSet?.name} onChange={handleSelectDataSet}>
+        <select onChange={handleDataSetSelection} defaultValue={selectedDataSet?.name}>
           <option key="dataset-option--noDataset"></option>
           {dataSets?.length && dataSets.map((set) => {
             const dataSetIdentifier = set.title || set.name;
@@ -43,7 +53,7 @@ export const Menu = observer(function Menu(props: IProps) {
       {showDisplayMode && handleSelectDisplayMode &&
         <div className={css.option}>
           <span>Display mode:</span>
-          <select onChange={handleSelectDisplayMode} defaultValue={displayMode}>
+          <select onChange={(e) => handleSelectDisplayMode(e.currentTarget.value)} defaultValue={displayMode}>
             {displayModes.map((mode) => {
               return (
                 <option key={`mode-option--${mode}`} disabled={!mode.length} value={mode}>
