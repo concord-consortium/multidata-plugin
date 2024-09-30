@@ -1,7 +1,7 @@
 import React from "react";
-import { ICollection, ICollections } from "../types";
+import { ICollection, ICollections } from "../../../types";
 
-import AddIcon from "../assets/add-icon.svg";
+import AddIcon from "../../../assets/add-icon.svg";
 
 import css from "./add-attribute-button.scss";
 

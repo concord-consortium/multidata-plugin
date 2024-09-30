@@ -1,7 +1,7 @@
 import React from "react";
 import { DraggableTableHeader } from "./draggable-table-tags";
-import { IDataSet, Values } from "../types";
-import { isNewAttribute } from "../utils/utils";
+import { IDataSet, Values } from "../../../types";
+import { isNewAttribute } from "../../../utils/utils";
 
 interface MapHeadersFromValuesProps {
   collectionId: number;

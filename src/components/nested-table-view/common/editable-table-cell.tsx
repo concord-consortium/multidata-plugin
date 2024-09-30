@@ -2,19 +2,23 @@ import React, { useState } from "react";
 import { observer } from "mobx-react-lite";
 import { Editable, EditablePreview, EditableInput } from "@chakra-ui/react";
 import { IResult } from "@concord-consortium/codap-plugin-api";
-import { IProcessedCaseObj } from "../types";
+import { IProcessedCaseObj } from "../../../types";
 
 import css from "./editable-table-cell.scss";
+import { getDisplayValue } from "../../../utils/utils";
 
 interface IProps {
   attrTitle: string;
   case: IProcessedCaseObj;
   editCaseValue: (newValue: string, cCase: IProcessedCaseObj, attrTitle: string) => Promise<IResult | undefined>;
+  precisions: Record<string, number>;
+  attrTypes: Record<string, string | undefined | null>;
 }
 
 export const EditableTableCell = observer(function EditableTableCell(props: IProps) {
-  const { attrTitle, case: cCase, editCaseValue } = props;
-  const displayValue = cCase.values.get(attrTitle);
+  const { attrTitle, case: cCase, editCaseValue, attrTypes, precisions } = props;
+  const cellValue = cCase.values.get(attrTitle);
+  const displayValue = getDisplayValue(cellValue, attrTitle, attrTypes, precisions);
   const [editingValue, setEditingValue] = useState(displayValue);
   const [isEditing, setIsEditing] = useState(false);
 

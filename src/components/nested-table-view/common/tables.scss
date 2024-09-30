@@ -265,10 +265,9 @@ table.draggableTableContainer {
   position: relative;
   .cellTextValue{
     position: absolute;
-    width: calc(100% - 8px);
     display: flex;
     flex-wrap: wrap;
-    top: 0;
+    width: calc(100% - 8px);
   }
 }
 

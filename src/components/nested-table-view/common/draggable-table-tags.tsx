@@ -2,16 +2,17 @@ import React, { useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { observer } from "mobx-react-lite";
 import { getAttribute, IResult } from "@concord-consortium/codap-plugin-api";
-import { useDraggableTableContext, Side } from "../hooks/useDraggableTable";
-import { useTableTopScrollTopContext } from "../hooks/useTableScrollTop";
-import { getCollectionById } from "../utils/apiHelpers";
-import { ICollection, ICollections, IProcessedCaseObj, PropsWithChildren } from "../types";
+import { useDraggableTableContext, Side } from "../../../hooks/useDraggableTable";
+import { useTableTopScrollTopContext } from "../../../hooks/useTableScrollTop";
+import { getCollectionById } from "../../../utils/apiHelpers";
+import { getDisplayValue } from "../../../utils/utils";
+import { ICollection, ICollections, IProcessedCaseObj, PropsWithChildren } from "../../../types";
 import { EditableTableCell } from "./editable-table-cell";
 import { AddAttributeButton } from "./add-attribute-button";
 import { EditableTableHeader } from "./editable-table-header";
 
-import AddIcon from "../assets/plus-level-1.svg";
-import DropdownIcon from "../assets/dropdown-arrow-icon.svg";
+import AddIcon from "../../../assets/plus-level-1.svg";
+import DropdownIcon from "../../../assets/dropdown-arrow-icon.svg";
 
 import css from "./tables.scss";
 
@@ -192,15 +193,18 @@ interface DraggagleTableDataProps {
   isParent?: boolean;
   parentLevel?: number;
   selectedDataSetName: string;
+  precisions: Record<string, number>;
+  attrTypes: Record<string, string | undefined | null>;
   editCaseValue: (newValue: string, caseObj: IProcessedCaseObj, attrTitle: string) => Promise<IResult | undefined>;
 }
 
 export const DraggagleTableData: React.FC<PropsWithChildren<DraggagleTableDataProps>> =
   observer(function DraggagleTableData(props) {
-    const {collectionId, attrTitle, children, caseObj, isParent, parentLevel=0, editCaseValue} = props;
+    const {collectionId, attrTitle, attrTypes, caseObj, isParent, parentLevel=0, precisions, editCaseValue} = props;
     const {dragOverId, dragSide} = useDraggableTableContext();
     const {style} = getIdAndStyle(collectionId, attrTitle, dragOverId, dragSide);
     const {tableScrollTop, scrollY} = useTableTopScrollTopContext();
+    const cellValue = caseObj.values.get(attrTitle);
 
     const cellRef = useRef<HTMLTableCellElement | null>(null);
 
@@ -242,6 +246,8 @@ export const DraggagleTableData: React.FC<PropsWithChildren<DraggagleTableDataPr
           attrTitle={attrTitle}
           case={caseObj}
           editCaseValue={editCaseValue}
+          precisions={precisions}
+          attrTypes={attrTypes}
         />
       );
     };
@@ -255,7 +261,9 @@ export const DraggagleTableData: React.FC<PropsWithChildren<DraggagleTableDataPr
       <td style={style} className={`draggable-table-data ${isParent ? css.parentData : ""}`} ref={cellRef}>
         {isParent
           ? <>
-              <span style={{opacity: 0}}>{children}</span>
+              <span style={{opacity: 0}}>
+                {getDisplayValue(cellValue, attrTitle, attrTypes, precisions)}
+              </span>
               <div style={textStyle} className={css.cellTextValue}>
                 <EditableCell />
               </div>

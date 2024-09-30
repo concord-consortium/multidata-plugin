@@ -1,3 +1,5 @@
+import { IResult } from "@concord-consortium/codap-plugin-api";
+import { CollectionsModelType } from "./models/collections";
 import { ReactNode } from "react";
 
 export type PropsWithChildren<P> = P & { children?: ReactNode | ReactNode[] };
@@ -71,11 +73,8 @@ export interface ITableProps {
   collectionClasses: Array<ICollectionClass>;
   getClassName: (caseObj: IProcessedCaseObj) => string;
   selectedDataSet: IDataSet;
-  collections: ICollection[];
-  mapCellsFromValues: (collectionId: number, rowKey: string, caseObj: IProcessedCaseObj,
-      precisions: Record<string, number>, attrTypes: Record<string, string | undefined | null>,
-      attrVisibilities: Record<string, boolean>, isParent?: boolean, resizeCounter?: number,
-      parentLevel?: number) => ReactNode | ReactNode[];
+  collectionsModel: CollectionsModelType;
+  editCaseValue: (newValue: string, caseObj: IProcessedCaseObj, attrTitle: string) => Promise<IResult | undefined>;
   getValueLength: (firstRow: Array<Values>) => number;
   paddingStyle: Record<string, string>;
   handleSortAttribute: (context: string, attrId: number, isDescending: boolean) => void;

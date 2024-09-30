@@ -1,42 +1,30 @@
-import { IAttribute, ICollections } from "../types";
+import { IAttribute } from "../types";
 
-const getAllAttributesFromCollections = (collections: ICollections[]) => {
-  const attrArray: any[] = [];
-  collections.forEach((collection: any) => {
-    attrArray.push(...collection.attrs);
-  });
-  return attrArray;
-};
+export const getDisplayValue = (cellValue: string | number, attrTitle: string,
+  attrTypes: Record<string, string | undefined | null>, precisions: Record<string, number>) => {
+    let displayValue: string|number;
+    const isNumericType = attrTypes[attrTitle] === "numeric";
+    const hasValue = cellValue !== "";
+    const parsedValue: number = typeof cellValue === "string" ? parseFloat(cellValue) : NaN;
+    const isNumber = !isNaN(parsedValue);
+    const hasPrecision = precisions[attrTitle] !== undefined;
+    const defaultValue: string | number = cellValue;
+    const isNumberType = typeof cellValue === "number";
 
-export const getAttrPrecisions = (collections: any) => {
-  const attrs = getAllAttributesFromCollections(collections);
-  const precisions = attrs.reduce((acc: Record<string, number>, attr: any) => {
-    const numPrecision = parseInt(attr.precision, 10);
-    acc[attr.name] = isNaN(numPrecision) ? 2 : numPrecision;
-    return acc;
-  }, {});
-  return precisions;
-};
+    if (isNumericType && hasValue && isNumber) {
+      const cellValAsNumber = Number(cellValue);
+      const isWholeNumber: boolean = cellValAsNumber % 1 === 0;
+      displayValue = isWholeNumber
+        ? parseInt(cellValue as string, 10)
+        : parsedValue.toFixed(hasPrecision ? precisions[attrTitle] : 2);
+    } else if (!isNumericType && isNumberType && hasValue) {
+      displayValue = (cellValue as number).toFixed(hasPrecision ? precisions[attrTitle] : 2);
+    } else {
+      displayValue = defaultValue;
+    }
 
-export const getAttrTypes = (collections: any) => {
-  const attrs = getAllAttributesFromCollections(collections);
-  const attrTypes = attrs.reduce(
-      (acc: Record<string, string | null | undefined>, attr: any) => {
-    acc[attr.name] = attr.type || null;
-    return acc;
-  }, {});
-  return attrTypes;
-};
-
-export const getAttrVisibility = (collections: any) => {
-  const attrs = getAllAttributesFromCollections(collections);
-  const attrVisibilities = attrs.reduce(
-      (acc: Record<string, boolean>, attr: any) => {
-    acc[attr.name] = attr.hidden || false;
-    return acc;
-  }, {});
-  return attrVisibilities;
-};
+    return `${displayValue}`;
+  };
 
 export const newAttributeSlug = "newAttr";
 
