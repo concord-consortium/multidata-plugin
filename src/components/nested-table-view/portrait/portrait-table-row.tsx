@@ -3,18 +3,18 @@ import { IProcessedCaseObj, ITableProps } from "../../../types";
 import { observer } from "mobx-react-lite";
 import { useTableHeaderFocusContext } from "../../../hooks/useTableHeaderFocusContext";
 import { TableCells } from "../common/table-cells";
+import { TableHeaders } from "../common/table-headers";
 import { DraggableTableContainer, DroppableTableData, DroppableTableHeader } from "../common/draggable-table-tags";
 
 import css from "../common/tables.scss";
-import { TableHeaders } from "../common/table-headers";
 
-export type PortraitViewRowProps = {
+export type PortraitTableRowProps = {
   caseObj: IProcessedCaseObj, index?: null | number,
   isParent: boolean, parentLevel?: number
   dataSetName: string, hasFocusBeenSet?: boolean
 } & ITableProps;
 
-export const PortraitTableRow = observer(function PortraitViewRow(props: PortraitViewRowProps) {
+export const PortraitTableRow = observer(function PortraitTableRow(props: PortraitTableRowProps) {
   const { paddingStyle, showHeaders, getClassName, caseObj, index, isParent, parentLevel = 0, dataSetName,
     handleAddAttribute, collectionsModel, handleSortAttribute, renameAttribute, hasFocusBeenSet,
     editCaseValue, selectedDataSet } = props;
@@ -93,7 +93,7 @@ export const PortraitTableRow = observer(function PortraitViewRow(props: Portrai
               <table style={paddingStyle} className={`${css.subTable} ${css[getClassName(children[0])]}`}>
                 <tbody className={`table-body ${css[getClassName(children[0])]}`}>
                   {caseObj.children.map((child, i) => {
-                    const nextProps: PortraitViewRowProps = {
+                    const nextProps: PortraitTableRowProps = {
                       ...props,
                       caseObj: child,
                       index: i,
@@ -118,11 +118,11 @@ export const PortraitTableRow = observer(function PortraitViewRow(props: Portrai
                               renameAttribute={renameAttribute}
                             />
                           </tr>
-                          <PortraitViewRow {...nextProps} />
+                          <PortraitTableRow {...nextProps} />
                         </React.Fragment>
                       );
                     } else {
-                      return <PortraitViewRow key={child.id} {...nextProps} />;
+                      return <PortraitTableRow key={child.id} {...nextProps} />;
                     }
                   })}
                 </tbody>

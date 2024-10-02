@@ -3,9 +3,9 @@ import { observer } from "mobx-react-lite";
 import { Editable, EditablePreview, EditableInput } from "@chakra-ui/react";
 import { IResult } from "@concord-consortium/codap-plugin-api";
 import { IProcessedCaseObj } from "../../../types";
+import { getDisplayValue } from "../../../utils/utils";
 
 import css from "./editable-table-cell.scss";
-import { getDisplayValue } from "../../../utils/utils";
 
 interface IProps {
   attrTitle: string;
