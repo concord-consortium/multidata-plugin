@@ -125,11 +125,9 @@ export const DraggableTableHeader: React.FC<PropsWithChildren<DraggagleTableHead
                   />
                 : children}
             </button>
-            {
-              <button className={css.dropdownIcon} onClick={handleShowHeaderMenu}>
-                {showDropdownIcon && <DropdownIcon className={css.dropdownIcon} />}
-              </button>
-            }
+            <button className={css.dropdownIcon} onClick={handleShowHeaderMenu}>
+              {showDropdownIcon && <DropdownIcon className={css.dropdownIcon} />}
+            </button>
           </div>
         </th>
         { showHeaderMenu && tableContainer && headerPos &&

@@ -35,7 +35,7 @@ export const LandscapeView = observer(function LandscapeView(props: ITableProps)
               <TableHeaders
                 collectionId={parentColl.id}
                 key={`first-row-${values}`}
-                rowKey={`first-row`}
+                rowKey="first-row"
                 values={values}
                 attrVisibilities={attrVisibilities}
                 selectedDataSet={props.selectedDataSet}
