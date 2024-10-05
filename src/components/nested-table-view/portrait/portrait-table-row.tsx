@@ -1,7 +1,6 @@
 import React from "react";
 import { IProcessedCaseObj, ITableProps } from "../../../types";
 import { observer } from "mobx-react-lite";
-import { useTableHeaderFocusContext } from "../../../hooks/useTableHeaderFocusContext";
 import { TableCells } from "../common/table-cells";
 import { TableHeaders } from "../common/table-headers";
 import { DraggableTableContainer, DroppableTableData, DroppableTableHeader } from "../common/draggable-table-tags";
@@ -11,22 +10,16 @@ import css from "../common/tables.scss";
 export type PortraitTableRowProps = {
   caseObj: IProcessedCaseObj, index?: null | number,
   isParent: boolean, parentLevel?: number
-  dataSetName: string, hasFocusBeenSet?: boolean
+  dataSetName: string, isTopRow?: boolean
 } & ITableProps;
 
 export const PortraitTableRow = observer(function PortraitTableRow(props: PortraitTableRowProps) {
   const { paddingStyle, showHeaders, getClassName, caseObj, index, isParent, parentLevel = 0, dataSetName,
-    handleAddAttribute, collectionsModel, handleSortAttribute, renameAttribute, hasFocusBeenSet,
-    editCaseValue, selectedDataSet } = props;
+    handleAddAttribute, collectionsModel, handleSortAttribute, renameAttribute, editCaseValue,
+    selectedDataSet, isTopRow } = props;
   const { collections, attrVisibilities, attrPrecisions, attrTypes } = collectionsModel;
   const collectionId = caseObj.collection.id;
-  const { focusSetForLevels, updateFocusSetForLevel } = useTableHeaderFocusContext();
   const { children, id, values } = caseObj;
-  const focusSetForLevel = !!parentLevel && focusSetForLevels.get(parentLevel);
-  const shouldGetFocusOnNewAttribute = !focusSetForLevel;
-  if (!focusSetForLevel) {
-    updateFocusSetForLevel?.(parentLevel || 0);
-  }
 
   if (!children.length) {
     return (
@@ -57,7 +50,7 @@ export const PortraitTableRow = observer(function PortraitTableRow(props: Portra
               attrVisibilities={attrVisibilities}
               isParent={true}
               attrId={id}
-              editableHasFocus={shouldGetFocusOnNewAttribute}
+              editableHasFocus={isTopRow}
               selectedDataSet={selectedDataSet}
               handleSortAttribute={handleSortAttribute}
               renameAttribute={renameAttribute}
@@ -99,7 +92,7 @@ export const PortraitTableRow = observer(function PortraitTableRow(props: Portra
                       index: i,
                       isParent: true,
                       parentLevel: parentLevel + 1,
-                      hasFocusBeenSet: hasFocusBeenSet || shouldGetFocusOnNewAttribute
+                      isTopRow: isTopRow && i === 0
                     };
                     if (i === 0 && !child.children.length) {
                       return (
@@ -112,7 +105,7 @@ export const PortraitTableRow = observer(function PortraitTableRow(props: Portra
                               attrVisibilities={attrVisibilities}
                               isParent={false}
                               attrId={child.id}
-                              editableHasFocus={shouldGetFocusOnNewAttribute}
+                              editableHasFocus={isTopRow}
                               selectedDataSet={selectedDataSet}
                               handleSortAttribute={handleSortAttribute}
                               renameAttribute={renameAttribute}
