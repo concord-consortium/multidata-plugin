@@ -254,6 +254,9 @@ export const DraggagleTableData: React.FC<PropsWithChildren<DraggagleTableDataPr
     if (cellTextTop === 0) {
       textStyle.alignContent = "center";
       textStyle.bottom = 0;
+      textStyle.position = "relative";
+    } else {
+      textStyle.position = "absolute";
     }
     return (
       <td style={style} className={`draggable-table-data ${isParent ? css.parentData : ""}`} ref={cellRef}>
