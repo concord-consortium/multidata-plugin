@@ -1,6 +1,8 @@
 import React, { useEffect, useRef, useState } from "react";
 import { observer } from "mobx-react-lite";
 import { IBoundingBox, ICollection } from "../../types";
+import { newAttributeSlug } from "../../utils/utils";
+
 import AddIcon from "../../assets/add-icon.svg";
 
 import css from "./add-buttons.scss";
@@ -12,7 +14,7 @@ interface IProps {
 
 export const AddAttribute = observer(function AddAttribute({collection, handleAddAttribute}: IProps) {
   const [showInput, setShowInput] = useState<boolean>(false);
-  const [newAttrName, setNewAttrName] = useState<string>("newAttr");
+  const [newAttrName, setNewAttrName] = useState<string>(newAttributeSlug);
   const ref = useRef<HTMLDivElement>(null);
 
   const handleAddButtonClick = () => {
@@ -62,7 +64,7 @@ export const AddAttribute = observer(function AddAttribute({collection, handleAd
   const renderInput = () => {
     return (
       <div ref={ref} className={css.createNewAttr}>
-        <input type="textbox" defaultValue={"newAttr"} onChange={handleChange}></input>
+        <input type="textbox" defaultValue={newAttributeSlug} onChange={handleChange}></input>
         <button onClick={handleNewAttrNameClick}>Create</button>
       </div>
     );
