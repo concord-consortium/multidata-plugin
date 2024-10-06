@@ -51,7 +51,7 @@ interface DraggagleTableHeaderProps {
 export const DraggableTableHeader: React.FC<PropsWithChildren<DraggagleTableHeaderProps>> =
   observer(function DraggagleTableHeader(props) {
     const {collectionId, attrTitle, dataSetName, editableHasFocus, children, handleSortAttribute,
-           isParent, attrId, renameAttribute} = props;
+           isParent, attrId, renameAttribute, colSpan} = props;
     const {dragOverId, dragSide, handleDragStart, handleDragOver, handleOnDrop, handleDragEnter,
       handleDragLeave, handleDragEnd} = useDraggableTableContext();
     const {id, style} = getIdAndStyle(collectionId, attrTitle, dragOverId, dragSide);
@@ -99,6 +99,7 @@ export const DraggableTableHeader: React.FC<PropsWithChildren<DraggagleTableHead
           data-id={id}
           style={style}
           draggable={true}
+          colSpan={colSpan}
           className={css.draggable}
           onDragStart={handleDragStart}
           onDragOver={handleDragOver}

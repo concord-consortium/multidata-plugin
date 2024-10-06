@@ -3,7 +3,7 @@ import { DraggableTableHeader } from "./draggable-table-tags";
 import { IDataSet, Values } from "../../../types";
 import { isNewAttribute } from "../../../utils/utils";
 
-interface MapHeadersFromValuesProps {
+interface ITableHeaders {
   collectionId: number;
   rowKey: string;
   values: Values;
@@ -16,7 +16,7 @@ interface MapHeadersFromValuesProps {
   renameAttribute: (collectionName: string, attrId: number, oldName: string, newName: string) => Promise<void>;
 }
 
-export const TableHeaders: React.FC<MapHeadersFromValuesProps> = ({
+export const TableHeaders: React.FC<ITableHeaders> = ({
   collectionId,
   rowKey,
   values,

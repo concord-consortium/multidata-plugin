@@ -18,7 +18,6 @@ export const LandscapeTable = observer(function LandscapeView(props: ITableProps
       return {...caseObj.values, id: caseObj.id};
     });
 
-    const parentCase = parentColl.cases[0];
     const valueCount = getValueLength(firstRowValues);
     const className = getClassName(parentColl.cases[0]);
     return (
@@ -32,7 +31,7 @@ export const LandscapeTable = observer(function LandscapeView(props: ITableProps
             return (
               <TableHeaders
                 collectionId={parentColl.id}
-                key={`first-row-${values}`}
+                key={`first-row-${values.entries().next().value}`}
                 rowKey="first-row"
                 values={values}
                 attrVisibilities={attrVisibilities}
@@ -44,30 +43,30 @@ export const LandscapeTable = observer(function LandscapeView(props: ITableProps
           })}
         </tr>
         <tr className={css[className]}>
-          {firstRowValues.map((values, idx) => {
+          {parentColl.cases.map((caseObj, idx) => {
             return (
               <TableCells
                 key={`row-${parentColl.id}-${idx}`}
                 collectionId={parentColl.id}
                 rowKey={`first-row`}
-                cCase={parentCase}
+                cCase={caseObj}
                 precisions={attrPrecisions}
                 attrTypes={attrTypes}
                 attrVisibilities={attrVisibilities}
                 selectedDataSetName={selectedDataSet.name}
                 editCaseValue={editCaseValue}
               />
-              );
-            })}
+            );
+          })}
         </tr>
         <tr className={css[className]}>
           {parentColl.cases.map((caseObj) => {
             return (
               <td
-                width={`calc(100%/${parentColl.cases.length})`}
+                width={`${100 / parentColl.cases.length}%`}
                 key={`${caseObj.id}`}
                 style={{...paddingStyle, verticalAlign: "top"}}
-                colSpan={Object.values(caseObj.values).length}>
+              >
                 <div style={{width: `100%`, overflow: "scroll"}}>
                   {renderColFromCaseObj(parentColl, caseObj)}
                 </div>
@@ -152,7 +151,7 @@ export const LandscapeTable = observer(function LandscapeView(props: ITableProps
           <DraggableTableHeader
             collectionId={parentColl[0].id}
             attrTitle={selectedDataSet.name}
-            colSpan={getValueLength(firstRowValues)}
+            colSpan={firstRowValues.length}
             dataSetName={selectedDataSet.name}
             dataSetTitle={selectedDataSet.title}
             handleSortAttribute={handleSortAttribute}
