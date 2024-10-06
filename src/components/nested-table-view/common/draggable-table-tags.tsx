@@ -153,12 +153,13 @@ interface DroppableTableHeaderProps {
   childCollectionId: number;
   collectionId: number;
   dataSetName: string;
-  handleAddAttribute: (collection: ICollection, attrName: string) => Promise<void>;
+  tableIndex?: number;
+  handleAddAttribute: (collection: ICollection, attrName: string, tableIndex: number) => Promise<void>;
 }
 
 export const DroppableTableHeader: React.FC<PropsWithChildren<DroppableTableHeaderProps>> =
   observer(function DroppableTableHeader(props) {
-    const {childCollectionId, collectionId, collections, children, handleAddAttribute} = props;
+    const {childCollectionId, collectionId, collections, children, handleAddAttribute, tableIndex=0} = props;
     const {dragOverId, handleDragOver, handleOnDrop, handleDragEnter, handleDragLeave} = useDraggableTableContext();
     const id = `${collectionId}`;
     const style = getStyle(id, dragOverId, "left");
@@ -178,6 +179,7 @@ export const DroppableTableHeader: React.FC<PropsWithChildren<DroppableTableHead
             collectionId={childCollectionId}
             collections={collections}
             handleAddAttribute={handleAddAttribute}
+            tableIndex={tableIndex}
           />
         </div>
       </th>

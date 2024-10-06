@@ -29,7 +29,7 @@ interface IProps {
   handleCreateCollectionFromAttribute: (collection: ICollection, attr: any, parent: number|string) => Promise<void>
   handleSortAttribute: (context: string, attrId: number, isDescending: boolean) => void;
   editCaseValue: (newValue: string, caseObj: IProcessedCaseObj, attrTitle: string) => Promise<IResult | undefined>;
-  handleAddAttribute: (collection: ICollection, attrName: string) => Promise<void>;
+  handleAddAttribute: (collection: ICollection, attrName: string, tableIndex: number) => Promise<void>;
   renameAttribute: (collectionName: string, attrId: number, oldName: string, newName: string) => Promise<void>;
 }
 
@@ -110,7 +110,8 @@ export const NestedTable = observer(function NestedTable(props: IProps) {
     const classesExist = collectionClasses.length > 0;
     const tableProps = {showHeaders: interactiveState.showHeaders, collectionClasses, collectionsModel,
       selectedDataSet, getClassName, getValueLength, paddingStyle, editCaseValue, handleSortAttribute,
-      dataSetName: selectedDataSet.name, renameAttribute, handleAddAttribute};
+      dataSetName: selectedDataSet.name, renameAttribute, handleAddAttribute,
+      activeTableIndex: interactiveState.activeTableIndex};
     const flatProps = {...tableProps, cases};
     if (isNoHierarchy && classesExist) {
       return <FlatTable {...flatProps}/>;

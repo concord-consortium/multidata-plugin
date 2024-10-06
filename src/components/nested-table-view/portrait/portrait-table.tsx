@@ -10,7 +10,7 @@ import css from "../common/tables.scss";
 
 export const PortraitTable = observer(function PortraitView(props: ITableProps) {
   const {collectionClasses, collectionsModel, selectedDataSet, getValueLength, dataSetName,
-    handleAddAttribute} = props;
+    handleAddAttribute, activeTableIndex} = props;
   const { collections } = collectionsModel;
   const tableRef = useRef<HTMLTableElement | null>(null);
   const tableScrollTop = useTableScrollTop(tableRef);
@@ -46,10 +46,11 @@ export const PortraitTable = observer(function PortraitView(props: ITableProps) 
                 {...props}
                 caseObj={caseObj}
                 index={index}
+                tableIndex={index}
                 isParent={true}
                 parentLevel={0}
                 dataSetName={dataSetName}
-                isTopRow={index === 0}
+                getsFocusOnAddAttr={index === activeTableIndex}
               />
             ))}
           </tbody>

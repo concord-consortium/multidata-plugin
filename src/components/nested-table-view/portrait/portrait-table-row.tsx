@@ -10,13 +10,13 @@ import css from "../common/tables.scss";
 export type PortraitTableRowProps = {
   caseObj: IProcessedCaseObj, index?: null | number,
   isParent: boolean, parentLevel?: number
-  dataSetName: string, isTopRow?: boolean
+  dataSetName: string, getsFocusOnAddAttr?: boolean
 } & ITableProps;
 
 export const PortraitTableRow = observer(function PortraitTableRow(props: PortraitTableRowProps) {
   const { paddingStyle, showHeaders, getClassName, caseObj, index, isParent, parentLevel = 0, dataSetName,
     handleAddAttribute, collectionsModel, handleSortAttribute, renameAttribute, editCaseValue,
-    selectedDataSet, isTopRow } = props;
+    selectedDataSet, getsFocusOnAddAttr, tableIndex } = props;
   const { collections, attrVisibilities, attrPrecisions, attrTypes } = collectionsModel;
   const collectionId = caseObj.collection.id;
   const { children, id, values } = caseObj;
@@ -50,7 +50,7 @@ export const PortraitTableRow = observer(function PortraitTableRow(props: Portra
               attrVisibilities={attrVisibilities}
               isParent={true}
               attrId={id}
-              editableHasFocus={isTopRow}
+              editableHasFocus={getsFocusOnAddAttr}
               selectedDataSet={selectedDataSet}
               handleSortAttribute={handleSortAttribute}
               renameAttribute={renameAttribute}
@@ -62,6 +62,7 @@ export const PortraitTableRow = observer(function PortraitTableRow(props: Portra
                 childCollectionId={caseObj.children[0].collection.id}
                 dataSetName={dataSetName}
                 handleAddAttribute={handleAddAttribute}
+                tableIndex={tableIndex}
               >
                 {children[0].collection.name}
               </DroppableTableHeader>
@@ -92,7 +93,7 @@ export const PortraitTableRow = observer(function PortraitTableRow(props: Portra
                       index: i,
                       isParent: true,
                       parentLevel: parentLevel + 1,
-                      isTopRow: isTopRow && i === 0
+                      getsFocusOnAddAttr: getsFocusOnAddAttr && i === 0
                     };
                     if (i === 0 && !child.children.length) {
                       return (
@@ -105,7 +106,7 @@ export const PortraitTableRow = observer(function PortraitTableRow(props: Portra
                               attrVisibilities={attrVisibilities}
                               isParent={false}
                               attrId={child.id}
-                              editableHasFocus={isTopRow}
+                              editableHasFocus={getsFocusOnAddAttr}
                               selectedDataSet={selectedDataSet}
                               handleSortAttribute={handleSortAttribute}
                               renameAttribute={renameAttribute}

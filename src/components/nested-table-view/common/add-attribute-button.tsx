@@ -8,14 +8,16 @@ import css from "./add-attribute-button.scss";
 interface IProps {
   collectionId: number;
   collections: ICollections;
-  handleAddAttribute: (collection: ICollection, attrName: string) => Promise<void>;
+  tableIndex?: number;
+  handleAddAttribute: (collection: ICollection, attrName: string, tableIndex: number) => Promise<void>;
 }
 
-export const AddAttributeButton: React.FC<IProps> = ({collections, collectionId, handleAddAttribute}: IProps) => {
+export const AddAttributeButton: React.FC<IProps> = (props: IProps) => {
+  const { collections, collectionId, handleAddAttribute, tableIndex=0 } = props;
 
   const handleAddAttributeToCollection = async () => {
     const collection = collections.find((c) => c.id === collectionId);
-    collection && await handleAddAttribute(collection, "");
+    collection && await handleAddAttribute(collection, "", tableIndex);
   };
 
   return (

@@ -40,6 +40,7 @@ export interface InteractiveState {
   padding: boolean;
   showHeaders: boolean;
   displayMode: string;
+  activeTableIndex: number;
 }
 
 export const useCodapState = () => {
@@ -63,7 +64,8 @@ export const useCodapState = () => {
     dataSetName: null,
     padding: true,
     showHeaders: true,
-    displayMode: ""
+    displayMode: "",
+    activeTableIndex: 0
   });
 
   const getDataSets = useCallback(async () => {
@@ -231,7 +233,7 @@ export const useCodapState = () => {
     sortAttribute(context, attrId, isDescending);
   };
 
-  const handleAddAttribute = async (collection: ICollection, attrName: string) => {
+  const handleAddAttribute = async (collection: ICollection, attrName: string, tableIndex=0) => {
     if (!selectedDataSet) return;
 
     const proposedName = attrName.length ? attrName : newAttributeSlug;
@@ -262,6 +264,7 @@ export const useCodapState = () => {
     }
     await createNewAttribute(selectedDataSet.name, collection.name, newAttributeName||"");
     updateCollections();
+    setInteractiveState({...interactiveState, activeTableIndex: tableIndex});
   };
 
   const updateInteractiveState = useCallback((update: InteractiveState) => {

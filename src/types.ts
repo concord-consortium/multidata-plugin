@@ -77,8 +77,10 @@ export interface ITableProps {
   editCaseValue: (newValue: string, caseObj: IProcessedCaseObj, attrTitle: string) => Promise<IResult | undefined>;
   getValueLength: (firstRow: Array<Values>) => number;
   paddingStyle: Record<string, string>;
+  tableIndex?: number;
+  activeTableIndex?: number;
   handleSortAttribute: (context: string, attrId: number, isDescending: boolean) => void;
-  handleAddAttribute: (collection: ICollection, attrName: string) => Promise<void>;
+  handleAddAttribute: (collection: ICollection, attrName: string, tableIndex: number) => Promise<void>;
   renameAttribute: (collectionName: string, attrId: number, oldName: string, newName: string) => Promise<void>;
 }
 
