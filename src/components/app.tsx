@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { InteractiveState, useCodapState } from "../hooks/useCodapState";
-import { NestedTable } from "./nested-table";
+import { NestedTable } from "./nested-table-view/nested-table";
 import { Hierarchy } from "./hierarchy-view/hierarchy";
 import { CardView } from "./card-view/card-view";
 import { ICaseObjCommon } from "../types";
@@ -100,7 +100,7 @@ function App() {
         <NestedTable
           selectedDataSet={selectedDataSet}
           dataSets={dataSets}
-          collections={collections}
+          collectionsModel={collectionsModel}
           cases={cases}
           interactiveState={interactiveState}
           handleSelectDataSet={handleSelectDataSet}

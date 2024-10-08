@@ -9,6 +9,7 @@ export const AttributeModel = types.model("AttributeModel", {
   id: types.number,
   name: types.string,
   renamable: types.optional(types.boolean, true),
+  precision: types.optional(types.number, 2),
   title: types.string,
   type: types.string,
 });

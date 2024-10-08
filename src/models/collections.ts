@@ -34,6 +34,33 @@ export const CollectionsModel = types.model("CollectionsModel", {
       });
     });
     return result;
+  },
+  get attrPrecisions() {
+    const precisions: Record<string, number> = {};
+    self.collections.forEach(collection => {
+      collection.attrs.forEach(attr => {
+        precisions[attr.name] = attr.precision;
+      });
+    });
+    return precisions;
+  },
+  get attrTypes() {
+    const attrTypes: Record<string, string> = {};
+    self.collections.forEach(collection => {
+      collection.attrs.forEach(attr => {
+        attrTypes[attr.name] = attr.type;
+      });
+    });
+    return attrTypes;
+  },
+  get attrVisibilities() {
+    const visibilities: Record<string, boolean> = {};
+    self.collections.forEach(collection => {
+      collection.attrs.forEach(attr => {
+        visibilities[attr.name] = attr.hidden;
+      });
+    });
+    return visibilities;
   }
 }));
 

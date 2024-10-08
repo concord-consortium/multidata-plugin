@@ -1,15 +1,16 @@
 import React from "react";
 import { observer } from "mobx-react-lite";
-import { ICollection, IProcessedCaseObj, ITableProps } from "../types";
-import { DraggableTableHeader } from "./draggable-table-tags";
-import { getAttrPrecisions, getAttrTypes, getAttrVisibility } from "../utils/utils";
-import { TableHeaders } from "./table-headers";
+import { ICollection, IProcessedCaseObj, ITableProps } from "../../../types";
+import { DraggableTableHeader } from "../common/draggable-table-tags";
+import { TableHeaders } from "../common/table-headers";
+import { TableCells } from "../common/table-cells";
 
-import css from "./tables.scss";
+import css from "../common/tables.scss";
 
-export const LandscapeView = observer(function LandscapeView(props: ITableProps) {
-  const {mapCellsFromValues, showHeaders, collectionClasses, getClassName, selectedDataSet,
-         collections, getValueLength, paddingStyle, handleSortAttribute, renameAttribute} = props;
+export const LandscapeTable = observer(function LandscapeView(props: ITableProps) {
+  const { showHeaders, collectionClasses, getClassName, selectedDataSet, collectionsModel, getValueLength,
+    paddingStyle, handleSortAttribute, renameAttribute, editCaseValue } = props;
+  const { collections, attrPrecisions, attrTypes, attrVisibilities } = collectionsModel;
 
   const renderNestedTable = (parentColl: ICollection) => {
     const headers = parentColl.cases.map((caseObj) => caseObj.values);
@@ -17,12 +18,8 @@ export const LandscapeView = observer(function LandscapeView(props: ITableProps)
       return {...caseObj.values, id: caseObj.id};
     });
 
-    const parentCase = parentColl.cases[0];
     const valueCount = getValueLength(firstRowValues);
     const className = getClassName(parentColl.cases[0]);
-    const precisions = getAttrPrecisions(collections);
-    const attrTypes = getAttrTypes(collections);
-    const attrVisibilities = getAttrVisibility(collections);
     return (
       <>
         {showHeaders &&
@@ -34,11 +31,11 @@ export const LandscapeView = observer(function LandscapeView(props: ITableProps)
             return (
               <TableHeaders
                 collectionId={parentColl.id}
-                key={`first-row-${values}`}
+                key={`first-row-${values.entries().next().value}`}
                 rowKey="first-row"
                 values={values}
                 attrVisibilities={attrVisibilities}
-                selectedDataSet={props.selectedDataSet}
+                selectedDataSet={selectedDataSet}
                 handleSortAttribute={handleSortAttribute}
                 renameAttribute={renameAttribute}
               />
@@ -46,20 +43,30 @@ export const LandscapeView = observer(function LandscapeView(props: ITableProps)
           })}
         </tr>
         <tr className={css[className]}>
-          {firstRowValues.map(values =>
-            mapCellsFromValues(
-              parentColl.id, "first-row", parentCase, precisions, attrTypes, attrVisibilities
-            ))
-          }
+          {parentColl.cases.map((caseObj, idx) => {
+            return (
+              <TableCells
+                key={`row-${parentColl.id}-${idx}`}
+                collectionId={parentColl.id}
+                rowKey={`first-row`}
+                cCase={caseObj}
+                precisions={attrPrecisions}
+                attrTypes={attrTypes}
+                attrVisibilities={attrVisibilities}
+                selectedDataSetName={selectedDataSet.name}
+                editCaseValue={editCaseValue}
+              />
+            );
+          })}
         </tr>
         <tr className={css[className]}>
           {parentColl.cases.map((caseObj) => {
             return (
               <td
-                width={`calc(100%/${parentColl.cases.length})`}
+                width={`${100 / parentColl.cases.length}%`}
                 key={`${caseObj.id}`}
                 style={{...paddingStyle, verticalAlign: "top"}}
-                colSpan={Object.values(caseObj.values).length}>
+              >
                 <div style={{width: `100%`, overflow: "scroll"}}>
                   {renderColFromCaseObj(parentColl, caseObj)}
                 </div>
@@ -74,9 +81,6 @@ export const LandscapeView = observer(function LandscapeView(props: ITableProps)
   const renderColFromCaseObj = (collection: ICollection, caseObj: IProcessedCaseObj, index?: number) => {
     const {children, values} = caseObj;
     const isFirstIndex = index === 0;
-    const precisions = getAttrPrecisions(collections);
-    const attrTypes = getAttrTypes(collections);
-    const attrVisibilities = getAttrVisibility(collections);
 
     if (!children.length) {
       const className = getClassName(caseObj);
@@ -94,17 +98,23 @@ export const LandscapeView = observer(function LandscapeView(props: ITableProps)
                 rowKey={`first-row-${index}`}
                 values={values}
                 attrVisibilities={attrVisibilities}
-                selectedDataSet={props.selectedDataSet}
+                selectedDataSet={selectedDataSet}
                 handleSortAttribute={handleSortAttribute}
                 renameAttribute={renameAttribute}
               />
             </tr>
           }
           <tr>
-            {mapCellsFromValues(
-                collection.id, `row-${index}`, caseObj, precisions, attrTypes, attrVisibilities
-              )
-            }
+            <TableCells
+              collectionId={collection.id}
+              rowKey={`row-${index}`}
+              cCase={caseObj}
+              precisions={attrPrecisions}
+              attrTypes={attrTypes}
+              attrVisibilities={attrVisibilities}
+              selectedDataSetName={selectedDataSet.name}
+              editCaseValue={editCaseValue}
+            />
           </tr>
         </>
       );
@@ -141,7 +151,7 @@ export const LandscapeView = observer(function LandscapeView(props: ITableProps)
           <DraggableTableHeader
             collectionId={parentColl[0].id}
             attrTitle={selectedDataSet.name}
-            colSpan={getValueLength(firstRowValues)}
+            colSpan={firstRowValues.length}
             dataSetName={selectedDataSet.name}
             dataSetTitle={selectedDataSet.title}
             handleSortAttribute={handleSortAttribute}

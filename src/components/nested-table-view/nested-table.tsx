@@ -1,14 +1,14 @@
 import React, { useCallback, useEffect, useState } from "react";
 import { observer } from "mobx-react-lite";
 import { IResult } from "@concord-consortium/codap-plugin-api";
-import { InteractiveState } from "../hooks/useCodapState";
-import { ICollection, IProcessedCaseObj, Values, ICollectionClass, IDataSet, ICollections } from "../types";
-import { PortraitView } from "./portrait-view";
-import { Menu } from "./menu";
-import { LandscapeView } from "./landscape-view";
-import { FlatTable } from "./flat-table";
-import { DraggableTableContext, useDraggableTable } from "../hooks/useDraggableTable";
-import { DraggagleTableData } from "./draggable-table-tags";
+import { InteractiveState } from "../../hooks/useCodapState";
+import { ICollection, IProcessedCaseObj, Values, ICollectionClass, IDataSet } from "../../types";
+import { DraggableTableContext, useDraggableTable } from "../../hooks/useDraggableTable";
+import { CollectionsModelType } from "../../models/collections";
+import { Menu } from "../menu";
+import { PortraitTable } from "./portrait/portrait-table";
+import { LandscapeTable } from "./landscape/landscape-table";
+import { FlatTable } from "./flat/flat-table";
 
 import css from "./nested-table.scss";
 
@@ -19,7 +19,7 @@ const none = "";
 interface IProps {
   selectedDataSet: IDataSet | null;
   dataSets: IDataSet[];
-  collections: ICollections;
+  collectionsModel: CollectionsModelType;
   cases: IProcessedCaseObj[];
   interactiveState: InteractiveState;
   handleSelectDataSet: (e: React.ChangeEvent<HTMLSelectElement>, defaultDisplayMode?: string) => void;
@@ -29,17 +29,18 @@ interface IProps {
   handleCreateCollectionFromAttribute: (collection: ICollection, attr: any, parent: number|string) => Promise<void>
   handleSortAttribute: (context: string, attrId: number, isDescending: boolean) => void;
   editCaseValue: (newValue: string, caseObj: IProcessedCaseObj, attrTitle: string) => Promise<IResult | undefined>;
-  handleAddAttribute: (collection: ICollection, attrName: string) => Promise<void>;
+  handleAddAttribute: (collection: ICollection, attrName: string, tableIndex: number) => Promise<void>;
   renameAttribute: (collectionName: string, attrId: number, oldName: string, newName: string) => Promise<void>;
 }
 
 export const NestedTable = observer(function NestedTable(props: IProps) {
-  const {selectedDataSet, dataSets, collections, cases, interactiveState,
+  const {selectedDataSet, dataSets, collectionsModel, cases, interactiveState,
          handleSelectDataSet, updateInteractiveState, handleShowComponent,
          handleUpdateAttributePosition, handleCreateCollectionFromAttribute,
          handleSortAttribute, editCaseValue, renameAttribute, handleAddAttribute} = props;
   const [collectionClasses, setCollectionClasses] = useState<ICollectionClass[]>([]);
   const [paddingStyle, setPaddingStyle] = useState<Record<string, string>>({padding: "0px"});
+  const collections = collectionsModel.collections;
 
   const draggableTable = useDraggableTable({
     collections,
@@ -93,60 +94,6 @@ export const NestedTable = observer(function NestedTable(props: IProps) {
     updateInteractiveState({displayMode: mode});
   }, [updateInteractiveState]);
 
-  const mapCellsFromValues = (collectionId: number, rowKey: string, cCase: IProcessedCaseObj,
-      precisions: Record<string, number>, attrTypes: Record<string, string | undefined | null>,
-      attrVisibilities: Record<string, boolean>, isParent?: boolean, parentLevel?: number) => {
-    if (!selectedDataSet) return null;
-
-    const aCase = cCase.values;
-    return [...aCase.keys()].map((key, index) => {
-      if (key === "id") return null;
-
-      const isWholeNumber = aCase.get(key) % 1 === 0;
-      const precision = precisions[key];
-      // Numbers are sometimes passed in from CODAP as a string so we use the attribute type to
-      // determine if it should be parsed as a number.
-      // Numbers that are whole numbers are treated as integers, so we should ignore the precision.
-      // Numeric cells that are empty should be treated as empty strings.
-      const isNumericType = attrTypes[key] === "numeric";
-      const hasValue = aCase.get(key) !== "";
-      const parsedValue = parseFloat(aCase.get(key));
-      const isNumber = !isNaN(parsedValue);
-      const hasPrecision = precision !== undefined;
-      const defaultValue = aCase.get(key);
-      const isNumberType = typeof aCase.get(key) === "number";
-      let val;
-      if (isNumericType && hasValue && isNumber) {
-          val = isWholeNumber ? parseInt(aCase.get(key), 10)
-                              : parsedValue.toFixed(hasPrecision ? precision : 2);
-      } else if (!isNumericType && isNumberType && hasValue) {
-          val = defaultValue.toFixed(hasPrecision ? precision : 2);
-      } else {
-          val = defaultValue;
-      }
-
-      if (attrVisibilities[key]) {
-        return null;
-      }
-      if (typeof val === "string" || typeof val === "number") {
-        return (
-          <DraggagleTableData
-            collectionId={collectionId}
-            attrTitle={String(key)}
-            key={`${rowKey}-${val}-${index}}`}
-            isParent={isParent}
-            caseObj={cCase}
-            parentLevel={parentLevel}
-            selectedDataSetName={selectedDataSet.name}
-            editCaseValue={editCaseValue}
-          >
-            {val}
-          </DraggagleTableData>
-        );
-      }
-    });
-  };
-
   const getValueLength = (firstRow: Array<Values>) => {
     let valueCount = 0;
     firstRow.forEach((values: Values) => {
@@ -161,18 +108,19 @@ export const NestedTable = observer(function NestedTable(props: IProps) {
 
     const isNoHierarchy = collections.length === 1;
     const classesExist = collectionClasses.length > 0;
-    const tableProps = {showHeaders: interactiveState.showHeaders, collectionClasses, collections, selectedDataSet,
-      getClassName, mapCellsFromValues, getValueLength, paddingStyle, editCaseValue, handleSortAttribute,
-      dataSetName: selectedDataSet.name, renameAttribute, handleAddAttribute};
+    const tableProps = {showHeaders: interactiveState.showHeaders, collectionClasses, collectionsModel,
+      selectedDataSet, getClassName, getValueLength, paddingStyle, editCaseValue, handleSortAttribute,
+      dataSetName: selectedDataSet.name, renameAttribute, handleAddAttribute,
+      activeTableIndex: interactiveState.activeTableIndex};
     const flatProps = {...tableProps, cases};
     if (isNoHierarchy && classesExist) {
       return <FlatTable {...flatProps}/>;
     } else {
       return (
         interactiveState.displayMode === portrait ?
-          <PortraitView {...tableProps} /> :
+          <PortraitTable {...tableProps} /> :
           interactiveState.displayMode === landscape ?
-          <LandscapeView {...tableProps} /> :
+          <LandscapeTable {...tableProps} /> :
           <div/>
       );
     }
