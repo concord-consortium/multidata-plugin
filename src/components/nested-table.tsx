@@ -1,13 +1,14 @@
+import { DndContext } from "@dnd-kit/core";
 import React, { useCallback, useEffect, useState } from "react";
 import { observer } from "mobx-react-lite";
 import { IResult } from "@concord-consortium/codap-plugin-api";
 import { InteractiveState } from "../hooks/useCodapState";
+import { DraggableTableContext, useDraggableTable } from "../hooks/useDraggableTable";
 import { ICollection, IProcessedCaseObj, Values, ICollectionClass, IDataSet, ICollections } from "../types";
 import { PortraitView } from "./portrait-view";
 import { Menu } from "./menu";
 import { LandscapeView } from "./landscape-view";
 import { FlatTable } from "./flat-table";
-import { DraggableTableContext, useDraggableTable } from "../hooks/useDraggableTable";
 import { DraggagleTableData, DraggableTableHeader } from "./draggable-table-tags";
 
 import css from "./nested-table.scss";
@@ -220,7 +221,9 @@ export const NestedTable = observer(function NestedTable(props: IProps) {
         showDisplayMode={showDisplayMode}
       />
       <DraggableTableContext.Provider value={draggableTable}>
-        {selectedDataSet && renderTable()}
+        <DndContext onDragEnd={draggableTable.handleOnDrop}>
+          {selectedDataSet && renderTable()}
+        </DndContext>
       </DraggableTableContext.Provider>
     </div>
   );

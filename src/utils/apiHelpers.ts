@@ -69,3 +69,35 @@ export const sortAttribute = async (context: string, attrId: number, isDescendin
     }
   });
 };
+
+export function startCodapDrag(context: string, attrTitle: string, overlayHeight?: number, overlayWidth?: number) {
+  codapInterface.sendRequest({
+    "action": "notify",
+    "resource": `dataContext[${context}].attribute[${attrTitle}]`,
+    "values": {
+      "request": "dragStart",
+      overlayHeight,
+      overlayWidth
+    }
+  });
+}
+
+function continueCodapDrag(request: string, context: string, attrTitle: string, mouseX?: number, mouseY?: number) {
+  codapInterface.sendRequest({
+    "action": "notify",
+    "resource": `dataContext[${context}].attribute[${attrTitle}]`,
+    "values": {
+      request,
+      mouseX,
+      mouseY
+    }
+  });
+}
+
+export function moveCodapDrag(context: string, attrTitle: string, mouseX: number, mouseY: number) {
+  continueCodapDrag("dragOver", context, attrTitle, mouseX, mouseY);
+}
+
+export function endCodapDrag(context: string, attrTitle: string, mouseX: number, mouseY: number) {
+  continueCodapDrag("dragEnd", context, attrTitle, mouseX, mouseY);
+}
