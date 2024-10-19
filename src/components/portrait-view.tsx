@@ -42,7 +42,7 @@ export const PortraitViewRow = observer(function PortraitViewRow(props: Portrait
             isParent, resizeCounter, parentLevel
           )}
           <DroppableTableData collectionId={collectionId} style={paddingStyle}>
-            <DraggableTableContainer collectionId={collectionId}>
+            <DraggableTableContainer caseId={caseObj.id} collectionId={collectionId}>
               <table style={paddingStyle} className={`${css.subTable} ${css[getClassName(children[0])]}`}>
                 <tbody className={`table-body ${css[getClassName(children[0])]}`}>
                   {caseObj.children.map((child, i) => {

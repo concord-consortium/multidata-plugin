@@ -1,6 +1,7 @@
 import { DragEndEvent, Over } from "@dnd-kit/core";
 import { useContext, useState, createContext, useCallback } from "react";
 import { ICollection } from "../types";
+import { getTableContainerCollectionId } from "../utils/drag-utils";
 
 export type Side = "left"|"right";
 
@@ -57,7 +58,7 @@ export const useDraggableTable = (options: IUseDraggableTableOptions) => {
       if (targetId.startsWith("parent:")) {
         // handle drag to create parent
         const parts = targetId.split(":");
-        const collectionId = parts[1] === "root" ? "root" : parseInt(parts[1], 10);
+        const collectionId = parts[1] === "root" ? "root" : getTableContainerCollectionId(targetId);
         if ((collectionId === "root" || !isNaN(collectionId)) && source) {
           handleCreateCollectionFromAttribute(source.collection, source.attr, collectionId);
         }

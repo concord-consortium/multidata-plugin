@@ -6,6 +6,7 @@ import { getAttribute, IResult } from "@concord-consortium/codap-plugin-api";
 import { useDraggableTableContext, Side } from "../hooks/useDraggableTable";
 import { useTableTopScrollTopContext } from "../hooks/useTableScrollTop";
 import { endCodapDrag, getCollectionById, moveCodapDrag, startCodapDrag } from "../utils/apiHelpers";
+import { getTableContainerCollectionId } from "../utils/drag-utils";
 import { IProcessedCaseObj, PropsWithChildren } from "../types";
 import { EditableTableCell } from "./editable-table-cell";
 
@@ -328,17 +329,20 @@ export const DroppableTableData: React.FC<PropsWithChildren<DroppableTableDataPr
 });
 
 interface DraggableTableContainerProps {
+  caseId?: number;
   collectionId?: number|string;
 }
 
 export const DraggableTableContainer: React.FC<PropsWithChildren<DraggableTableContainerProps>> =
   observer(function DraggableTableContainer(props) {
-    const {collectionId, children} = props;
+    const { caseId, collectionId, children } = props;
     const { active, over } = useDndContext();
     const dragOverId = over ? `${over.id}` : undefined;
-    const id = collectionId ? `parent:${collectionId}` : `parent:root`;
+    const id = collectionId ? `parent:${caseId}:${collectionId}` : `parent:root`;
     const { setNodeRef } = useDroppable({ id });
-    const hovering = id === dragOverId;
+    const hovering = dragOverId && collectionId
+      ? getTableContainerCollectionId(dragOverId) === collectionId
+      : id === dragOverId;
     const style: React.CSSProperties = {
       display: active ? "table-cell" : "none",
       backgroundColor: hovering ? highlightColor : undefined,
