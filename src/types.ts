@@ -88,3 +88,21 @@ export interface IBoundingBox {
   width: number;
   height: number;
 }
+
+export interface IData {
+  type: string;
+  collectionId?: number | string;
+  attrTitle?: string;
+}
+
+export function isAttributeData(data?: Record<string, any>): data is IData {
+  return data?.type === "attribute";
+}
+
+export function isCollectionData(data?: Record<string, any>): data is IData {
+  return data?.type === "collection";
+}
+
+export function isHeaderData(data?: Record<string, any>): data is IData {
+  return data?.type === "header";
+}

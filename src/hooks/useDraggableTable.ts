@@ -1,7 +1,6 @@
 import { DragEndEvent, Over } from "@dnd-kit/core";
 import { useContext, useState, createContext, useCallback } from "react";
-import { ICollection } from "../types";
-import { getTableContainerCollectionId } from "../utils/drag-utils";
+import { ICollection, IData, isCollectionData } from "../types";
 
 export type Side = "left"|"right";
 
@@ -26,20 +25,14 @@ export const useDraggableTable = (options: IUseDraggableTableOptions) => {
   const {collections, handleUpdateAttributePosition, handleCreateCollectionFromAttribute} = options;
   const [dragSide, setDragSide] = useState<Side|undefined>("left");
 
-  const getCollectionAndAttribute = useCallback((id?: string) => {
-    let collection: ICollection|undefined = undefined;
+  const getCollectionAndAttribute = useCallback((data?: IData) => {
+    if (!data) return;
 
-    if (!id) {
-      return undefined;
-    }
+    const { collectionId, attrTitle } = data;
+    const collection = collections.find(c => collectionId != null && `${collectionId}` === `${c.id}`);
+    if (!collection) return;
 
-    const [collectionId, attrTitle] = id.split("-");
-    collection = collections.find(c => collectionId === `${c.id}`);
-    if (!collection) {
-      return undefined;
-    }
-
-    return {collection, attr: collection.attrs.find(a => a.title === attrTitle)};
+    return { collection, attr: collection.attrs.find(a => a.title === attrTitle)};
   }, [collections]);
 
   const handleDragOver = (clientX: number, _over?: Over) => {
@@ -51,15 +44,14 @@ export const useDraggableTable = (options: IUseDraggableTableOptions) => {
   const handleOnDrop = useCallback((e: DragEndEvent) => {
     const { active, over } = e;
     if (over) {
-      const targetId = `${over.id}`;
-      const source = getCollectionAndAttribute(`${active.id}`);
-      const target = getCollectionAndAttribute(targetId);
+      const source = getCollectionAndAttribute(active.data.current as IData);
+      const overData = over.data.current;
+      const target = getCollectionAndAttribute(overData as IData);
 
-      if (targetId.startsWith("parent:")) {
+      if (isCollectionData(overData)) {
         // handle drag to create parent
-        const parts = targetId.split(":");
-        const collectionId = parts[1] === "root" ? "root" : getTableContainerCollectionId(targetId);
-        if ((collectionId === "root" || !isNaN(collectionId)) && source) {
+        const { collectionId } = overData;
+        if ((collectionId === "root" || (typeof collectionId === "number" && !isNaN(collectionId))) && source) {
           handleCreateCollectionFromAttribute(source.collection, source.attr, collectionId);
         }
       } else if (source && target && (source.collection !== target.collection || source.attr !== target.attr)) {
