@@ -1,5 +1,5 @@
 import { Over, useDndContext, useDndMonitor, useDraggable, useDroppable } from "@dnd-kit/core";
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { observer } from "mobx-react-lite";
 import { getAttribute, IResult } from "@concord-consortium/codap-plugin-api";
@@ -22,13 +22,17 @@ const borderRight = border;
 const kCellHeight = 16;
 const kMinNumHeaders = 3;
 
+function getId(collectionId: number, attrTitle: string) {
+  return `${collectionId}-${attrTitle}`;
+}
+
 const getStyle = (id: string, dragOverId?: string, dragSide?: Side) => {
   return id === dragOverId ? (dragSide === "left" ? {borderLeft} : {borderRight}) : {};
 };
 
 const getIdAndStyle = (collectionId: number, attrTitle: string, dragOverId?: string, dragSide?: Side)
   : {id: string, style: React.CSSProperties} => {
-  const id = `${collectionId}-${attrTitle}`;
+  const id = getId(collectionId, attrTitle);
   const style = getStyle(id, dragOverId, dragSide);
   return { id, style };
 };
@@ -48,11 +52,12 @@ export const DraggableTableHeader: React.FC<PropsWithChildren<DraggagleTableHead
     const {collectionId, attrTitle, dataSetName, children, handleSortAttribute} = props;
     const { dragSide, handleDragOver } = useDraggableTableContext();
     const draggingOver = useRef<Over|null>();
-    const dragOverId = draggingOver.current ? `${draggingOver.current.id}` : undefined
-    const { id, style: baseStyle } = getIdAndStyle(collectionId, attrTitle, dragOverId, dragSide);
+    const id = getId(collectionId, attrTitle);
+    const { over, setNodeRef: setDroppableRef } = useDroppable({ id });
+    const dragOverId = over ? `${over.id}` : undefined;
+    const baseStyle = getStyle(id, dragOverId, dragSide);
     const { attributes, listeners, setNodeRef, transform } = useDraggable({ id });
     const style = { ...baseStyle, ...transform };
-    const { setNodeRef: setDroppableRef } = useDroppable({ id });
     const headerRef = useRef<HTMLTableCellElement | null>(null);
     const [showDropdownIcon, setShowDropdownIcon] = useState(false);
     const [showHeaderMenu, setShowHeaderMenu] = useState(false);
@@ -92,7 +97,7 @@ export const DraggableTableHeader: React.FC<PropsWithChildren<DraggagleTableHead
 
     // Manage synthetic drag in Codap via API requests
     const globalListeners = useRef(false); // True if the global drag listeners have already been set up.
-    const dragInCodap = (pointerId: number) => {
+    const dragInCodap = useCallback((pointerId: number) => {
       // Bail if we have already set up global listeners
       if (globalListeners.current) return;
 
@@ -126,7 +131,7 @@ export const DraggableTableHeader: React.FC<PropsWithChildren<DraggagleTableHead
         globalListeners.current = false;
       };
       body.addEventListener("pointerup", handlePointerUp);
-    };
+    }, [attrTitle, dataSetName, handleDragOver]);
     // Add Codap drag to dnd-kit onPointerDown listener
     if (listeners) {
       const oldPointerDown = listeners.onPointerDown;
@@ -137,6 +142,9 @@ export const DraggableTableHeader: React.FC<PropsWithChildren<DraggagleTableHead
     }
 
     useDndMonitor({
+      onDragEnd: () => {
+        draggingOver.current = null;
+      },
       onDragMove: (e) => {
         draggingOver.current = e.over;
       }
@@ -269,7 +277,7 @@ export const DraggagleTableData: React.FC<PropsWithChildren<DraggagleTableDataPr
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [tableScrollTop, isParent, scrollY, parentLevel, resizeCounter]);
 
-    const EditableCell = () => {
+    const EditableCell = useCallback(() => {
       return (
         <EditableTableCell
           attrTitle={attrTitle}
@@ -277,7 +285,7 @@ export const DraggagleTableData: React.FC<PropsWithChildren<DraggagleTableDataPr
           editCaseValue={editCaseValue}
         />
       );
-    };
+    }, [attrTitle, caseObj, editCaseValue]);
 
     const textStyle: React.CSSProperties = {top: cellTextTop};
     if (cellTextTop === 0) {
@@ -337,12 +345,13 @@ export const DraggableTableContainer: React.FC<PropsWithChildren<DraggableTableC
     };
 
     return (
-      <table key={collectionId} className={css.draggableTableContainer} ref={setNodeRef}>
+      <table key={collectionId} className={css.draggableTableContainer}>
         <tbody>
           <tr>
             <td
               className={css.draggableTableContainerDropTarget}
               data-id={id}
+              ref={setNodeRef}
               style={style}
             >
               <AddIcon />

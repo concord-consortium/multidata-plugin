@@ -1,5 +1,5 @@
 import { DragEndEvent, Over } from "@dnd-kit/core";
-import React, { useContext, useState, createContext, useCallback, useRef } from "react";
+import { useContext, useState, createContext, useCallback } from "react";
 import { ICollection } from "../types";
 
 export type Side = "left"|"right";
@@ -24,9 +24,6 @@ interface IUseDraggableTableOptions {
 export const useDraggableTable = (options: IUseDraggableTableOptions) => {
   const {collections, handleUpdateAttributePosition, handleCreateCollectionFromAttribute} = options;
   const [dragSide, setDragSide] = useState<Side|undefined>("left");
-  const dragOverRectRef = useRef<DOMRect|undefined>(undefined);
-
-  const getItemId = (e: React.DragEvent<HTMLTableCellElement>) => (e.target as HTMLElement)?.dataset?.id;
 
   const getCollectionAndAttribute = useCallback((id?: string) => {
     let collection: ICollection|undefined = undefined;
@@ -78,6 +75,7 @@ export const useDraggableTable = (options: IUseDraggableTableOptions) => {
         }
       }
     }
+    setDragSide(undefined);
   }, [dragSide, getCollectionAndAttribute, handleUpdateAttributePosition, handleCreateCollectionFromAttribute]);
 
   return {
