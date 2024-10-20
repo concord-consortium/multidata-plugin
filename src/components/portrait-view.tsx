@@ -17,7 +17,7 @@ export type PortraitViewRowProps = {collectionId: number, caseObj: IProcessedCas
 export const PortraitViewRow = observer(function PortraitViewRow(props: PortraitViewRowProps) {
   const {paddingStyle, mapCellsFromValues, mapHeadersFromValues, showHeaders, precisions, attrTypes, attrVisibilities,
           getClassName, collectionId, caseObj, index, isParent, resizeCounter, parentLevel} = props;
-  const {children, values} = caseObj;
+  const {children, id, values} = caseObj;
 
   if (!children.length) {
     return (
@@ -30,7 +30,7 @@ export const PortraitViewRow = observer(function PortraitViewRow(props: Portrait
       <>
         {index === 0 &&
           <tr className={`${css[getClassName(caseObj)]}`}>
-            {mapHeadersFromValues(collectionId, `first-row-${index}`, values, attrVisibilities)}
+            {mapHeadersFromValues(collectionId, `first-row-${index}`, values, attrVisibilities, id)}
             {showHeaders ? (
                 <DroppableTableHeader collectionId={collectionId}>{children[0].collection.name}</DroppableTableHeader>
               ) : <th />}
@@ -59,7 +59,7 @@ export const PortraitViewRow = observer(function PortraitViewRow(props: Portrait
                         <React.Fragment key={child.collection.id}>
                           <tr className={`${css[getClassName(child)]}`}>
                             {mapHeadersFromValues(child.collection.id, `child-row-${index}-${i}`, child.values,
-                                attrVisibilities)}
+                                attrVisibilities, caseObj.id)}
                           </tr>
                           <PortraitViewRow {...nextProps} />
                         </React.Fragment>

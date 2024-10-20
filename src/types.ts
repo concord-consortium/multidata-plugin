@@ -76,7 +76,7 @@ export interface ITableProps {
       attrVisibilities: Record<string, boolean>, isParent?: boolean, resizeCounter?: number,
       parentLevel?: number) => ReactNode | ReactNode[];
   mapHeadersFromValues: (collectionId: number, rowKey: string, values: Values,
-      attrVisibilities: Record<string, boolean>) => ReactNode | ReactNode[];
+      attrVisibilities: Record<string, boolean>, caseId?: number) => ReactNode | ReactNode[];
   getValueLength: (firstRow: Array<Values>) => number;
   paddingStyle: Record<string, string>;
   handleSortAttribute: (context: string, attrId: number, isDescending: boolean) => void;

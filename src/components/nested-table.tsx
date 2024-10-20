@@ -93,7 +93,7 @@ export const NestedTable = observer(function NestedTable(props: IProps) {
   }, [updateInteractiveState]);
 
   const mapHeadersFromValues = (collectionId: number, rowKey: string, values: Values,
-      attrVisibilities: Record<string, boolean>) => {
+      attrVisibilities: Record<string, boolean>, caseId?: number) => {
     if (!selectedDataSet) return null;
 
     const caseValuesKeys = [...values.keys()];
@@ -106,6 +106,7 @@ export const NestedTable = observer(function NestedTable(props: IProps) {
                 key={`${collectionId}-${rowKey}-${key}-${index}`}
                 collectionId={collectionId}
                 attrTitle={String(key)}
+                caseId={caseId}
                 dataSetName={selectedDataSet.name}
                 dataSetTitle={selectedDataSet.title}
                 handleSortAttribute={handleSortAttribute}

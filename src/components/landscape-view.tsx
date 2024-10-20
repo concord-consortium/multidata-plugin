@@ -58,7 +58,7 @@ export const LandscapeView = observer(function LandscapeView(props: ITableProps)
   };
 
   const renderColFromCaseObj = (collection: ICollection, caseObj: IProcessedCaseObj, index?: number) => {
-    const {children, values} = caseObj;
+    const {children, id, values} = caseObj;
     const isFirstIndex = index === 0;
     const precisions = getAttrPrecisions(collections);
     const attrTypes = getAttrTypes(collections);
@@ -75,7 +75,7 @@ export const LandscapeView = observer(function LandscapeView(props: ITableProps)
           }
           {isFirstIndex &&
             <tr className={css[className]}>
-              {mapHeadersFromValues(collection.id, `first-row-${index}`, values, attrVisibilities)}
+              {mapHeadersFromValues(collection.id, `first-row-${index}`, values, attrVisibilities, id)}
             </tr>
           }
           <tr>

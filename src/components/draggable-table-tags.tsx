@@ -6,7 +6,7 @@ import { getAttribute, IResult } from "@concord-consortium/codap-plugin-api";
 import { useDraggableTableContext, Side } from "../hooks/useDraggableTable";
 import { useTableTopScrollTopContext } from "../hooks/useTableScrollTop";
 import { endCodapDrag, getCollectionById, moveCodapDrag, startCodapDrag } from "../utils/apiHelpers";
-import { IProcessedCaseObj, isCollectionData, PropsWithChildren } from "../types";
+import { IData, IProcessedCaseObj, isCollectionData, PropsWithChildren } from "../types";
 import { EditableTableCell } from "./editable-table-cell";
 
 import AddIcon from "../assets/plus-level-1.svg";
@@ -22,24 +22,32 @@ const borderRight = border;
 const kCellHeight = 16;
 const kMinNumHeaders = 3;
 
-function getId(collectionId: number, attrTitle: string) {
-  return `${collectionId}-${attrTitle}`;
+function getId(collectionId: number, attrTitle?: string, caseId?: number) {
+  const base = `${collectionId}-${attrTitle}`;
+  return caseId != null ? `${caseId}-${base}` : base;
 }
 
-const getStyle = (id: string, dragOverId?: string, dragSide?: Side) => {
-  return id === dragOverId ? (dragSide === "left" ? {borderLeft} : {borderRight}) : {};
+const getStyle = (collectionId: number, attrTitle?: string, over?: Over|null, dragSide?: Side) => {
+  if (attrTitle == null) return {};
+
+  const data = over?.data.current as IData;
+  const hovering = collectionId === data?.collectionId && (attrTitle == null || attrTitle === data?.attrTitle);
+  return hovering
+    ? (dragSide === "left" ? {borderLeft} : {borderRight})
+    : {};
 };
 
-const getIdAndStyle = (collectionId: number, attrTitle: string, dragOverId?: string, dragSide?: Side)
+const getIdAndStyle = (collectionId: number, attrTitle: string, over?: Over|null, dragSide?: Side)
   : {id: string, style: React.CSSProperties} => {
   const id = getId(collectionId, attrTitle);
-  const style = getStyle(id, dragOverId, dragSide);
+  const style = getStyle(collectionId, attrTitle, over, dragSide);
   return { id, style };
 };
 
 interface DraggagleTableHeaderProps {
   collectionId: number;
   attrTitle: string;
+  caseId?: number;
   colSpan?: number;
   dataSetName: string;
   dataSetTitle: string;
@@ -49,14 +57,13 @@ interface DraggagleTableHeaderProps {
 
 export const DraggableTableHeader: React.FC<PropsWithChildren<DraggagleTableHeaderProps>> =
   observer(function DraggagleTableHeader(props) {
-    const {collectionId, attrTitle, dataSetName, children, handleSortAttribute} = props;
+    const {collectionId, attrTitle, caseId, dataSetName, children, handleSortAttribute} = props;
     const { dragSide, handleDragOver } = useDraggableTableContext();
     const draggingOver = useRef<Over|null>();
-    const id = getId(collectionId, attrTitle);
+    const id = getId(collectionId, attrTitle, caseId);
     const data = { type: "attribute", collectionId, attrTitle };
     const { over, setNodeRef: setDroppableRef } = useDroppable({ id, data });
-    const dragOverId = over ? `${over.id}` : undefined;
-    const baseStyle = getStyle(id, dragOverId, dragSide);
+    const baseStyle = getStyle(collectionId, attrTitle, over, dragSide);
     const { attributes, listeners, setNodeRef, transform } = useDraggable({ id, data });
     const style = { ...baseStyle, ...transform };
     const headerRef = useRef<HTMLTableCellElement | null>(null);
@@ -206,11 +213,10 @@ export const DroppableTableHeader: React.FC<PropsWithChildren<DroppableTableHead
   observer(function DroppableTableHeader(props) {
     const {collectionId, children} = props;
     const { over } = useDndContext();
-    const dragOverId = over ? `${over.id}` : undefined;
     const id = `${collectionId}`;
     const data = { type: "header" };
     const { setNodeRef } = useDroppable({ id, data });
-    const style = getStyle(id, dragOverId, "left");
+    const style = getStyle(collectionId, undefined, over, "left");
 
     return (
       <th
@@ -240,8 +246,7 @@ export const DraggagleTableData: React.FC<PropsWithChildren<DraggagleTableDataPr
     const {collectionId, attrTitle, children, caseObj, isParent, resizeCounter, parentLevel=0, editCaseValue} = props;
     const { dragSide } = useDraggableTableContext();
     const { over } = useDndContext();
-    const dragOverId = over ? `${over.id}` : undefined;
-    const {style} = getIdAndStyle(collectionId, attrTitle, dragOverId, dragSide);
+    const {style} = getIdAndStyle(collectionId, attrTitle, over, dragSide);
     const {tableScrollTop, scrollY} = useTableTopScrollTopContext();
 
     const cellRef = useRef<HTMLTableCellElement | null>(null);
@@ -319,8 +324,7 @@ export const DroppableTableData: React.FC<PropsWithChildren<DroppableTableDataPr
     const {collectionId, style, children} = props;
     const { dragSide } = useDraggableTableContext();
     const { over } = useDndContext();
-    const dragOverId = over ? `${over.id}` : undefined;
-    const dragStyle = getStyle(`${collectionId}`, dragOverId, dragSide);
+    const dragStyle = getStyle(collectionId, undefined, over, dragSide);
 
     return (
       <td style={{...dragStyle, ...style}} className="droppable-table-data">
