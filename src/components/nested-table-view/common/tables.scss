@@ -23,10 +23,6 @@ table {
   }
 }
 
-.landscape {
-  table-layout: fixed;
-}
-
 .scrollable {
   table-layout: auto;
 }
@@ -35,10 +31,15 @@ table {
   width: 100%;
   margin-bottom: 10px;
 
+  &.landscape {
+    table-layout: fixed;
+  }
+
   .mainHeader {
     th {
       background-color: #EFEFEF;
       border: 1px solid #3c78d8;
+      width: 100%;
     }
   }
 
@@ -120,9 +121,19 @@ table {
     border-spacing: 0;
 
     .datasetNameHeader {
+      font-size: 13px;
+      padding: 3px 0;
       position: sticky;
       top: 0;
       z-index: 10;
+    }
+
+    .parentCollHeader {
+      align-items: center;
+      display: flex;
+      font-size: 12px;
+      justify-content: center;
+      padding: 3px 0;
     }
 
     &.collection0, .collection0, &.collection0>tbody>tr>td {
@@ -253,12 +264,9 @@ table.draggableTableContainer {
 .parentData {
   position: relative;
   .cellTextValue{
-    position: absolute;
-    width: fit-content;
     display: flex;
     flex-wrap: wrap;
-    // align-content: center;
-    top: 0;
+    width: calc(100% - 8px);
   }
 }
 
@@ -287,8 +295,13 @@ table.draggableTableContainer {
   justify-content: center;
   width: 100%;
   height: 15px;
-  width: 100%;
   gap: 5px;
+
+  button {
+    all: unset;
+    cursor: pointer;
+  }
+
   .dropdownIcon {
     &:hover {
       cursor: pointer;
@@ -296,6 +309,17 @@ table.draggableTableContainer {
     svg {
       width: 10px;
     }
+  }
+
+  .spacer {
+    flex-grow: 1;
+  }
+  button:nth-child(4) {
+    height: 16px;
+    margin-top: 1px;
+    margin-left: 5px;
+    margin-left: 5px;
+    width: 16px;
   }
 }
 

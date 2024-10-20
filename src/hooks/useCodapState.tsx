@@ -11,15 +11,18 @@ import {
   selectSelf,
   createCollectionFromAttribute,
   createNewCollection,
+  getAttribute,
+  updateAttribute,
   updateAttributePosition,
-  updateCaseById,
+  updateCaseById
 } from "@concord-consortium/codap-plugin-api";
 import { runInAction } from "mobx";
 import { applySnapshot, unprotect } from "mobx-state-tree";
-import { getCases, getDataSetCollections, sortAttribute } from "../utils/apiHelpers";
+import { getCases, getCollectionById, getDataSetCollections, sortAttribute } from "../utils/apiHelpers";
 import { ICollection, IDataSet, IProcessedCaseObj } from "../types";
 import { DataSetsModel, DataSetsModelType } from "../models/datasets";
 import { CollectionsModel, CollectionsModelType } from "../models/collections";
+import { newAttributeSlug } from "../utils/utils";
 
 const iFrameDescriptor = {
   version: "0.5.0",
@@ -37,6 +40,7 @@ export interface InteractiveState {
   padding: boolean;
   showHeaders: boolean;
   displayMode: string;
+  activeTableIndex: number;
 }
 
 export const useCodapState = () => {
@@ -58,9 +62,10 @@ export const useCodapState = () => {
   const [interactiveState, setInteractiveState] = useState<InteractiveState>({
     view: null,
     dataSetName: null,
-    padding: false,
-    showHeaders: false,
-    displayMode: ""
+    padding: true,
+    showHeaders: true,
+    displayMode: "",
+    activeTableIndex: 0
   });
 
   const getDataSets = useCallback(async () => {
@@ -193,7 +198,8 @@ export const useCodapState = () => {
 
 
   const handleSelectDataSet = (name: string) => {
-    handleSetDataSet(name);
+    const dataSetIdentifier = dataSets.find((d) => d.title === name || d.name === name)?.name;
+    return dataSetIdentifier ? handleSetDataSet(dataSetIdentifier) : handleSetDataSet("");
   };
 
   const getCollectionNameFromId = (id: number) => {
@@ -210,7 +216,7 @@ export const useCodapState = () => {
 
   const handleAddCollection = async (newCollectionName: string) => {
     if (selectedDataSet) {
-      await createNewCollection(selectedDataSet.name, newCollectionName, [{"name": "newAttr"}]);
+      await createNewCollection(selectedDataSet.name, newCollectionName, [{"name": newAttributeSlug}]);
       // update collections because CODAP does not send dataContextChangeNotice
       updateCollections();
     }
@@ -227,10 +233,10 @@ export const useCodapState = () => {
     sortAttribute(context, attrId, isDescending);
   };
 
-  const handleAddAttribute = async (collection: ICollection, attrName: string) => {
+  const handleAddAttribute = async (collection: ICollection, attrName: string, tableIndex=0) => {
     if (!selectedDataSet) return;
 
-    const proposedName = attrName.length ? attrName : "newAttr";
+    const proposedName = attrName.length ? attrName : newAttributeSlug;
     let newAttributeName;
     const allAttributes: Array<any> = [];
     collectionsModel.collections.map((coll) => coll.attrs.map((attr) => allAttributes.push(attr)));
@@ -258,6 +264,7 @@ export const useCodapState = () => {
     }
     await createNewAttribute(selectedDataSet.name, collection.name, newAttributeName||"");
     updateCollections();
+    setInteractiveState({...interactiveState, activeTableIndex: tableIndex});
   };
 
   const updateInteractiveState = useCallback((update: InteractiveState) => {
@@ -288,6 +295,13 @@ export const useCodapState = () => {
     }
   }, [selectedDataSet]);
 
+  const handleUpdateInteractiveState = useCallback((update: Partial<InteractiveState>) => {
+    const newState = {...interactiveState, ...update};
+    if (JSON.stringify(newState) !== JSON.stringify(interactiveState)) {
+      updateInteractiveState(newState);
+    }
+  }, [interactiveState, updateInteractiveState]);
+
   const listenForSelectionChanges = useCallback((callback: (notification: any) => void) => {
     if (selectedDataSet) {
       addDataContextChangeListener(selectedDataSet.name, callback);
@@ -307,6 +321,25 @@ export const useCodapState = () => {
     }
 
     return request;
+  };
+
+  const addAttributeToCollection = async (collectionId: number, attrName: string) => {
+    try {
+      const collectionName = await getCollectionById(selectedDataSetName, collectionId);
+      await createNewAttribute(selectedDataSetName, collectionName, attrName);
+    } catch (e) {
+      console.error("Failed to add attribute to collection: ", e);
+    }
+  };
+
+  const renameAttribute = async (collectionName: string, attrId: number, oldName: string, newName: string) => {
+    const _attribute = await getAttribute(selectedDataSetName, collectionName, oldName);
+    const attribute = {..._attribute, name: oldName};
+    try {
+      await updateAttribute(selectedDataSetName, collectionName, oldName, attribute, {name: newName});
+    } catch (e) {
+      console.error("Failed to rename attribute: ", e);
+    }
   };
 
   return {
@@ -331,6 +364,9 @@ export const useCodapState = () => {
     listenForSelectionChanges,
     handleCreateCollectionFromAttribute,
     handleUpdateCollections: updateCollections,
-    editCaseValue
+    editCaseValue,
+    addAttributeToCollection,
+    handleUpdateInteractiveState,
+    renameAttribute
   };
 };

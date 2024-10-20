@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { InteractiveState, useCodapState } from "../hooks/useCodapState";
-import { NestedTable } from "./nested-table";
+import { NestedTable } from "./nested-table-view/nested-table";
 import { Hierarchy } from "./hierarchy-view/hierarchy";
 import { CardView } from "./card-view/card-view";
 import { ICaseObjCommon } from "../types";
@@ -14,7 +14,7 @@ function App() {
          handleAddCollection, handleAddAttribute, handleSelectSelf,
          updateTitle, selectCODAPCases, listenForSelectionChanges,
          handleCreateCollectionFromAttribute, handleSetCollections,
-         handleSortAttribute, editCaseValue } = useCodapState();
+         handleSortAttribute, editCaseValue, renameAttribute } = useCodapState();
   const collections = collectionsModel.collections;
 
   useEffect(() => {
@@ -33,10 +33,14 @@ function App() {
     updateInteractiveState({view});
   }, [updateInteractiveState]);
 
-  const handleSelectDataSet = useCallback((e: React.ChangeEvent<HTMLSelectElement>) => {
+  const handleSelectDataSet = useCallback((e: React.ChangeEvent<HTMLSelectElement>, defaultDisplayMode?: string) => {
     const dataSetName = e.target.value;
     _handleSelectDataSet(dataSetName);
-    updateInteractiveState({dataSetName});
+    const update: Partial<InteractiveState> = {dataSetName};
+    if (defaultDisplayMode) {
+      update.displayMode = defaultDisplayMode;
+    }
+    updateInteractiveState(update);
   }, [_handleSelectDataSet, updateInteractiveState]);
 
   const handleShowComponent = () => {
@@ -96,7 +100,7 @@ function App() {
         <NestedTable
           selectedDataSet={selectedDataSet}
           dataSets={dataSets}
-          collections={collections}
+          collectionsModel={collectionsModel}
           cases={cases}
           interactiveState={interactiveState}
           handleSelectDataSet={handleSelectDataSet}
@@ -106,6 +110,8 @@ function App() {
           handleCreateCollectionFromAttribute={handleCreateCollectionFromAttribute}
           editCaseValue={editCaseValue}
           handleSortAttribute={handleSortAttribute}
+          handleAddAttribute={handleAddAttribute}
+          renameAttribute={renameAttribute}
         />
       );
 
