@@ -21,7 +21,7 @@ import { applySnapshot, unprotect } from "mobx-state-tree";
 import { getCases, getCollectionById, getDataSetCollections, sortAttribute } from "../utils/apiHelpers";
 import { ICollection, IDataSet, IProcessedCaseObj } from "../types";
 import { DataSetsModel, DataSetsModelType } from "../models/datasets";
-import { CollectionsModel, CollectionsModelType } from "../models/collections";
+import { CollectionsModel, CollectionsModelSnapshot, CollectionsModelType } from "../models/collections";
 import { newAttributeSlug } from "../utils/utils";
 
 const iFrameDescriptor = {
@@ -43,6 +43,12 @@ export interface InteractiveState {
   activeTableIndex: number;
 }
 
+function unprotectedCollectionsModel(snap?: CollectionsModelSnapshot) {
+  const collectionsModel = CollectionsModel.create(snap);
+  unprotect(collectionsModel);
+  return collectionsModel;
+}
+
 export const useCodapState = () => {
   const [connected, setConnected] = useState(false);
   const [dataSets] = useState<DataSetsModelType>(() => {
@@ -52,11 +58,7 @@ export const useCodapState = () => {
   });
   const [selectedDataSet, setSelectedDataSet] = useState<IDataSet|null>(null);
   const [selectedDataSetName, setSelectedDataSetName] = useState<string>("");
-  const [collectionsModel] = useState<CollectionsModelType>(() => {
-    const newCollectionsModel = CollectionsModel.create();
-    unprotect(newCollectionsModel);
-    return newCollectionsModel;
-  });
+  const [collectionsModel, setCollectionsModel] = useState<CollectionsModelType>(() => unprotectedCollectionsModel());
 
   const [cases, setCases] = useState<IProcessedCaseObj[]>([]);
   const [interactiveState, setInteractiveState] = useState<InteractiveState>({
@@ -164,8 +166,8 @@ export const useCodapState = () => {
         collapseChildren, guid, id, name, parent, title, type
       };
     });
-    applySnapshot(collectionsModel, {collections: newCollectionModels});
-  }, [collectionsModel]);
+    setCollectionsModel(unprotectedCollectionsModel({collections: newCollectionModels}));
+  }, []);
 
   const updateCollections = useCallback(async () => {
     const colls = await getDataSetCollections(selectedDataSetName);
@@ -209,8 +211,6 @@ export const useCodapState = () => {
   const handleUpdateAttributePosition = async (coll: ICollection, attrName: string, position: number) => {
     if (selectedDataSet) {
       await updateAttributePosition(selectedDataSet.name, coll.name, attrName, position);
-      // update collections because CODAP does not send dataContextChangeNotice
-      updateCollections();
     }
   };
 
