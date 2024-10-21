@@ -74,6 +74,7 @@ const {collectionId, attrTitle, caseId, dataSetName, editableHasFocus, children,
     const headerPos = headerRef.current?.getBoundingClientRect();
     const headerMenuRef = useRef<HTMLDivElement | null>(null);
     const tableContainer = document.querySelector(".nested-table-nestedTableWrapper");
+    const pointerId = useRef<number|null>();
 
     useEffect(() => {
       const handleClickOutside = (e: MouseEvent) => {
@@ -107,14 +108,14 @@ const {collectionId, attrTitle, caseId, dataSetName, editableHasFocus, children,
 
     // Manage synthetic drag in Codap via API requests
     const globalListeners = useRef(false); // True if the global drag listeners have already been set up.
-    const dragInCodap = useCallback((pointerId: number) => {
+    const dragInCodap = useCallback(() => {
       // Bail if we have already set up global listeners
-      if (globalListeners.current) return;
+      if (globalListeners.current || pointerId.current == null) return;
 
       // Listen for pointer events everywhere, even outside the plugin
       globalListeners.current = true;
       const { body } = document;
-      body.setPointerCapture(pointerId);
+      body.setPointerCapture(pointerId.current);
 
       // Initialize drag in Codap
       const rect = headerRef.current?.getBoundingClientRect();
@@ -142,11 +143,11 @@ const {collectionId, attrTitle, caseId, dataSetName, editableHasFocus, children,
       };
       body.addEventListener("pointerup", handlePointerUp);
     }, [attrTitle, dataSetName, handleDragOver]);
-    // Add Codap drag to dnd-kit onPointerDown listener
+    // Save pointerId in onPointerDown listener. It will be used when a drag actually starts.
     if (listeners) {
       const oldPointerDown = listeners.onPointerDown;
       listeners.onPointerDown = (event: React.PointerEvent<HTMLTableCellElement>) => {
-        dragInCodap(event.pointerId);
+        pointerId.current = event.pointerId;
         oldPointerDown(event);
       };
     }
@@ -157,6 +158,11 @@ const {collectionId, attrTitle, caseId, dataSetName, editableHasFocus, children,
       },
       onDragMove: (e) => {
         draggingOver.current = e.over;
+      },
+      onDragStart: (e) => {
+        if (e.active.id === id) {
+          dragInCodap();
+        }
       }
     });
 

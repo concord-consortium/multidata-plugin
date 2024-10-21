@@ -1,10 +1,7 @@
-import { DndContext } from "@dnd-kit/core";
+import { DndContext, KeyboardSensor, PointerSensor, useSensor, useSensors } from "@dnd-kit/core";
 import React, { useCallback, useEffect, useState } from "react";
 import { observer } from "mobx-react-lite";
 import { IResult } from "@concord-consortium/codap-plugin-api";
-// import { PortraitView } from "./portrait-view";
-// import { LandscapeView } from "./landscape-view";
-// import { DraggagleTableData, DraggableTableHeader } from "./draggable-table-tags";
 import { InteractiveState } from "../../hooks/useCodapState";
 import { DraggableTableContext, useDraggableTable } from "../../hooks/useDraggableTable";
 import { ICollection, IProcessedCaseObj, Values, ICollectionClass, IDataSet } from "../../types";
@@ -98,88 +95,6 @@ export const NestedTable = observer(function NestedTable(props: IProps) {
     updateInteractiveState({displayMode: mode});
   }, [updateInteractiveState]);
 
-  // const mapHeadersFromValues = (collectionId: number, rowKey: string, values: Values,
-  //     attrVisibilities: Record<string, boolean>, caseId?: number) => {
-  //   if (!selectedDataSet) return null;
-
-  //   const caseValuesKeys = [...values.keys()];
-  //   return (
-  //     <>
-  //       {caseValuesKeys.map((key, index) => {
-  //      if (!attrVisibilities[key] && (typeof values.get(key) === "string" || typeof values.get(key) === "number")) {
-  //           return (
-  //             <DraggableTableHeader
-  //               key={`${collectionId}-${rowKey}-${key}-${index}`}
-  //               collectionId={collectionId}
-  //               attrTitle={String(key)}
-  //               caseId={caseId}
-  //               dataSetName={selectedDataSet.name}
-  //               dataSetTitle={selectedDataSet.title}
-  //               handleSortAttribute={handleSortAttribute}
-  //             >{key}
-  //             </DraggableTableHeader>
-  //           );
-  //         }
-  //       })}
-  //     </>
-  //   );
-  // };
-
-  // const mapCellsFromValues = (collectionId: number, rowKey: string, cCase: IProcessedCaseObj,
-  //     precisions: Record<string, number>, attrTypes: Record<string, string | undefined | null>,
-  //  attrVisibilities: Record<string, boolean>, isParent?: boolean, resizeCounter?: number, parentLevel?: number) => {
-  //   if (!selectedDataSet) return null;
-
-  //   const aCase = cCase.values;
-  //   return [...aCase.keys()].map((key, index) => {
-  //     if (key === "id") return null;
-
-  //     const isWholeNumber = aCase.get(key) % 1 === 0;
-  //     const precision = precisions[key];
-  //     // Numbers are sometimes passed in from CODAP as a string so we use the attribute type to
-  //     // determine if it should be parsed as a number.
-  //     // Numbers that are whole numbers are treated as integers, so we should ignore the precision.
-  //     // Numeric cells that are empty should be treated as empty strings.
-  //     const isNumericType = attrTypes[key] === "numeric";
-  //     const hasValue = aCase.get(key) !== "";
-  //     const parsedValue = parseFloat(aCase.get(key));
-  //     const isNumber = !isNaN(parsedValue);
-  //     const hasPrecision = precision !== undefined;
-  //     const defaultValue = aCase.get(key);
-  //     const isNumberType = typeof aCase.get(key) === "number";
-  //     let val;
-  //     if (isNumericType && hasValue && isNumber) {
-  //         val = isWholeNumber ? parseInt(aCase.get(key), 10)
-  //                             : parsedValue.toFixed(hasPrecision ? precision : 2);
-  //     } else if (!isNumericType && isNumberType && hasValue) {
-  //         val = defaultValue.toFixed(hasPrecision ? precision : 2);
-  //     } else {
-  //         val = defaultValue;
-  //     }
-
-  //     if (attrVisibilities[key]) {
-  //       return null;
-  //     }
-  //     if (typeof val === "string" || typeof val === "number") {
-  //       return (
-  //         <DraggagleTableData
-  //           collectionId={collectionId}
-  //           attrTitle={String(key)}
-  //           key={`${rowKey}-${val}-${index}}`}
-  //           isParent={isParent}
-  //           caseObj={cCase}
-  //           resizeCounter={resizeCounter}
-  //           parentLevel={parentLevel}
-  //           selectedDataSetName={selectedDataSet.name}
-  //           editCaseValue={editCaseValue}
-  //         >
-  //           {val}
-  //         </DraggagleTableData>
-  //       );
-  //     }
-  //   });
-  // };
-
   const getValueLength = (firstRow: Array<Values>) => {
     let valueCount = 0;
     firstRow.forEach((values: Values) => {
@@ -214,6 +129,15 @@ export const NestedTable = observer(function NestedTable(props: IProps) {
 
   const showDisplayMode = collections.length > 1 && !!selectedDataSet;
 
+  const sensors = useSensors(
+    useSensor(KeyboardSensor),
+    useSensor(PointerSensor, {
+      activationConstraint: {
+        distance: 3
+      }
+    })
+  );
+
   return (
     <div className={css.nestedTableWrapper} onClick={handleShowComponent}>
       <Menu
@@ -230,7 +154,7 @@ export const NestedTable = observer(function NestedTable(props: IProps) {
         defaultDisplayMode="Portrait"
       />
       <DraggableTableContext.Provider value={draggableTable}>
-        <DndContext onDragEnd={draggableTable.handleOnDrop}>
+        <DndContext onDragEnd={draggableTable.handleOnDrop} sensors={sensors}>
           {selectedDataSet && renderTable()}
         </DndContext>
       </DraggableTableContext.Provider>
