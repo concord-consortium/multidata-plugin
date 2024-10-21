@@ -44,6 +44,7 @@ export const PortraitTableRow = observer(function PortraitTableRow(props: Portra
         {index === 0 &&
           <tr className={`${css[getClassName(caseObj)]}`}>
             <TableHeaders
+              caseId={id}
               collectionId={collectionId}
               rowKey={`first-row-${index}`}
               values={values}
@@ -83,7 +84,7 @@ export const PortraitTableRow = observer(function PortraitTableRow(props: Portra
             editCaseValue={editCaseValue}
           />
           <DroppableTableData collectionId={collectionId} style={paddingStyle}>
-            <DraggableTableContainer collectionId={collectionId}>
+            <DraggableTableContainer caseId={id} collectionId={collectionId}>
               <table style={paddingStyle} className={`${css.subTable} ${css[getClassName(children[0])]}`}>
                 <tbody className={`table-body ${css[getClassName(children[0])]}`}>
                   {caseObj.children.map((child, i) => {
@@ -100,6 +101,7 @@ export const PortraitTableRow = observer(function PortraitTableRow(props: Portra
                         <React.Fragment key={child.collection.id}>
                           <tr className={`${css[getClassName(child)]}`}>
                             <TableHeaders
+                              caseId={child.id}
                               collectionId={child.collection.id}
                               rowKey={`child-row-${index}-${i}`}
                               values={child.values}
