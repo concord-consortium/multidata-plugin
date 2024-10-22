@@ -95,7 +95,7 @@ function continueCodapDrag(request: string, context: string, attrTitle: string, 
 }
 
 export function moveCodapDrag(context: string, attrTitle: string, mouseX: number, mouseY: number) {
-  continueCodapDrag("dragOver", context, attrTitle, mouseX, mouseY);
+  continueCodapDrag("dragMove", context, attrTitle, mouseX, mouseY);
 }
 
 export function endCodapDrag(context: string, attrTitle: string, mouseX: number, mouseY: number) {
