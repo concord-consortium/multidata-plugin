@@ -131,11 +131,8 @@ export const NestedTable = observer(function NestedTable(props: IProps) {
 
   const sensors = useSensors(
     useSensor(KeyboardSensor),
-    useSensor(PointerSensor, {
-      activationConstraint: {
-        distance: 3
-      }
-    })
+    // Require a small movement before actually starting a drag
+    useSensor(PointerSensor, { activationConstraint: { distance: 3 } })
   );
 
   return (

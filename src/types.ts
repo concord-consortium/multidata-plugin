@@ -73,13 +73,6 @@ export interface ITableProps {
   collectionClasses: Array<ICollectionClass>;
   getClassName: (caseObj: IProcessedCaseObj) => string;
   selectedDataSet: IDataSet;
-  // collections: ICollection[];
-  // mapCellsFromValues: (collectionId: number, rowKey: string, caseObj: IProcessedCaseObj,
-  //     precisions: Record<string, number>, attrTypes: Record<string, string | undefined | null>,
-  //     attrVisibilities: Record<string, boolean>, isParent?: boolean, resizeCounter?: number,
-  //     parentLevel?: number) => ReactNode | ReactNode[];
-  // mapHeadersFromValues: (collectionId: number, rowKey: string, values: Values,
-  //     attrVisibilities: Record<string, boolean>, caseId?: number) => ReactNode | ReactNode[];
   collectionsModel: CollectionsModelType;
   editCaseValue: (newValue: string, caseObj: IProcessedCaseObj, attrTitle: string) => Promise<IResult | undefined>;
   getValueLength: (firstRow: Array<Values>) => number;
@@ -105,16 +98,8 @@ export interface IData {
   attrTitle?: string;
 }
 
-export function isAttributeData(data?: Record<string, any>): data is IData {
-  return data?.type === "attribute";
-}
-
 export function isCollectionData(data?: Record<string, any>): data is IData {
   return data?.type === "collection";
-}
-
-export function isHeaderData(data?: Record<string, any>): data is IData {
-  return data?.type === "header";
 }
 
 export interface InteractiveState {
