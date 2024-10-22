@@ -217,8 +217,6 @@ export const useCodapState = () => {
   const handleAddCollection = async (newCollectionName: string) => {
     if (selectedDataSet) {
       await createNewCollection(selectedDataSet.name, newCollectionName, [{"name": newAttributeSlug}]);
-      // update collections because CODAP does not send dataContextChangeNotice
-      updateCollections();
     }
   };
 
@@ -263,7 +261,6 @@ export const useCodapState = () => {
       }
     }
     await createNewAttribute(selectedDataSet.name, collection.name, newAttributeName||"");
-    updateCollections();
     setInteractiveState({...interactiveState, activeTableIndex: tableIndex});
   };
 
