@@ -113,6 +113,7 @@ export const DraggableTableHeader: React.FC<PropsWithChildren<DraggagleTableHead
     // The pointerId is saved on pointerDown and monitors pointer events after the drag actually starts
     const pointerId = useRef<number|null>();
     // Saving the drag Over in a ref ensures it is always up to date in an event listener
+    // TODO This causes a bug, where updates to left/right are one frame behind
     const draggingOver = useRef<Over|null>();
     const dragInCodap = useCallback(() => {
       // Bail if we have already set up global listeners or don't know the pointerId
