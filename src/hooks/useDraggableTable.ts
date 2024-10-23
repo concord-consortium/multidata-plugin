@@ -1,6 +1,6 @@
 import { DragEndEvent, Over } from "@dnd-kit/core";
 import { useContext, useState, createContext, useCallback } from "react";
-import { ICollection, IData, isCollectionData } from "../types";
+import { ICollection, IDndData, isCollectionData } from "../types";
 
 export type Side = "left"|"right";
 
@@ -25,7 +25,7 @@ export const useDraggableTable = (options: IUseDraggableTableOptions) => {
   const {collections, handleUpdateAttributePosition, handleCreateCollectionFromAttribute} = options;
   const [dragSide, setDragSide] = useState<Side|undefined>("left");
 
-  const getCollectionAndAttribute = useCallback((data?: IData) => {
+  const getCollectionAndAttribute = useCallback((data?: IDndData) => {
     if (!data) return;
 
     const { collectionId, attrTitle } = data;
@@ -41,12 +41,12 @@ export const useDraggableTable = (options: IUseDraggableTableOptions) => {
     }
   };
 
-  const handleOnDrop = useCallback((e: DragEndEvent) => {
+  const handleDrop = useCallback((e: DragEndEvent) => {
     const { active, over } = e;
     if (over) {
-      const source = getCollectionAndAttribute(active.data.current as IData);
+      const source = getCollectionAndAttribute(active.data.current as IDndData);
       const overData = over.data.current;
-      const target = getCollectionAndAttribute(overData as IData);
+      const target = getCollectionAndAttribute(overData as IDndData);
 
       if (isCollectionData(overData)) {
         // handle drag to create parent
@@ -73,7 +73,7 @@ export const useDraggableTable = (options: IUseDraggableTableOptions) => {
 
   return {
     handleDragOver,
-    handleOnDrop,
+    handleDrop,
     dragSide,
   };
 };

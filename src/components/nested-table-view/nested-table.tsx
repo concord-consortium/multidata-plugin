@@ -151,7 +151,7 @@ export const NestedTable = observer(function NestedTable(props: IProps) {
         defaultDisplayMode="Portrait"
       />
       <DraggableTableContext.Provider value={draggableTable}>
-        <DndContext onDragEnd={draggableTable.handleOnDrop} sensors={sensors}>
+        <DndContext onDragEnd={draggableTable.handleDrop} sensors={sensors}>
           {selectedDataSet && renderTable()}
         </DndContext>
       </DraggableTableContext.Provider>
