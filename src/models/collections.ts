@@ -1,4 +1,4 @@
-import { Instance, types } from "mobx-state-tree";
+import { Instance, SnapshotIn, types } from "mobx-state-tree";
 import { CaseModel } from "./cases";
 import { AttributeModel } from "./attributes";
 
@@ -65,3 +65,4 @@ export const CollectionsModel = types.model("CollectionsModel", {
 }));
 
 export type CollectionsModelType = Instance<typeof CollectionsModel>;
+export type CollectionsModelSnapshot = SnapshotIn<typeof CollectionsModel>;

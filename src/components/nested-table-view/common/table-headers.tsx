@@ -4,6 +4,7 @@ import { IDataSet, Values } from "../../../types";
 import { isNewAttribute } from "../../../utils/utils";
 
 interface ITableHeaders {
+  caseId?: number;
   collectionId: number;
   rowKey: string;
   values: Values;
@@ -17,6 +18,7 @@ interface ITableHeaders {
 }
 
 export const TableHeaders: React.FC<ITableHeaders> = ({
+  caseId,
   collectionId,
   rowKey,
   values,
@@ -39,6 +41,7 @@ export const TableHeaders: React.FC<ITableHeaders> = ({
               key={`${collectionId}-${rowKey}-${key}-${index}`}
               collectionId={collectionId}
               attrTitle={String(key)}
+              caseId={caseId}
               dataSetName={selectedDataSet.name}
               dataSetTitle={selectedDataSet.title}
               isParent={isParent}

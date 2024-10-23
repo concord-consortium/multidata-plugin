@@ -91,6 +91,17 @@ export interface IBoundingBox {
   height: number;
 }
 
+// Data for draggables and droppables
+export interface IData {
+  type: string;
+  collectionId?: number | string;
+  attrTitle?: string;
+}
+
+export function isCollectionData(data?: Record<string, any>): data is IData {
+  return data?.type === "collection";
+}
+
 export interface InteractiveState {
   dataSetName: string | null;
   displayMode: string;

@@ -1,12 +1,15 @@
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import { Over, useDndContext, useDndMonitor, useDraggable, useDroppable } from "@dnd-kit/core";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { observer } from "mobx-react-lite";
 import { getAttribute, IResult } from "@concord-consortium/codap-plugin-api";
 import { useDraggableTableContext, Side } from "../../../hooks/useDraggableTable";
 import { useTableTopScrollTopContext } from "../../../hooks/useTableScrollTop";
-import { getCollectionById } from "../../../utils/apiHelpers";
+import { endCodapDrag, getCollectionById, moveCodapDrag, startCodapDrag } from "../../../utils/apiHelpers";
 import { getDisplayValue } from "../../../utils/utils";
-import { ICollection, ICollections, IProcessedCaseObj, PropsWithChildren } from "../../../types";
+import {
+  ICollection, ICollections, IData, IProcessedCaseObj, isCollectionData, PropsWithChildren
+} from "../../../types";
 import { EditableTableCell } from "./editable-table-cell";
 import { AddAttributeButton } from "./add-attribute-button";
 import { EditableTableHeader } from "./editable-table-header";
@@ -24,20 +27,23 @@ const borderRight = border;
 const kCellHeight = 16;
 const kMinNumHeaders = 3;
 
-const getStyle = (id: string, dragOverId?: string, dragSide?: Side) => {
-  return id === dragOverId ? (dragSide === "left" ? {borderLeft} : {borderRight}) : {};
-};
+function getId(collectionId: number, attrTitle?: string, caseId?: number) {
+  const base = `${collectionId}-${attrTitle}`;
+  return caseId != null ? `${caseId}-${base}` : base;
+}
 
-const getIdAndStyle = (collectionId: number, attrTitle: string, dragOverId?: string, dragSide?: Side)
-  : {id: string, style: React.CSSProperties} => {
-  const id = `${collectionId}-${attrTitle}`;
-  const style = getStyle(id, dragOverId, dragSide);
-  return { id, style };
+const getStyle = (collectionId: number, attrTitle?: string, over?: Over|null, dragSide?: Side) => {
+  if (attrTitle == null) return {};
+
+  const data = over?.data.current as IData;
+  const hovering = collectionId === data?.collectionId && (attrTitle == null || attrTitle === data?.attrTitle);
+  return hovering ? (dragSide === "left" ? {borderLeft} : {borderRight}) : {};
 };
 
 interface DraggagleTableHeaderProps {
   collectionId: number;
   attrTitle: string;
+  caseId?: number;
   colSpan?: number;
   dataSetName: string;
   dataSetTitle: string;
@@ -50,14 +56,13 @@ interface DraggagleTableHeaderProps {
 
 export const DraggableTableHeader: React.FC<PropsWithChildren<DraggagleTableHeaderProps>> =
   observer(function DraggagleTableHeader(props) {
-    const {collectionId, attrTitle, dataSetName, editableHasFocus, children, handleSortAttribute,
-           isParent, attrId, renameAttribute, colSpan} = props;
-    const {dragOverId, dragSide, handleDragStart, handleDragOver, handleOnDrop, handleDragEnter,
-      handleDragLeave, handleDragEnd} = useDraggableTableContext();
-    const {id, style} = getIdAndStyle(collectionId, attrTitle, dragOverId, dragSide);
-    const headerRef = useRef<HTMLTableCellElement | null>(null);
+    const {collectionId, attrTitle, caseId, dataSetName, editableHasFocus, children, handleSortAttribute,
+       isParent, attrId, renameAttribute, colSpan} = props;
+
+    // Manage header dropdown menus
     const [showDropdownIcon, setShowDropdownIcon] = useState(false);
     const [showHeaderMenu, setShowHeaderMenu] = useState(false);
+    const headerRef = useRef<HTMLTableCellElement | null>(null);
     const headerPos = headerRef.current?.getBoundingClientRect();
     const headerMenuRef = useRef<HTMLDivElement | null>(null);
     const tableContainer = document.querySelector(".nested-table-nestedTableWrapper");
@@ -92,21 +97,98 @@ export const DraggableTableHeader: React.FC<PropsWithChildren<DraggagleTableHead
       setShowHeaderMenu(false);
     };
 
+    // Manage synthetic drag in Codap via API requests
+
+    // Basic setup
+    const { dragSide, handleDragOver } = useDraggableTableContext();
+    const id = getId(collectionId, attrTitle, caseId);
+    const data = { type: "attribute", collectionId, attrTitle };
+    const { over, setNodeRef: setDroppableRef } = useDroppable({ id, data });
+    const baseStyle = getStyle(collectionId, attrTitle, over, dragSide);
+    const { attributes, listeners, setNodeRef, transform } = useDraggable({ id, data });
+    const style = { ...baseStyle, ...transform };
+
+    // True if the global drag listeners have already been set up
+    const globalListeners = useRef(false);
+    // The pointerId is saved on pointerDown and monitors pointer events after the drag actually starts
+    const pointerId = useRef<number|null>();
+    // Saving the drag Over in a ref ensures it is always up to date in an event listener
+    // TODO This causes a bug, where updates to left/right are one frame behind
+    const draggingOver = useRef<Over|null>();
+    const dragInCodap = useCallback(() => {
+      // Bail if we have already set up global listeners or don't know the pointerId
+      if (globalListeners.current || pointerId.current == null) return;
+
+      // Listen for pointer events everywhere, even outside the plugin
+      globalListeners.current = true;
+      const { body } = document;
+      body.setPointerCapture(pointerId.current);
+
+      // Initialize drag in Codap
+      const rect = headerRef.current?.getBoundingClientRect();
+      startCodapDrag(dataSetName, attrTitle, rect?.height, rect?.width);
+
+      // Notify Codap of pointer moves while dragging
+      let allowMove = true; // Throttle API requests to 30/second
+      const handleGlobalPointerMove = (e: PointerEvent) => {
+        if (allowMove) {
+          allowMove = false;
+          moveCodapDrag(dataSetName, attrTitle, e.clientX, e.clientY);
+          setTimeout(() => allowMove = true, 33);
+        }
+        handleDragOver(e.clientX, draggingOver.current || undefined);
+      };
+      body.addEventListener("pointermove", handleGlobalPointerMove);
+
+      // Notify Codap when the drag ends and clean up listeners
+      const handlePointerUp = (e: PointerEvent) => {
+        endCodapDrag(dataSetName, attrTitle, e.clientX, e.clientY);
+        body.releasePointerCapture(e.pointerId);
+        body.removeEventListener("pointermove", handleGlobalPointerMove);
+        body.removeEventListener("pointerup", handlePointerUp);
+        globalListeners.current = false;
+      };
+      body.addEventListener("pointerup", handlePointerUp);
+    }, [attrTitle, dataSetName, handleDragOver]);
+    // Save pointerId in onPointerDown listener. It will be used when a drag actually starts.
+    if (listeners) {
+      const oldPointerDown = listeners.onPointerDown;
+      listeners.onPointerDown = (event: React.PointerEvent<HTMLTableCellElement>) => {
+        pointerId.current = event.pointerId;
+        oldPointerDown(event);
+      };
+    }
+
+    useDndMonitor({
+      onDragEnd: () => {
+        draggingOver.current = null;
+      },
+      onDragMove: (e) => {
+        draggingOver.current = e.over;
+      },
+      onDragStart: (e) => {
+        if (e.active.id === id) {
+          dragInCodap();
+        }
+      }
+    });
+
+    const setRef = (element: HTMLTableCellElement) => {
+      headerRef.current = element;
+      setNodeRef(element);
+      setDroppableRef(element);
+    };
+
     return (
       <>
         <th
-          ref={headerRef}
+          ref={setRef}
           data-id={id}
           style={style}
-          draggable={true}
           colSpan={colSpan}
           className={css.draggable}
-          onDragStart={handleDragStart}
-          onDragOver={handleDragOver}
-          onDrop={handleOnDrop}
-          onDragEnter={handleDragEnter}
-          onDragLeave={handleDragLeave}
-          onDragEnd={handleDragEnd}
+          { ...attributes }
+          { ...listeners }
           onMouseEnter={() => setShowDropdownIcon(true)}
           onMouseLeave={() => setShowDropdownIcon(false)}
           onClick={handleShowHeaderMenu}
@@ -160,18 +242,17 @@ interface DroppableTableHeaderProps {
 export const DroppableTableHeader: React.FC<PropsWithChildren<DroppableTableHeaderProps>> =
   observer(function DroppableTableHeader(props) {
     const {childCollectionId, collectionId, collections, children, handleAddAttribute, tableIndex=0} = props;
-    const {dragOverId, handleDragOver, handleOnDrop, handleDragEnter, handleDragLeave} = useDraggableTableContext();
+    const { over } = useDndContext();
     const id = `${collectionId}`;
-    const style = getStyle(id, dragOverId, "left");
+    const data = { type: "header" };
+    const { setNodeRef } = useDroppable({ id, data });
+    const style = getStyle(collectionId, undefined, over, "left");
 
     return (
       <th
         data-id={id}
+        ref={setNodeRef}
         style={style}
-        onDragOver={handleDragOver}
-        onDrop={handleOnDrop}
-        onDragEnter={handleDragEnter}
-        onDragLeave={handleDragLeave}
       >
         <div className={css.parentCollHeader}>
           {children}
@@ -202,8 +283,9 @@ interface DraggagleTableDataProps {
 export const DraggagleTableData: React.FC<PropsWithChildren<DraggagleTableDataProps>> =
   observer(function DraggagleTableData(props) {
     const {collectionId, attrTitle, attrTypes, caseObj, isParent, parentLevel=0, precisions, editCaseValue} = props;
-    const {dragOverId, dragSide} = useDraggableTableContext();
-    const {style} = getIdAndStyle(collectionId, attrTitle, dragOverId, dragSide);
+    const { dragSide } = useDraggableTableContext();
+    const { over } = useDndContext();
+    const style = getStyle(collectionId, attrTitle, over, dragSide);
     const {tableScrollTop, scrollY} = useTableTopScrollTopContext();
     const cellValue = caseObj.values.get(attrTitle);
 
@@ -241,7 +323,7 @@ export const DraggagleTableData: React.FC<PropsWithChildren<DraggagleTableDataPr
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [tableScrollTop, isParent, scrollY, parentLevel]);
 
-    const EditableCell = () => {
+    const EditableCell = useCallback(() => {
       return (
         <EditableTableCell
           attrTitle={attrTitle}
@@ -251,7 +333,7 @@ export const DraggagleTableData: React.FC<PropsWithChildren<DraggagleTableDataPr
           attrTypes={attrTypes}
         />
       );
-    };
+    }, [attrTitle, attrTypes, caseObj, editCaseValue, precisions]);
 
     const textStyle: React.CSSProperties = {top: cellTextTop};
     if (cellTextTop === 0) {
@@ -286,8 +368,9 @@ interface DroppableTableDataProps {
 export const DroppableTableData: React.FC<PropsWithChildren<DroppableTableDataProps>> =
   observer(function DroppableTableData(props) {
     const {collectionId, style, children} = props;
-    const {dragOverId, dragSide} = useDraggableTableContext();
-    const dragStyle = getStyle(`${collectionId}`, dragOverId, dragSide);
+    const { dragSide } = useDraggableTableContext();
+    const { over } = useDndContext();
+    const dragStyle = getStyle(collectionId, undefined, over, dragSide);
 
     return (
       <td style={{...dragStyle, ...style}} className="droppable-table-data">
@@ -297,18 +380,22 @@ export const DroppableTableData: React.FC<PropsWithChildren<DroppableTableDataPr
 });
 
 interface DraggableTableContainerProps {
+  caseId?: number;
   collectionId?: number|string;
 }
 
 export const DraggableTableContainer: React.FC<PropsWithChildren<DraggableTableContainerProps>> =
   observer(function DraggableTableContainer(props) {
-    const {collectionId, children} = props;
-    const {dragging, dragOverId, handleDragOver, handleOnDrop, handleDragEnter,
-           handleDragLeave} = useDraggableTableContext();
-    const id = collectionId ? `parent:${collectionId}` : `parent:root`;
-    const hovering = id === dragOverId;
+    const { caseId, collectionId: _collectionId, children } = props;
+    const collectionId = _collectionId ?? "root";
+    const id = `parent:${caseId}:${collectionId}`;
+    const data = { type: "collection", collectionId };
+    const { setNodeRef } = useDroppable({ id, data });
+    const { active, over } = useDndContext();
+    const overData = over?.data?.current;
+    const hovering = overData && isCollectionData(overData) && overData.collectionId === collectionId;
     const style: React.CSSProperties = {
-      display: dragging ? "table-cell" : "none",
+      display: active ? "table-cell" : "none",
       backgroundColor: hovering ? highlightColor : undefined,
     };
 
@@ -319,11 +406,8 @@ export const DraggableTableContainer: React.FC<PropsWithChildren<DraggableTableC
             <td
               className={css.draggableTableContainerDropTarget}
               data-id={id}
+              ref={setNodeRef}
               style={style}
-              onDragOver={handleDragOver}
-              onDrop={handleOnDrop}
-              onDragEnter={handleDragEnter}
-              onDragLeave={handleDragLeave}
             >
               <AddIcon />
               {hovering && <div>Drop to create new collection</div>}

@@ -79,7 +79,7 @@ export const LandscapeTable = observer(function LandscapeView(props: ITableProps
   };
 
   const renderColFromCaseObj = (collection: ICollection, caseObj: IProcessedCaseObj, index?: number) => {
-    const {children, values} = caseObj;
+    const {children, id, values} = caseObj;
     const isFirstIndex = index === 0;
 
     if (!children.length) {
@@ -94,6 +94,7 @@ export const LandscapeTable = observer(function LandscapeView(props: ITableProps
           {isFirstIndex &&
             <tr className={css[className]}>
               <TableHeaders
+                caseId={id}
                 collectionId={collection.id}
                 rowKey={`first-row-${index}`}
                 values={values}

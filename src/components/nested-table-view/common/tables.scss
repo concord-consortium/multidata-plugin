@@ -273,6 +273,11 @@ table.draggableTableContainer {
 .draggable {
   padding-right: 17px;
   padding-left: 15px;
+  box-sizing: border-box;
+}
+
+.draggable-table-data {
+  box-sizing: border-box;
 }
 
 .headerMenu {

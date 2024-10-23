@@ -1,14 +1,15 @@
+import { DndContext, KeyboardSensor, PointerSensor, useSensor, useSensors } from "@dnd-kit/core";
 import React, { useCallback, useEffect, useState } from "react";
 import { observer } from "mobx-react-lite";
 import { IResult } from "@concord-consortium/codap-plugin-api";
 import { InteractiveState } from "../../hooks/useCodapState";
-import { ICollection, IProcessedCaseObj, Values, ICollectionClass, IDataSet } from "../../types";
 import { DraggableTableContext, useDraggableTable } from "../../hooks/useDraggableTable";
+import { ICollection, IProcessedCaseObj, Values, ICollectionClass, IDataSet } from "../../types";
 import { CollectionsModelType } from "../../models/collections";
 import { Menu } from "../menu";
-import { PortraitTable } from "./portrait/portrait-table";
-import { LandscapeTable } from "./landscape/landscape-table";
 import { FlatTable } from "./flat/flat-table";
+import { LandscapeTable } from "./landscape/landscape-table";
+import { PortraitTable } from "./portrait/portrait-table";
 
 import css from "./nested-table.scss";
 
@@ -128,6 +129,12 @@ export const NestedTable = observer(function NestedTable(props: IProps) {
 
   const showDisplayMode = collections.length > 1 && !!selectedDataSet;
 
+  const sensors = useSensors(
+    useSensor(KeyboardSensor),
+    // Require a small movement before actually starting a drag
+    useSensor(PointerSensor, { activationConstraint: { distance: 3 } })
+  );
+
   return (
     <div className={css.nestedTableWrapper} onClick={handleShowComponent}>
       <Menu
@@ -144,7 +151,9 @@ export const NestedTable = observer(function NestedTable(props: IProps) {
         defaultDisplayMode="Portrait"
       />
       <DraggableTableContext.Provider value={draggableTable}>
-        {selectedDataSet && renderTable()}
+        <DndContext onDragEnd={draggableTable.handleOnDrop} sensors={sensors}>
+          {selectedDataSet && renderTable()}
+        </DndContext>
       </DraggableTableContext.Provider>
     </div>
   );
