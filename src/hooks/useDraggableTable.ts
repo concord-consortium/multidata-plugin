@@ -41,7 +41,7 @@ export const useDraggableTable = (options: IUseDraggableTableOptions) => {
     }
   };
 
-  const handleOnDrop = useCallback((e: DragEndEvent) => {
+  const handleDrop = useCallback((e: DragEndEvent) => {
     const { active, over } = e;
     if (over) {
       const source = getCollectionAndAttribute(active.data.current as IData);
@@ -73,7 +73,7 @@ export const useDraggableTable = (options: IUseDraggableTableOptions) => {
 
   return {
     handleDragOver,
-    handleOnDrop,
+    handleDrop,
     dragSide,
   };
 };
