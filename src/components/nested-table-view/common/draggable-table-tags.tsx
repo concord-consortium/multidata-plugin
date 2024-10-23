@@ -40,7 +40,7 @@ const getStyle = (collectionId: number, attrTitle?: string, over?: Over|null, dr
   return hovering ? (dragSide === "left" ? {borderLeft} : {borderRight}) : {};
 };
 
-interface DraggagleTableHeaderProps {
+interface DraggableTableHeaderProps {
   collectionId: number;
   attrTitle: string;
   caseId?: number;
@@ -54,7 +54,7 @@ interface DraggagleTableHeaderProps {
   renameAttribute: (collectionName: string, attrId: number, oldName: string, newName: string) => Promise<void>;
 }
 
-export const DraggableTableHeader: React.FC<PropsWithChildren<DraggagleTableHeaderProps>> =
+export const DraggableTableHeader: React.FC<PropsWithChildren<DraggableTableHeaderProps>> =
   observer(function DraggagleTableHeader(props) {
     const {collectionId, attrTitle, caseId, dataSetName, editableHasFocus, children, handleSortAttribute,
        isParent, attrId, renameAttribute, colSpan} = props;
@@ -267,7 +267,7 @@ export const DroppableTableHeader: React.FC<PropsWithChildren<DroppableTableHead
     );
 });
 
-interface DraggagleTableDataProps {
+interface DraggableTableDataProps {
   collectionId: number;
   attrTitle: string;
   caseObj: IProcessedCaseObj;
@@ -280,8 +280,8 @@ interface DraggagleTableDataProps {
   editCaseValue: (newValue: string, caseObj: IProcessedCaseObj, attrTitle: string) => Promise<IResult | undefined>;
 }
 
-export const DraggagleTableData: React.FC<PropsWithChildren<DraggagleTableDataProps>> =
-  observer(function DraggagleTableData(props) {
+export const DraggableTableData: React.FC<PropsWithChildren<DraggableTableDataProps>> =
+  observer(function DraggableTableData(props) {
     const {collectionId, attrTitle, attrTypes, caseObj, isParent, parentLevel=0, precisions, editCaseValue} = props;
     const { dragSide } = useDraggableTableContext();
     const { over } = useDndContext();
@@ -323,18 +323,6 @@ export const DraggagleTableData: React.FC<PropsWithChildren<DraggagleTableDataPr
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [tableScrollTop, isParent, scrollY, parentLevel]);
 
-    const EditableCell = useCallback(() => {
-      return (
-        <EditableTableCell
-          attrTitle={attrTitle}
-          case={caseObj}
-          editCaseValue={editCaseValue}
-          precisions={precisions}
-          attrTypes={attrTypes}
-        />
-      );
-    }, [attrTitle, attrTypes, caseObj, editCaseValue, precisions]);
-
     const textStyle: React.CSSProperties = {top: cellTextTop};
     if (cellTextTop === 0) {
       textStyle.alignContent = "center";
@@ -351,10 +339,22 @@ export const DraggagleTableData: React.FC<PropsWithChildren<DraggagleTableDataPr
                 {getDisplayValue(cellValue, attrTitle, attrTypes, precisions)}
               </span>
               <div style={textStyle} className={css.cellTextValue}>
-                <EditableCell />
+                <EditableTableCell
+                  attrTitle={attrTitle}
+                  case={caseObj}
+                  editCaseValue={editCaseValue}
+                  precisions={precisions}
+                  attrTypes={attrTypes}
+                />
               </div>
             </>
-          : <EditableCell />
+          : <EditableTableCell
+              attrTitle={attrTitle}
+              case={caseObj}
+              editCaseValue={editCaseValue}
+              precisions={precisions}
+              attrTypes={attrTypes}
+            />
         }
       </td>
     );

@@ -1,6 +1,6 @@
 import React from "react";
 import { IProcessedCaseObj } from "../../../types";
-import { DraggagleTableData } from "./draggable-table-tags";
+import { DraggableTableData } from "./draggable-table-tags";
 import { IResult } from "@concord-consortium/codap-plugin-api";
 
 interface IProps {
@@ -31,7 +31,7 @@ export const TableCells = (props: IProps) => {
         }
 
         return (
-          <DraggagleTableData
+          <DraggableTableData
             collectionId={collectionId}
             attrTitle={String(key)}
             key={`${rowKey}-${cellValue}-${index}}`}
