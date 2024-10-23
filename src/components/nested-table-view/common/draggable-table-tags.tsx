@@ -8,7 +8,7 @@ import { useTableTopScrollTopContext } from "../../../hooks/useTableScrollTop";
 import { endCodapDrag, getCollectionById, moveCodapDrag, startCodapDrag } from "../../../utils/apiHelpers";
 import { getDisplayValue } from "../../../utils/utils";
 import {
-  ICollection, ICollections, IData, IProcessedCaseObj, isCollectionData, PropsWithChildren
+  ICollection, ICollections, IDndData, IProcessedCaseObj, isCollectionData, PropsWithChildren
 } from "../../../types";
 import { EditableTableCell } from "./editable-table-cell";
 import { AddAttributeButton } from "./add-attribute-button";
@@ -35,7 +35,7 @@ function getId(collectionId: number, attrTitle?: string, caseId?: number) {
 const getStyle = (collectionId: number, attrTitle?: string, over?: Over|null, dragSide?: Side) => {
   if (attrTitle == null) return {};
 
-  const data = over?.data.current as IData;
+  const data = over?.data.current as IDndData;
   const hovering = collectionId === data?.collectionId && (attrTitle == null || attrTitle === data?.attrTitle);
   return hovering ? (dragSide === "left" ? {borderLeft} : {borderRight}) : {};
 };

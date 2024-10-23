@@ -92,13 +92,13 @@ export interface IBoundingBox {
 }
 
 // Data for draggables and droppables
-export interface IData {
+export interface IDndData {
   type: string;
   collectionId?: number | string;
   attrTitle?: string;
 }
 
-export function isCollectionData(data?: Record<string, any>): data is IData {
+export function isCollectionData(data?: Record<string, any>): data is IDndData {
   return data?.type === "collection";
 }
 
