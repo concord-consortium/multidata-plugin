@@ -70,7 +70,10 @@ export const DraggableTableHeader: React.FC<PropsWithChildren<DraggableTableHead
 
     useEffect(() => {
       const handleClickOutside = (e: MouseEvent) => {
-        if (headerMenuRef.current && !headerMenuRef.current.contains(e.target as Node)) {
+        if (headerMenuRef.current &&
+          !headerMenuRef.current.contains(e.target as Node) &&
+          !headerRef.current?.contains(e.target as Node)
+        ) {
           setShowHeaderMenu(false);
         }
       };
