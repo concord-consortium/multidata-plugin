@@ -200,9 +200,9 @@ export const DraggableTableHeader: React.FC<PropsWithChildren<DraggableTableHead
           onClick={handleShowHeaderMenu}
         >
           <div className={`${css.thChildContainer} ${isParent ? css.isParent : ""}`}>
+            <button className={css.dropdownIconContainer} onClick={handleShowHeaderMenu} />
             <button
-              onMouseEnter={() => setShowDropdownIcon(true)}
-              onMouseLeave={() => setShowDropdownIcon(false)}
+              className={css.attributeTitleContainer}
               onClick={handleShowHeaderMenu}
             >
               {attrId && editableHasFocus
@@ -215,7 +215,7 @@ export const DraggableTableHeader: React.FC<PropsWithChildren<DraggableTableHead
                   />
                 : children}
             </button>
-            <button className={css.dropdownIcon} onClick={handleShowHeaderMenu}>
+            <button className={css.dropdownIconContainer} onClick={handleShowHeaderMenu}>
               {showDropdownIcon && <DropdownIcon className={css.dropdownIcon} />}
             </button>
           </div>

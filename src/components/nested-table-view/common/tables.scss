@@ -271,6 +271,7 @@ table.draggableTableContainer {
 }
 
 .draggable {
+  cursor: pointer;
   padding-right: 17px;
   padding-left: 15px;
   box-sizing: border-box;
@@ -310,19 +311,25 @@ table.draggableTableContainer {
   justify-content: center;
   width: 100%;
   height: 15px;
-  gap: 5px;
 
   button {
     all: unset;
     cursor: pointer;
   }
 
-  .dropdownIcon {
-    &:hover {
-      cursor: pointer;
-    }
-    svg {
+  .attributeTitleContainer {
+    padding: 0 5px;
+  }
+
+  .dropdownIconContainer {
+    width: 10px;
+
+    .dropdownIcon {
       width: 10px;
+
+      &:hover {
+        cursor: pointer;
+      }
     }
   }
 
