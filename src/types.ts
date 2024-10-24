@@ -79,7 +79,6 @@ export interface ITableProps {
   paddingStyle: Record<string, string>;
   tableIndex?: number;
   activeTableIndex?: number;
-  handleSortAttribute: (context: string, attrId: number, isDescending: boolean) => void;
   handleAddAttribute: (collection: ICollection, attrName: string, tableIndex: number) => Promise<void>;
   renameAttribute: (collectionName: string, attrId: number, oldName: string, newName: string) => Promise<void>;
 }
@@ -123,7 +122,6 @@ export type CodapState = {
   handleSelectDataSet: (name: string) => void;
   handleSelectSelf: () => Promise<void>;
   handleSetCollections: (collections: ICollections) => void;
-  handleSortAttribute: (context: string, attrId: number, isDescending: boolean) => Promise<void>;
   handleUpdateAttributePosition: (coll: ICollection, attrName: string, position: number) => Promise<void>;
   handleUpdateCollections: () => Promise<void>;
   init: () => Promise<void>;

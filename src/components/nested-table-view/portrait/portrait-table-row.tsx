@@ -15,7 +15,7 @@ export type PortraitTableRowProps = {
 
 export const PortraitTableRow = observer(function PortraitTableRow(props: PortraitTableRowProps) {
   const { paddingStyle, showHeaders, getClassName, caseObj, index, isParent, parentLevel = 0, dataSetName,
-    handleAddAttribute, collectionsModel, handleSortAttribute, renameAttribute, editCaseValue,
+    handleAddAttribute, collectionsModel, renameAttribute, editCaseValue,
     selectedDataSet, getsFocusOnAddAttr, tableIndex } = props;
   const { collections, attrVisibilities, attrPrecisions, attrTypes } = collectionsModel;
   const collectionId = caseObj.collection.id;
@@ -53,7 +53,6 @@ export const PortraitTableRow = observer(function PortraitTableRow(props: Portra
               attrId={id}
               editableHasFocus={getsFocusOnAddAttr}
               selectedDataSet={selectedDataSet}
-              handleSortAttribute={handleSortAttribute}
               renameAttribute={renameAttribute}
             />
             {showHeaders ? (
@@ -110,7 +109,6 @@ export const PortraitTableRow = observer(function PortraitTableRow(props: Portra
                               attrId={child.id}
                               editableHasFocus={getsFocusOnAddAttr}
                               selectedDataSet={selectedDataSet}
-                              handleSortAttribute={handleSortAttribute}
                               renameAttribute={renameAttribute}
                             />
                           </tr>

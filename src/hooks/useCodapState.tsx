@@ -18,7 +18,7 @@ import {
 } from "@concord-consortium/codap-plugin-api";
 import { runInAction } from "mobx";
 import { applySnapshot, unprotect } from "mobx-state-tree";
-import { getCases, getCollectionById, getDataSetCollections, sortAttribute } from "../utils/apiHelpers";
+import { getCases, getCollectionById, getDataSetCollections } from "../utils/apiHelpers";
 import { ICollection, IDataSet, IProcessedCaseObj } from "../types";
 import { DataSetsModel, DataSetsModelType } from "../models/datasets";
 import { CollectionsModel, CollectionsModelSnapshot, CollectionsModelType } from "../models/collections";
@@ -227,10 +227,6 @@ export const useCodapState = () => {
       }
     };
 
-  const handleSortAttribute = async (context: string, attrId: number, isDescending: boolean) => {
-    sortAttribute(context, attrId, isDescending);
-  };
-
   const handleAddAttribute = async (collection: ICollection, attrName: string, tableIndex=0) => {
     if (!selectedDataSet) return;
 
@@ -354,7 +350,6 @@ export const useCodapState = () => {
     connected,
     handleUpdateAttributePosition,
     handleAddCollection,
-    handleSortAttribute,
     handleAddAttribute,
     updateTitle,
     selectCODAPCases,

@@ -9,7 +9,7 @@ import css from "../common/tables.scss";
 
 export const LandscapeTable = observer(function LandscapeView(props: ITableProps) {
   const { showHeaders, collectionClasses, getClassName, selectedDataSet, collectionsModel, getValueLength,
-    paddingStyle, handleSortAttribute, renameAttribute, editCaseValue } = props;
+    paddingStyle, renameAttribute, editCaseValue } = props;
   const { collections, attrPrecisions, attrTypes, attrVisibilities } = collectionsModel;
 
   const renderNestedTable = (parentColl: ICollection) => {
@@ -36,7 +36,6 @@ export const LandscapeTable = observer(function LandscapeView(props: ITableProps
                 values={values}
                 attrVisibilities={attrVisibilities}
                 selectedDataSet={selectedDataSet}
-                handleSortAttribute={handleSortAttribute}
                 renameAttribute={renameAttribute}
               />
             );
@@ -100,7 +99,6 @@ export const LandscapeTable = observer(function LandscapeView(props: ITableProps
                 values={values}
                 attrVisibilities={attrVisibilities}
                 selectedDataSet={selectedDataSet}
-                handleSortAttribute={handleSortAttribute}
                 renameAttribute={renameAttribute}
               />
             </tr>
@@ -155,7 +153,6 @@ export const LandscapeTable = observer(function LandscapeView(props: ITableProps
             colSpan={firstRowValues.length}
             dataSetName={selectedDataSet.name}
             dataSetTitle={selectedDataSet.title}
-            handleSortAttribute={handleSortAttribute}
             renameAttribute={renameAttribute}
           >
             {selectedDataSet.name}

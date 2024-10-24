@@ -14,7 +14,7 @@ function App() {
          handleAddCollection, handleAddAttribute, handleSelectSelf,
          updateTitle, selectCODAPCases, listenForSelectionChanges,
          handleCreateCollectionFromAttribute, handleSetCollections,
-         handleSortAttribute, editCaseValue, renameAttribute } = useCodapState();
+         editCaseValue, renameAttribute } = useCodapState();
   const collections = collectionsModel.collections;
 
   useEffect(() => {
@@ -109,7 +109,6 @@ function App() {
           handleUpdateAttributePosition={handleUpdateAttributePosition}
           handleCreateCollectionFromAttribute={handleCreateCollectionFromAttribute}
           editCaseValue={editCaseValue}
-          handleSortAttribute={handleSortAttribute}
           handleAddAttribute={handleAddAttribute}
           renameAttribute={renameAttribute}
         />
