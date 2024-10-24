@@ -95,10 +95,12 @@ export const DraggableTableHeader: React.FC<PropsWithChildren<DraggableTableHead
 
     const handleSortAttribute = (isDescending = false) => {
       sortAttribute(dataSetName, attrTitle, isDescending);
+      setShowHeaderMenu(false);
     };
 
     const handleDisplayFormulaEditor = () => {
       displayFormulaEditor(dataSetName, attrTitle);
+      setShowHeaderMenu(false);
     };
 
     // Manage synthetic drag in Codap via API requests
@@ -221,8 +223,8 @@ export const DraggableTableHeader: React.FC<PropsWithChildren<DraggableTableHead
         { showHeaderMenu && tableContainer && headerPos &&
             createPortal(
               <div className={css.headerMenu} ref={headerMenuRef}
-                    style={{left: headerPos?.left + 5, top: headerPos?.bottom  + scrollY}}>
-                <button onClick={handleDisplayFormulaEditor}>Edit Formula</button>
+                    style={{left: headerPos?.left + 5 + scrollX, top: headerPos?.bottom  + scrollY}}>
+                <button onClick={handleDisplayFormulaEditor}>Edit Formula...</button>
                 <button onClick={() => handleSortAttribute()}>Sort Ascending (A➞Z, 0➞9)</button>
                 <button onClick={() => handleSortAttribute(true)}>Sort Descending (Z➞A, 9➞0)</button>
               </div>,

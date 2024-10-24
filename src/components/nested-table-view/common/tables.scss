@@ -294,7 +294,9 @@ table.draggableTableContainer {
     background-color: transparent;
     border: none;
     cursor: pointer;
+    text-align: left;
     white-space: nowrap;
+    width: 100%;
 
     &:hover {
       color: #666;
