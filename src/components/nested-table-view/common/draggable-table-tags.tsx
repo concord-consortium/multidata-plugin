@@ -5,7 +5,9 @@ import { observer } from "mobx-react-lite";
 import { getAttribute, IResult } from "@concord-consortium/codap-plugin-api";
 import { useDraggableTableContext, Side } from "../../../hooks/useDraggableTable";
 import { useTableTopScrollTopContext } from "../../../hooks/useTableScrollTop";
-import { endCodapDrag, getCollectionById, moveCodapDrag, startCodapDrag } from "../../../utils/apiHelpers";
+import {
+  endCodapDrag, getCollectionById, moveCodapDrag, sortAttribute, startCodapDrag
+} from "../../../utils/apiHelpers";
 import { getDisplayValue } from "../../../utils/utils";
 import {
   ICollection, ICollections, IDndData, IProcessedCaseObj, isCollectionData, PropsWithChildren
@@ -47,7 +49,6 @@ interface DraggableTableHeaderProps {
   colSpan?: number;
   dataSetName: string;
   dataSetTitle: string;
-  handleSortAttribute: (dataSetName: string, attributeId: number, isDescending: boolean) => void;
   isParent?: boolean;
   editableHasFocus?: boolean;
   attrId?: number;
@@ -56,7 +57,7 @@ interface DraggableTableHeaderProps {
 
 export const DraggableTableHeader: React.FC<PropsWithChildren<DraggableTableHeaderProps>> =
   observer(function DraggagleTableHeader(props) {
-    const {collectionId, attrTitle, caseId, dataSetName, editableHasFocus, children, handleSortAttribute,
+    const {collectionId, attrTitle, caseId, dataSetName, editableHasFocus, children,
        isParent, attrId, renameAttribute, colSpan} = props;
 
     // Manage header dropdown menus
@@ -93,7 +94,7 @@ export const DraggableTableHeader: React.FC<PropsWithChildren<DraggableTableHead
       const isDescending = e.target.value === "desc";
       const collectionName = await getCollectionById(dataSetName, collectionId);
       const attribute = (await getAttribute(dataSetName, collectionName, attrTitle)).values;
-      handleSortAttribute(dataSetName, attribute.id, isDescending);
+      sortAttribute(dataSetName, attribute.id, isDescending);
       setShowHeaderMenu(false);
     };
 
