@@ -2,10 +2,12 @@ import { Over, useDndContext, useDndMonitor, useDraggable, useDroppable } from "
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { observer } from "mobx-react-lite";
-import { getAttribute, IResult } from "@concord-consortium/codap-plugin-api";
+import { IResult } from "@concord-consortium/codap-plugin-api";
 import { useDraggableTableContext, Side } from "../../../hooks/useDraggableTable";
 import { useTableTopScrollTopContext } from "../../../hooks/useTableScrollTop";
-import { endCodapDrag, getCollectionById, moveCodapDrag, startCodapDrag } from "../../../utils/apiHelpers";
+import {
+  displayFormulaEditor, endCodapDrag, moveCodapDrag, sortAttribute, startCodapDrag
+} from "../../../utils/apiHelpers";
 import { getDisplayValue } from "../../../utils/utils";
 import {
   ICollection, ICollections, IDndData, IProcessedCaseObj, isCollectionData, PropsWithChildren
@@ -47,7 +49,6 @@ interface DraggableTableHeaderProps {
   colSpan?: number;
   dataSetName: string;
   dataSetTitle: string;
-  handleSortAttribute: (dataSetName: string, attributeId: number, isDescending: boolean) => void;
   isParent?: boolean;
   editableHasFocus?: boolean;
   attrId?: number;
@@ -56,7 +57,7 @@ interface DraggableTableHeaderProps {
 
 export const DraggableTableHeader: React.FC<PropsWithChildren<DraggableTableHeaderProps>> =
   observer(function DraggagleTableHeader(props) {
-    const {collectionId, attrTitle, caseId, dataSetName, editableHasFocus, children, handleSortAttribute,
+    const {collectionId, attrTitle, caseId, dataSetName, editableHasFocus, children,
        isParent, attrId, renameAttribute, colSpan} = props;
 
     // Manage header dropdown menus
@@ -69,7 +70,10 @@ export const DraggableTableHeader: React.FC<PropsWithChildren<DraggableTableHead
 
     useEffect(() => {
       const handleClickOutside = (e: MouseEvent) => {
-        if (headerMenuRef.current && !headerMenuRef.current.contains(e.target as Node)) {
+        if (headerMenuRef.current &&
+          !headerMenuRef.current.contains(e.target as Node) &&
+          !headerRef.current?.contains(e.target as Node)
+        ) {
           setShowHeaderMenu(false);
         }
       };
@@ -89,11 +93,13 @@ export const DraggableTableHeader: React.FC<PropsWithChildren<DraggableTableHead
       setShowHeaderMenu(!showHeaderMenu);
     };
 
-    const handleSortAttr = async (e: React.ChangeEvent<HTMLSelectElement>) => {
-      const isDescending = e.target.value === "desc";
-      const collectionName = await getCollectionById(dataSetName, collectionId);
-      const attribute = (await getAttribute(dataSetName, collectionName, attrTitle)).values;
-      handleSortAttribute(dataSetName, attribute.id, isDescending);
+    const handleSortAttribute = (isDescending = false) => {
+      sortAttribute(dataSetName, attrTitle, isDescending);
+      setShowHeaderMenu(false);
+    };
+
+    const handleDisplayFormulaEditor = () => {
+      displayFormulaEditor(dataSetName, attrTitle);
       setShowHeaderMenu(false);
     };
 
@@ -194,9 +200,9 @@ export const DraggableTableHeader: React.FC<PropsWithChildren<DraggableTableHead
           onClick={handleShowHeaderMenu}
         >
           <div className={`${css.thChildContainer} ${isParent ? css.isParent : ""}`}>
+            <button className={css.dropdownIconContainer} onClick={handleShowHeaderMenu} />
             <button
-              onMouseEnter={() => setShowDropdownIcon(true)}
-              onMouseLeave={() => setShowDropdownIcon(false)}
+              className={css.attributeTitleContainer}
               onClick={handleShowHeaderMenu}
             >
               {attrId && editableHasFocus
@@ -209,7 +215,7 @@ export const DraggableTableHeader: React.FC<PropsWithChildren<DraggableTableHead
                   />
                 : children}
             </button>
-            <button className={css.dropdownIcon} onClick={handleShowHeaderMenu}>
+            <button className={css.dropdownIconContainer} onClick={handleShowHeaderMenu}>
               {showDropdownIcon && <DropdownIcon className={css.dropdownIcon} />}
             </button>
           </div>
@@ -217,11 +223,10 @@ export const DraggableTableHeader: React.FC<PropsWithChildren<DraggableTableHead
         { showHeaderMenu && tableContainer && headerPos &&
             createPortal(
               <div className={css.headerMenu} ref={headerMenuRef}
-                    style={{left: headerPos?.left + 5, top: headerPos?.bottom  + scrollY}}>
-                  <select className={css.headerMenuSelect} size={2} onChange={handleSortAttr}>
-                      <option value="asc">Sort Ascending (A➞Z, 0➞9)</option>
-                      <option value="desc">Sort Descending (Z➞A, 9➞0)</option>
-                  </select>
+                    style={{left: headerPos?.left + 5 + scrollX, top: headerPos?.bottom  + scrollY}}>
+                <button onClick={handleDisplayFormulaEditor}>Edit Formula...</button>
+                <button onClick={() => handleSortAttribute()}>Sort Ascending (A➞Z, 0➞9)</button>
+                <button onClick={() => handleSortAttribute(true)}>Sort Descending (Z➞A, 9➞0)</button>
               </div>,
               tableContainer
             )

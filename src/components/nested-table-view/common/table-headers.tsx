@@ -13,7 +13,6 @@ interface ITableHeaders {
   attrId?: number;
   editableHasFocus?: boolean;
   selectedDataSet: IDataSet;
-  handleSortAttribute: (dataSetName: string, attributeId: number, isDescending: boolean) => void;
   renameAttribute: (collectionName: string, attrId: number, oldName: string, newName: string) => Promise<void>;
 }
 
@@ -27,7 +26,6 @@ export const TableHeaders: React.FC<ITableHeaders> = ({
   attrId,
   editableHasFocus,
   selectedDataSet,
-  handleSortAttribute,
   renameAttribute
 }) => {
   const caseValuesKeys = [...values.keys()];
@@ -48,7 +46,6 @@ export const TableHeaders: React.FC<ITableHeaders> = ({
               attrId={attrId}
               editableHasFocus={editableHasFocus && isEditable}
               renameAttribute={renameAttribute}
-              handleSortAttribute={handleSortAttribute}
             >
               {key}
             </DraggableTableHeader>

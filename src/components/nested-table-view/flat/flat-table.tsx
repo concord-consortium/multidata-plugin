@@ -12,11 +12,10 @@ import css from "../common/tables.scss";
 interface IFlatProps extends ITableProps {
   cases: IProcessedCaseObj[]
   editCaseValue: (newValue: string, cCase: IProcessedCaseObj, attrTitle: string) => Promise<IResult | undefined>;
-  handleSortAttribute: (context: string, attrId: number, isDescending: boolean) => void;
 }
 
 export const FlatTable = observer(function FlatTable(props: IFlatProps) {
-  const {selectedDataSet, collectionsModel, collectionClasses, handleSortAttribute, showHeaders,
+  const {selectedDataSet, collectionsModel, collectionClasses, showHeaders,
          editCaseValue, renameAttribute, handleAddAttribute } = props;
   const { collections, attrVisibilities, attrPrecisions, attrTypes } = collectionsModel;
   const collection = collectionsModel.collections[0];
@@ -53,7 +52,6 @@ export const FlatTable = observer(function FlatTable(props: IFlatProps) {
                        dataSetName={selectedDataSet.name}
                        dataSetTitle={selectedDataSet.title}
                        editableHasFocus={isEditable}
-                       handleSortAttribute={handleSortAttribute}
                        renameAttribute={renameAttribute}
                      >
                       {attr.title}

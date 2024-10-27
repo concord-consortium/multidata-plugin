@@ -57,13 +57,23 @@ export const getCollectionById = async (selectedDataSetName: string, collId: num
   return collectionName;
 };
 
-export const sortAttribute = async (context: string, attrId: number, isDescending: boolean) => {
+export function displayFormulaEditor(context: string, attrTitle: string) {
+  codapInterface.sendRequest({
+    "action": "notify",
+    "resource": `dataContext[${context}].attribute[${attrTitle}]`,
+    "values": {
+      "request": "formulaEditor"
+    }
+  });
+}
+
+export const sortAttribute = async (context: string, attrTitle: string, isDescending: boolean) => {
   await codapInterface.sendRequest({
     "action": "update",
     "resource": `dataContext[${context}]`,
     "values": {
       "sort": {
-        attr: attrId,
+        attr: attrTitle,
         isDescending,
       }
     }
