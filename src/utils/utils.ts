@@ -6,7 +6,7 @@ export const getDisplayValue = (cellValue: string | number, attrTitle: string,
     const isAttrNumberType = attrTypes[attrTitle] === "numeric";
     const cellHasValue = cellValue !== "";
     const isValueNumberType = typeof cellValue === "number";
-    const parsedValue: number = typeof cellValue === "string" ? parseFloat(cellValue) : NaN;
+    const parsedValue: number = typeof cellValue === "string" ? parseFloat(cellValue) : cellValue;
     const isValueNumber = !isNaN(parsedValue);
     const hasPrecision = precisions[attrTitle] !== undefined;
     const defaultValue: string | number = cellValue;
