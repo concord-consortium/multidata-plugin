@@ -130,6 +130,7 @@ export const useCodapState = () => {
               break;
           case "createCases":
           case "createItems":
+              refreshDataSetInfo();
               break;
           default:
               break;
