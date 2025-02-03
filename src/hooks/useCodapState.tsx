@@ -105,34 +105,27 @@ export const useCodapState = () => {
       if (iMessage.resource === `dataContextChangeNotice[${selectedDataSetName}]`) {
         const theValues = iMessage.values;
         switch (theValues.operation) {
-          case `selectCases`:
-          case `updateCases`:
-          // case `moveCases`:
-              refreshDataSetInfo();
-              break;
-          case `updateCollection`:
-          case `createCollection`:
-          case `deleteCollection`:
-          case `moveAttribute`:
-          case `deleteAttributes` :
-          case `createAttributes` :
-          case `updateAttributes`:
-          case `hideAttributes`:
-          case `showAttributes`:
-          case `unhideAttributes`:
-              refreshDataSetInfo();
-              break;
-          case `updateDataContext`:       //  includes renaming dataset, so we have to redo the menu
-              refreshDataSetInfo();
-              break;
-          case `moveCases`:
-              handleMoveCases();
-              break;
+          case "updateDataContext":       //  includes renaming dataset, so we have to redo the menu
+          case "createCollection":
+          case "updateCollection":
+          case "deleteCollection":
+          case "createAttributes":
+          case "moveAttribute":
+          case "updateAttributes":
+          case "deleteAttributes":
+          case "hideAttributes":
+          case "showAttributes":
+          case "unhideAttributes":
           case "createCases":
           case "createItems":
-              break;
+          case "moveCases":
+          case "selectCases":
+          case "updateCases":
+            // TODO: consider throttling
+            refreshDataSetInfo();
+            break;
           default:
-              break;
+            break;
         }
       }
     };
@@ -152,10 +145,6 @@ export const useCodapState = () => {
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedDataSet, selectedDataSetName]);
-
-  const handleMoveCases = () => {
-    updateCollections();
-  };
 
   const handleSetCollections = useCallback((colls: ICollection[]) => {
     const newCollectionModels = colls.map((coll: ICollection) => {
