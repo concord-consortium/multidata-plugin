@@ -294,39 +294,42 @@ export const DraggableTableData: React.FC<PropsWithChildren<DraggableTableDataPr
     const {tableScrollTop, scrollY} = useTableTopScrollTopContext();
     const cellValue = caseObj.values.get(attrTitle);
 
-    const cellRef = useRef<HTMLTableCellElement | null>(null);
+    // use state so that cellTextTop is recomputed when cellElt is available
+    const [cellElt, setCellElt] = useState<HTMLTableCellElement | null>(null);
 
-    const cellTextTop = useMemo (() =>{
-      if (!cellRef.current || !isParent) {
+    const cellTextTop = useMemo (() => {
+      if (!cellElt || !isParent) {
         return 0;
-      } else {
-        const {top, bottom, height} = cellRef.current.getBoundingClientRect();
-        const stickyHeaders = tableScrollTop === 0;
-        const stickyHeaderHeight = (kMinNumHeaders + parentLevel) * kCellHeight;
-        const visibleTop = stickyHeaders ?  Math.max(top, stickyHeaderHeight) : top;
-        const visibleBottom = Math.min(window.innerHeight, bottom);
-        const availableHeight = Math.abs(visibleBottom - visibleTop);
-
-        let newTop;
-
-        if (top >= visibleTop && bottom <= visibleBottom) { // the whole cell is visible
-          return 0;
-        } else if (top < visibleTop && bottom < window.innerHeight) {
-          // we can see the bottom border of the cell but not the top
-          const hiddenHeightOfCell = height - availableHeight;
-          newTop = Math.max(0, (hiddenHeightOfCell - kCellHeight + (availableHeight / 2)));
-        } else if (top >= visibleTop && bottom > visibleBottom) {
-          // we can see the top border of the cell but not the bottom
-          newTop = Math.max(0, ((availableHeight) / 2));
-        } else {
-          // we are in the middle of a cell - we can see neither the top nor the bottom border
-          const hiddenTopPartOfCell = Math.max(0, visibleTop - top);
-          newTop = Math.max(0, (hiddenTopPartOfCell - kCellHeight + (availableHeight) / 2));
-        }
-        return newTop;
       }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [tableScrollTop, isParent, scrollY, parentLevel]);
+
+      const {top, bottom, height} = cellElt.getBoundingClientRect();
+      const stickyHeaders = tableScrollTop === 0;
+      const stickyHeaderHeight = (kMinNumHeaders + parentLevel) * kCellHeight;
+      const visibleTop = stickyHeaders ?  Math.max(top, stickyHeaderHeight) : top;
+      const visibleBottom = Math.min(window.innerHeight, bottom);
+      const availableHeight = Math.abs(visibleBottom - visibleTop);
+
+      let newTop;
+
+      if (top >= visibleTop && bottom <= visibleBottom) { // the whole cell is visible
+        return 0;
+      } else if (top < visibleTop && bottom < window.innerHeight) {
+        // we can see the bottom border of the cell but not the top
+        const hiddenHeightOfCell = height - availableHeight;
+        newTop = Math.max(0, (hiddenHeightOfCell - kCellHeight + (availableHeight / 2)));
+      } else if (top >= visibleTop && bottom > visibleBottom) {
+        // we can see the top border of the cell but not the bottom
+        newTop = Math.max(0, (availableHeight / 2));
+      } else {
+        // we are in the middle of a cell - we can see neither the top nor the bottom border
+        const hiddenTopPartOfCell = Math.max(0, visibleTop - top);
+        newTop = Math.max(0, (hiddenTopPartOfCell - kCellHeight + (availableHeight) / 2));
+      }
+
+      // recompute when vertical scroll position changes
+      scrollY;  // eslint-disable-line no-unused-expressions
+      return newTop;
+    }, [cellElt, isParent, parentLevel, scrollY, tableScrollTop]);
 
     const textStyle: React.CSSProperties = {top: cellTextTop};
     if (cellTextTop === 0) {
@@ -337,7 +340,8 @@ export const DraggableTableData: React.FC<PropsWithChildren<DraggableTableDataPr
       textStyle.position = "absolute";
     }
     return (
-      <td style={style} className={`draggable-table-data ${isParent ? css.parentData : ""}`} ref={cellRef}>
+      <td style={style} className={`draggable-table-data ${isParent ? css.parentData : ""}`}
+          ref={elt => setCellElt(elt)}>
         {isParent
           ? <>
               <span style={{opacity: 0}}>
