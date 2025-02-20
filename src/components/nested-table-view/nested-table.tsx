@@ -4,8 +4,9 @@ import { observer } from "mobx-react-lite";
 import { IResult } from "@concord-consortium/codap-plugin-api";
 import { InteractiveState } from "../../hooks/useCodapState";
 import { DraggableTableContext, useDraggableTable } from "../../hooks/useDraggableTable";
-import { ICollection, IProcessedCaseObj, Values, ICollectionClass, IDataSet } from "../../types";
 import { CollectionsModelType } from "../../models/collections";
+import { ICollection, IProcessedCaseObj, Values, ICollectionClass, IDataSet } from "../../types";
+import { nestedTableCollisionDetection } from "../../utils/table-collision-detection";
 import { Menu } from "../menu";
 import { FlatTable } from "./flat/flat-table";
 import { LandscapeTable } from "./landscape/landscape-table";
@@ -150,7 +151,8 @@ export const NestedTable = observer(function NestedTable(props: IProps) {
         defaultDisplayMode="Portrait"
       />
       <DraggableTableContext.Provider value={draggableTable}>
-        <DndContext onDragEnd={draggableTable.handleDrop} sensors={sensors}>
+        <DndContext collisionDetection={nestedTableCollisionDetection} sensors={sensors}
+          onDragEnd={draggableTable.handleDrop}>
           {selectedDataSet && renderTable()}
         </DndContext>
       </DraggableTableContext.Provider>

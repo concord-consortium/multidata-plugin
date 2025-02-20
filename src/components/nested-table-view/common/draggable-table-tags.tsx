@@ -56,7 +56,7 @@ interface DraggableTableHeaderProps {
 }
 
 export const DraggableTableHeader: React.FC<PropsWithChildren<DraggableTableHeaderProps>> =
-  observer(function DraggagleTableHeader(props) {
+  observer(function DraggableTableHeader(props) {
     const {collectionId, attrTitle, caseId, dataSetName, editableHasFocus, children,
        isParent, attrId, renameAttribute, colSpan} = props;
 
