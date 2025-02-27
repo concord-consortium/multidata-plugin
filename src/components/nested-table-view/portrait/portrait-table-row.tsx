@@ -16,14 +16,15 @@ export type PortraitTableRowProps = {
 export const PortraitTableRow = observer(function PortraitTableRow(props: PortraitTableRowProps) {
   const { paddingStyle, showHeaders, getClassName, caseObj, index, isParent, parentLevel = 0, dataSetName,
     handleAddAttribute, collectionsModel, renameAttribute, editCaseValue,
-    selectedDataSet, getsFocusOnAddAttr, tableIndex } = props;
+    selectedDataSet, getsFocusOnAddAttr, tableIndex, codapSelectedCases } = props;
   const { collections, attrVisibilities, attrPrecisions, attrTypes } = collectionsModel;
   const collectionId = caseObj.collection.id;
   const { children, id, values } = caseObj;
+  const selectedCase = codapSelectedCases?.id === id;
 
   if (!children.length) {
     return (
-      <tr>
+      <tr className={`${css.tableDataRow} ${selectedCase ? css.selected : ""}`}>
         <TableCells
           collectionId={collectionId}
           rowKey={`row-${index}`}
@@ -69,7 +70,7 @@ export const PortraitTableRow = observer(function PortraitTableRow(props: Portra
             ) : <th />}
           </tr>
         }
-        <tr className={`${css[getClassName(caseObj)]} parent-row`}>
+        <tr className={`${css[getClassName(caseObj)]} parent-row ${selectedCase ? css.selected : ""}`}>
           <TableCells
             collectionId={collectionId}
             rowKey={`parent-row-${index}`}

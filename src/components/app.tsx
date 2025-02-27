@@ -111,6 +111,7 @@ function App() {
           editCaseValue={editCaseValue}
           handleAddAttribute={handleAddAttribute}
           renameAttribute={renameAttribute}
+          codapSelectedCases={codapSelectedCase}
         />
       );
 
