@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useRef } from "react";
 import { IProcessedCaseObj, ITableProps } from "../../../types";
 import { observer } from "mobx-react-lite";
 import { TableCells } from "../common/table-cells";
@@ -21,10 +21,18 @@ export const PortraitTableRow = observer(function PortraitTableRow(props: Portra
   const collectionId = caseObj.collection.id;
   const { children, id, values } = caseObj;
   const selectedCase = codapSelectedCases?.id === id;
+  const rowRef = useRef<HTMLTableRowElement>(null);
+
+  useEffect(() => {
+    if (selectedCase && rowRef.current) {
+      const offset = 60 + (20 * parentLevel); // Offset for the table header and each parent level
+      const top = rowRef.current.getBoundingClientRect().top + window.scrollY - offset;
+      window.scrollTo({ top, behavior: "smooth" });    }
+  }, [parentLevel, selectedCase]);
 
   if (!children.length) {
     return (
-      <tr className={`${css.tableDataRow} ${selectedCase ? css.selected : ""}`}>
+      <tr ref={rowRef} className={`${css.tableDataRow} ${selectedCase ? css.selected : ""}`}>
         <TableCells
           collectionId={collectionId}
           rowKey={`row-${index}`}
@@ -70,7 +78,7 @@ export const PortraitTableRow = observer(function PortraitTableRow(props: Portra
             ) : <th />}
           </tr>
         }
-        <tr className={`${css[getClassName(caseObj)]} parent-row ${selectedCase ? css.selected : ""}`}>
+        <tr ref={rowRef} className={`${css[getClassName(caseObj)]} parent-row ${selectedCase ? css.selected : ""}`}>
           <TableCells
             collectionId={collectionId}
             rowKey={`parent-row-${index}`}
