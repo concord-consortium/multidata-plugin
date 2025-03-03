@@ -12,7 +12,7 @@ function App() {
          updateInteractiveState: _updateInteractiveState, init,
          handleSelectDataSet: _handleSelectDataSet, handleUpdateAttributePosition,
          handleAddCollection, handleAddAttribute, handleSelectSelf,
-         updateTitle, selectCODAPCases, listenForSelectionChanges,
+         updateTitle, selectCODAPCases, getSelectionList, listenForSelectionChanges,
          handleCreateCollectionFromAttribute, handleSetCollections,
          editCaseValue, renameAttribute } = useCodapState();
   const collections = collectionsModel.collections;
@@ -75,20 +75,20 @@ function App() {
   }, [interactiveState, dataSets, selectedDataSet, _handleSelectDataSet]);
 
   const listeningToDataSetId = useRef(0);
-  const [codapSelectedCase, setCodapSelectedCase] = useState<ICaseObjCommon|undefined>(undefined);
+  const [codapSelectedCases, setCodapSelectedCases] = useState<ICaseObjCommon[]|undefined>(undefined);
   useEffect(() => {
     if (selectedDataSet && listeningToDataSetId.current !== selectedDataSet.id) {
-      listenForSelectionChanges((notification) => {
+      listenForSelectionChanges(async (notification) => {
         const result = notification?.values?.result;
-        let newCase: ICaseObjCommon|undefined = undefined;
+        let newCases: ICaseObjCommon[]|undefined = undefined;
         if (result?.success && result.cases?.length >= 0) {
-          newCase = result.cases[0];
+          newCases = result.cases;
         }
-        setCodapSelectedCase(newCase);
+        setCodapSelectedCases(newCases);
       });
       listeningToDataSetId.current = selectedDataSet.id;
     }
-  }, [selectedDataSet, listenForSelectionChanges, setCodapSelectedCase]);
+  }, [selectedDataSet, listenForSelectionChanges, getSelectionList, ]);
 
   if (!connected) {
     return <div className={css.loading}>Loading...</div>;
@@ -111,7 +111,8 @@ function App() {
           editCaseValue={editCaseValue}
           handleAddAttribute={handleAddAttribute}
           renameAttribute={renameAttribute}
-          codapSelectedCases={codapSelectedCase}
+          selectCases={selectCODAPCases}
+          codapSelectedCases={codapSelectedCases}
         />
       );
 
@@ -142,7 +143,7 @@ function App() {
           handleSelectDataSet={handleSelectDataSet}
           updateTitle={updateTitle}
           selectCases={selectCODAPCases}
-          codapSelectedCase={codapSelectedCase}
+          codapSelectedCase={codapSelectedCases?.[0]}
         />
       );
 

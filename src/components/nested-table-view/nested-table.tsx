@@ -32,14 +32,15 @@ interface IProps {
   editCaseValue: (newValue: string, caseObj: IProcessedCaseObj, attrTitle: string) => Promise<IResult | undefined>;
   handleAddAttribute: (collection: ICollection, attrName: string, tableIndex: number) => Promise<void>;
   renameAttribute: (collectionName: string, attrId: number, oldName: string, newName: string) => Promise<void>;
-  codapSelectedCases: ICaseObjCommon | undefined;
+  selectCases?: (caseIds: number[]) => Promise<void>;
+  codapSelectedCases: ICaseObjCommon[] | undefined;
 }
 
 export const NestedTable = observer(function NestedTable(props: IProps) {
   const {selectedDataSet, dataSets, collectionsModel, cases, interactiveState,
          handleSelectDataSet, updateInteractiveState, handleShowComponent,
          handleUpdateAttributePosition, handleCreateCollectionFromAttribute,
-         editCaseValue, renameAttribute, handleAddAttribute, codapSelectedCases} = props;
+         editCaseValue, renameAttribute, handleAddAttribute, selectCases, codapSelectedCases} = props;
   const [collectionClasses, setCollectionClasses] = useState<ICollectionClass[]>([]);
   const [paddingStyle, setPaddingStyle] = useState<Record<string, string>>({padding: "0px"});
   const collections = collectionsModel.collections;
@@ -113,7 +114,7 @@ export const NestedTable = observer(function NestedTable(props: IProps) {
     const tableProps = {showHeaders: interactiveState.showHeaders, collectionClasses, collectionsModel,
       selectedDataSet, getClassName, getValueLength, paddingStyle, editCaseValue,
       dataSetName: selectedDataSet.name, renameAttribute, handleAddAttribute,
-      activeTableIndex: interactiveState.activeTableIndex, codapSelectedCases
+      activeTableIndex: interactiveState.activeTableIndex, selectCases, codapSelectedCases
     };
     const flatProps = {...tableProps, cases};
     if (isNoHierarchy && classesExist) {

@@ -81,7 +81,8 @@ export interface ITableProps {
   activeTableIndex?: number;
   handleAddAttribute: (collection: ICollection, attrName: string, tableIndex: number) => Promise<void>;
   renameAttribute: (collectionName: string, attrId: number, oldName: string, newName: string) => Promise<void>;
-  codapSelectedCases?: ICaseObjCommon | undefined;
+  selectCases?: (caseIds: number[]) => Promise<void>;
+  codapSelectedCases?: ICaseObjCommon[] | undefined;
 }
 
 export interface IBoundingBox {

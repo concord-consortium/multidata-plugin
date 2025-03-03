@@ -14,11 +14,12 @@ interface IProps {
   parentLevel?: number;
   selectedDataSetName: string;
   editCaseValue: (newValue: string, caseObj: IProcessedCaseObj, attrTitle: string) => Promise<IResult | undefined>;
+  onSelectCase?: (caseId: number, e: React.MouseEvent<HTMLDivElement>) => void;
 }
 
 export const TableCells = (props: IProps) => {
   const { collectionId, rowKey, cCase, precisions, attrTypes, attrVisibilities, isParent, parentLevel,
-    selectedDataSetName, editCaseValue } = props;
+    selectedDataSetName, editCaseValue, onSelectCase } = props;
   if (!selectedDataSetName) return null;
   const aCase = cCase.values;
   return (
@@ -42,6 +43,7 @@ export const TableCells = (props: IProps) => {
             parentLevel={parentLevel}
             selectedDataSetName={selectedDataSetName}
             editCaseValue={editCaseValue}
+            onSelectCase={onSelectCase}
           />
         );
       })}

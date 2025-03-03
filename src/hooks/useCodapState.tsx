@@ -4,6 +4,7 @@ import {
   addDataContextsListListener,
   getDataContext,
   getListOfDataContexts,
+  getSelectionList,
   initializePlugin,
   codapInterface,
   selectCases,
@@ -14,7 +15,8 @@ import {
   getAttribute,
   updateAttribute,
   updateAttributePosition,
-  updateCaseById
+  updateCaseById,
+  addCasesToSelection
 } from "@concord-consortium/codap-plugin-api";
 import { runInAction } from "mobx";
 import { applySnapshot, unprotect } from "mobx-state-tree";
@@ -270,10 +272,38 @@ export const useCodapState = () => {
     await codapInterface.sendRequest(message);
   };
 
+  const updateSelection = async () => {
+    try {
+      const selectionListResult = await getSelectionList(selectedDataSetName);
+      if (selectionListResult.success) {
+        return selectionListResult.values;
+      }
+    } catch (error) {
+      // This will happen if not embedded in CODAP
+      console.warn("Not embedded in CODAP", error);
+    }
+  };
+
   const selectCODAPCases = useCallback(async (caseIds: number[]) => {
     const caseIdsToStrings = caseIds.map(c => c.toString());
     if (selectedDataSet) {
      selectCases(selectedDataSet.name, caseIdsToStrings);
+    }
+  }, [selectedDataSet]);
+
+  const selectCasesInCodap = useCallback(async (caseIds: number[]) => {
+    const caseIdsToStrings = caseIds.map(c => c.toString());
+    console.log(" in selectCODAPCases", caseIdsToStrings);
+
+    if (selectedDataSet) {
+      // try {
+        await addCasesToSelection(selectedDataSet.name, caseIdsToStrings);
+        // check if the selection was successful
+        const selectionList = await getSelectionList(selectedDataSet.name);
+        console.log("selectionList", selectionList);
+        if (selectionList.success) {
+          console.log("Selected cases: ", selectionList.values);
+        }
     }
   }, [selectedDataSet]);
 
@@ -342,6 +372,8 @@ export const useCodapState = () => {
     handleAddAttribute,
     updateTitle,
     selectCODAPCases,
+    getSelectionList,
+    updateSelection,
     listenForSelectionChanges,
     handleCreateCollectionFromAttribute,
     handleUpdateCollections: updateCollections,

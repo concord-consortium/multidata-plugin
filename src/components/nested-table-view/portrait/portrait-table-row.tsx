@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { IProcessedCaseObj, ITableProps } from "../../../types";
 import { observer } from "mobx-react-lite";
 import { TableCells } from "../common/table-cells";
@@ -16,11 +16,11 @@ export type PortraitTableRowProps = {
 export const PortraitTableRow = observer(function PortraitTableRow(props: PortraitTableRowProps) {
   const { paddingStyle, showHeaders, getClassName, caseObj, index, isParent, parentLevel = 0, dataSetName,
     handleAddAttribute, collectionsModel, renameAttribute, editCaseValue,
-    selectedDataSet, getsFocusOnAddAttr, tableIndex, codapSelectedCases } = props;
+    selectedDataSet, getsFocusOnAddAttr, tableIndex, selectCases, codapSelectedCases } = props;
   const { collections, attrVisibilities, attrPrecisions, attrTypes } = collectionsModel;
   const collectionId = caseObj.collection.id;
   const { children, id, values } = caseObj;
-  const selectedCase = codapSelectedCases?.id === id;
+  const selectedCase = codapSelectedCases?.some(sCase => sCase.id === id);
   const rowRef = useRef<HTMLTableRowElement>(null);
 
   useEffect(() => {
@@ -30,9 +30,15 @@ export const PortraitTableRow = observer(function PortraitTableRow(props: Portra
       window.scrollTo({ top, behavior: "smooth" });    }
   }, [parentLevel, selectedCase]);
 
+  const handleSelectCase = (caseId: number, e: React.MouseEvent<HTMLDivElement>) => {
+    e.stopPropagation();
+    selectCases?.([caseId]);
+  };
+
   if (!children.length) {
     return (
-      <tr ref={rowRef} className={`${css.tableDataRow} ${selectedCase ? css.selected : ""}`}>
+      <tr ref={rowRef} className={`${selectedCase ? css.selected : ""}`}
+          onClick={(e)=>handleSelectCase(caseObj.id, e)}>
         <TableCells
           collectionId={collectionId}
           rowKey={`row-${index}`}
@@ -44,6 +50,7 @@ export const PortraitTableRow = observer(function PortraitTableRow(props: Portra
           parentLevel={parentLevel}
           selectedDataSetName={dataSetName}
           editCaseValue={editCaseValue}
+          onSelectCase={handleSelectCase}
         />
       </tr>
     );
@@ -78,7 +85,8 @@ export const PortraitTableRow = observer(function PortraitTableRow(props: Portra
             ) : <th />}
           </tr>
         }
-        <tr ref={rowRef} className={`${css[getClassName(caseObj)]} parent-row ${selectedCase ? css.selected : ""}`}>
+        <tr ref={rowRef} className={`${css[getClassName(caseObj)]} parent-row ${selectedCase ? css.selected : ""}`}
+            onClick={(e)=>handleSelectCase(caseObj.id, e)}>
           <TableCells
             collectionId={collectionId}
             rowKey={`parent-row-${index}`}
