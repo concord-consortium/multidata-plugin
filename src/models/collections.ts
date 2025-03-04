@@ -61,7 +61,10 @@ export const CollectionsModel = types.model("CollectionsModel", {
       });
     });
     return visibilities;
-  }
+  },
+  get visibleCollections() {
+    return self.collections.filter(collection => collection.attrs.some(attr => !attr.hidden));
+   }
 }));
 
 export type CollectionsModelType = Instance<typeof CollectionsModel>;

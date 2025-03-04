@@ -21,7 +21,7 @@ export const PortraitTableRow = observer(function PortraitTableRow(props: Portra
   const collectionId = caseObj.collection.id;
   const { children, id, values } = caseObj;
 
-  if (!children.length) {
+  if (!children.length ) {
     return (
       <tr>
         <TableCells

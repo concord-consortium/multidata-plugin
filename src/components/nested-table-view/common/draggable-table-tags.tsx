@@ -254,21 +254,24 @@ export const DroppableTableHeader: React.FC<PropsWithChildren<DroppableTableHead
     const style = getStyle(collectionId, undefined, over, "left");
 
     return (
-      <th
-        data-id={id}
-        ref={setNodeRef}
-        style={style}
-      >
-        <div className={css.parentCollHeader}>
-          {children}
-          <AddAttributeButton
-            collectionId={childCollectionId}
-            collections={collections}
-            handleAddAttribute={handleAddAttribute}
-            tableIndex={tableIndex}
-          />
-        </div>
-      </th>
+      // isCollectionVisible
+      //   ?
+        <th
+            data-id={id}
+            ref={setNodeRef}
+            style={style}
+          >
+            <div className={css.parentCollHeader}>
+              {children}
+              <AddAttributeButton
+                collectionId={childCollectionId}
+                collections={collections}
+                handleAddAttribute={handleAddAttribute}
+                tableIndex={tableIndex}
+              />
+            </div>
+        </th>
+        // : null
     );
 });
 
