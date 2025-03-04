@@ -11,16 +11,17 @@ import css from "../common/tables.scss";
 export const PortraitTable = observer(function PortraitView(props: ITableProps) {
   const {collectionClasses, collectionsModel, selectedDataSet, getValueLength, dataSetName,
     handleAddAttribute, activeTableIndex} = props;
-  const { collections } = collectionsModel;
+  const { collections, visibleCollections  } = collectionsModel;
   const tableRef = useRef<HTMLTableElement | null>(null);
   const tableScrollTop = useTableScrollTop(tableRef);
-
+  // const visibleCollections = collectionsModel.visibleCollections;
   const renderTable = () => {
+    // const parentColl = collectionsArrToUse.filter((coll: ICollection) => !coll.parent)[0];
     const parentColl = collections.filter((coll: ICollection) => !coll.parent)[0];
     const {className} = collectionClasses[0];
     const firstRowValues = parentColl.cases.map(caseObj => caseObj.values);
     const valueCount = getValueLength(firstRowValues);
-
+    const isCollectionVisible = parentColl.attrs.some(attr => !attr.hidden);
     return (
       <DraggableTableContainer>
         <table className={`${css.mainTable} ${css.portraitTable} ${css[className]}`} ref={tableRef}>
@@ -28,31 +29,37 @@ export const PortraitTable = observer(function PortraitView(props: ITableProps) 
             <tr className={css.mainHeader}>
               <th className={css.datasetNameHeader} colSpan={valueCount}>{selectedDataSet.name}</th>
             </tr>
-            <tr className={css[className]}>
-              <th colSpan={valueCount}>
-                <div className={css.parentCollHeader}>
-                  {parentColl.name}
-                  <AddAttributeButton
-                    collectionId={parentColl.id}
-                    collections={collections}
-                    handleAddAttribute={handleAddAttribute}
-                  />
-                </div>
-              </th>
-            </tr>
-            {parentColl.cases.map((caseObj, index) => (
-              <PortraitTableRow
-                key={caseObj.id}
-                {...props}
-                caseObj={caseObj}
-                index={index}
-                tableIndex={index}
-                isParent={true}
-                parentLevel={0}
-                dataSetName={dataSetName}
-                getsFocusOnAddAttr={index === activeTableIndex}
-              />
-            ))}
+            {isCollectionVisible &&
+              <tr className={css[className]}>
+                <th colSpan={valueCount}>
+                  <div className={css.parentCollHeader}>
+                    {parentColl.name}
+                    <AddAttributeButton
+                      collectionId={parentColl.id}
+                      collections={collections}
+                      handleAddAttribute={handleAddAttribute}
+                    />
+                  </div>
+                </th>
+              </tr>
+            }
+            {parentColl.cases.map((caseObj, index) => {
+              return (
+                <PortraitTableRow
+                  key={caseObj.id}
+                  {...props}
+                  caseObj={caseObj}
+                  index={index}
+                  tableIndex={index}
+                  isParent={true}
+                  parentLevel={0}
+                  dataSetName={dataSetName}
+                  getsFocusOnAddAttr={index === activeTableIndex}
+                />
+              );
+            })
+            }
+
           </tbody>
         </table>
       </DraggableTableContainer>

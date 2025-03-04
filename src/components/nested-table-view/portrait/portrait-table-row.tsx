@@ -17,11 +17,19 @@ export const PortraitTableRow = observer(function PortraitTableRow(props: Portra
   const { paddingStyle, showHeaders, getClassName, caseObj, index, isParent, parentLevel = 0, dataSetName,
     handleAddAttribute, collectionsModel, renameAttribute, editCaseValue,
     selectedDataSet, getsFocusOnAddAttr, tableIndex } = props;
-  const { collections, attrVisibilities, attrPrecisions, attrTypes } = collectionsModel;
+  const { collections, attrVisibilities, attrPrecisions, attrTypes, visibleCollections } = collectionsModel;
   const collectionId = caseObj.collection.id;
   const { children, id, values } = caseObj;
+  //filter out caseObj.children if the child.collection.id is not in the visibleCollections
+  const visibleChildren = caseObj.children.filter(child => visibleCollections.map(coll => coll.id).includes(child.collection.id));
+  console.log("visibleChildren", visibleChildren);
+   const visibleCollectionIds = visibleCollections.map(coll => coll.id);
+  const collectionsArrToUse = visibleCollections.length > 0 ? visibleCollections : collections;
+console.log("coseObj.children", caseObj.children);
+  // const collection = collections.find(coll => coll.id === collectionId);
+  // const isCollectionVisible = collection?.attrs.some(attr => !attr.hidden);
 
-  if (!children.length) {
+  if (!children.length ) {
     return (
       <tr>
         <TableCells
