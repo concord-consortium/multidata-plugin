@@ -21,7 +21,6 @@ export const TableCells = (props: IProps) => {
     selectedDataSetName, editCaseValue } = props;
   if (!selectedDataSetName) return null;
   const aCase = cCase.values;
-  console.log("cCase", cCase, "aCase", aCase);
   return (
     <>
       {[...aCase.keys()].map((key, index) => {

@@ -252,9 +252,6 @@ export const DroppableTableHeader: React.FC<PropsWithChildren<DroppableTableHead
     const data = { type: "header" };
     const { setNodeRef } = useDroppable({ id, data });
     const style = getStyle(collectionId, undefined, over, "left");
-    // const collection = collections.find(coll => coll.id === childCollectionId);
-    // const isCollectionVisible = collection?.attrs.some(attr => !attr.hidden);
-    // console.log("isCollectionVisible", {name: collection?.name, attrs: collection?.attrs, isCollectionVisible});
 
     return (
       // isCollectionVisible
