@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { observer } from "mobx-react-lite";
-import { Editable, EditablePreview, EditableInput, Input } from "@chakra-ui/react";
+import { Editable, EditablePreview, EditableInput, Input, Box, Text, Textarea } from "@chakra-ui/react";
 import { IResult } from "@concord-consortium/codap-plugin-api";
 import { IProcessedCaseObj } from "../../../types";
 import { getDisplayValue } from "../../../utils/utils";
@@ -23,8 +23,8 @@ export const EditableTableCell = observer(function EditableTableCell(props: IPro
   const [editingValue, setEditingValue] = useState(displayValue);
   const [isEditing, setIsEditing] = useState(false);
 
-  const handleChangeValue = (newValue: string) => {
-    setEditingValue(newValue);
+  const handleChangeValue = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    setEditingValue(e.target.value);
   };
 
   const handleCancel = () => {
@@ -57,25 +57,33 @@ export const EditableTableCell = observer(function EditableTableCell(props: IPro
     e.preventDefault();
     setIsEditing(true);
   };
-console.log("isEditing", isEditing);
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if (e.key === "Enter") {
+      handleSubmit((e.target as HTMLTextAreaElement).value);
+    }
+    if (e.key === "Escape") {
+      handleCancel();
+    }
+  };
+
   return (
     <div className={css.editableTableCell}>
-      <Editable
-        isPreviewFocusable={true}
-        onCancel={handleCancel}
-        onChange={handleChangeValue}
-        onEdit={() => setIsEditing(true)}
-        onDoubleClick={handleStartEdit}
-        onSubmit={handleSubmit}
-        submitOnBlur={true}
-        value={isEditing ? editingValue : displayValue}
-        onClick={(e)=>handleCellClick(e)}
-      >
-        {!isEditing && <EditablePreview
-                  onClick={(e) => handleCellClick(e)}
-                  onDoubleClick={(e) => handleStartEdit(e)}/>}
-        <EditableInput />
-      </Editable>
+      <Box onClick={handleCellClick} position="relative" height="100%" width="100%">
+        {isEditing
+          ? <Textarea
+              className={css.editableInput}
+              value={editingValue}
+              onChange={(e) => handleChangeValue(e)}
+              onBlur={(e) => handleSubmit(e.target.value)}
+              onKeyDown={handleKeyDown}
+              autoFocus
+            />
+        : <Text onDoubleClick={handleStartEdit} cursor="pointer">
+            {displayValue}
+          </Text>
+        }
+      </Box>
     </div>
   );
 });
