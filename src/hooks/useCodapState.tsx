@@ -16,7 +16,6 @@ import {
   updateAttribute,
   updateAttributePosition,
   updateCaseById,
-  addCasesToSelection
 } from "@concord-consortium/codap-plugin-api";
 import { runInAction } from "mobx";
 import { applySnapshot, unprotect } from "mobx-state-tree";
