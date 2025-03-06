@@ -359,7 +359,6 @@ export const useCodapState = () => {
     handleAddAttribute,
     updateTitle,
     selectCODAPCases,
-    getSelectionList,
     updateSelection,
     listenForSelectionChanges,
     handleCreateCollectionFromAttribute,

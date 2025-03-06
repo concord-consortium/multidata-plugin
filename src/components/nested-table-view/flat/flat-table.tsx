@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useRef } from "react";
 import { observer } from "mobx-react-lite";
 import { IResult } from "@concord-consortium/codap-plugin-api";
 import { IProcessedCaseObj, ITableProps } from "../../../types";
@@ -15,13 +15,30 @@ interface IFlatProps extends ITableProps {
 }
 
 export const FlatTable = observer(function FlatTable(props: IFlatProps) {
-  const {selectedDataSet, collectionsModel, collectionClasses, showHeaders,
+  const {selectedDataSet, collectionsModel, collectionClasses, showHeaders, selectCases, selectionList,
          editCaseValue, renameAttribute, handleAddAttribute } = props;
   const { collections, attrVisibilities, attrPrecisions, attrTypes } = collectionsModel;
   const collection = collectionsModel.collections[0];
   const {className} = collectionClasses[0];
   const collectionAttrsToUse = collection.attrs.filter(attr => !attrVisibilities[attr.title]);
   const titles = collectionAttrsToUse.map(attr => attr.title);
+  const rowRefs = useRef<Map<number, HTMLTableRowElement>>(new Map());
+
+  useEffect(() => {
+    const selectedCase = selectionList?.find(sCase => rowRefs.current.has(sCase.caseID));
+    if (selectedCase) {
+      const row = rowRefs.current.get(selectedCase.caseID);
+      if (row) {
+        const top = row.getBoundingClientRect().top + window.scrollY;
+        window.scrollTo({ top, behavior: "smooth" });
+      }
+    }
+  }, [selectionList]);
+
+    const handleSelectCase = (caseIds: number | number[], e: React.MouseEvent<HTMLDivElement>) => {
+      e.stopPropagation();
+      selectCases?.(Array.isArray(caseIds) ? caseIds : [caseIds]);
+    };
 
   return (
     <DraggableTableContainer collectionId="root">
@@ -64,8 +81,17 @@ export const FlatTable = observer(function FlatTable(props: IFlatProps) {
             caseValuesKeys.sort((a, b) => {
               return titles.indexOf(String(a)) - titles.indexOf(String(b));
             });
+            const isSelected = selectionList?.some(sCase => sCase.caseID === c.id);
             return (
-              <tr key={`${index}-${c.id}`}>
+              <tr key={`${index}-${c.id}`} className={`${isSelected ? css.selected : ""}`}
+                ref={el => {
+                  if (el) {
+                    rowRefs.current.set(c.id, el);
+                  } else {
+                    rowRefs.current.delete(c.id);
+                  }
+                }}
+              >
                 <TableCells
                   collectionId={collection.id}
                   rowKey={`row-${index}`}
@@ -75,6 +101,8 @@ export const FlatTable = observer(function FlatTable(props: IFlatProps) {
                   attrVisibilities={attrVisibilities}
                   selectedDataSetName={selectedDataSet.name}
                   editCaseValue={editCaseValue}
+                  onSelectCase={handleSelectCase}
+                  selectionList={selectionList}
                 />
               </tr>
             );
