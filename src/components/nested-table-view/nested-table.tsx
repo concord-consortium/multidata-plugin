@@ -5,7 +5,7 @@ import { IResult } from "@concord-consortium/codap-plugin-api";
 import { InteractiveState } from "../../hooks/useCodapState";
 import { DraggableTableContext, useDraggableTable } from "../../hooks/useDraggableTable";
 import { CollectionsModelType } from "../../models/collections";
-import { ICollection, IProcessedCaseObj, Values, ICollectionClass, IDataSet } from "../../types";
+import { ICollection, IProcessedCaseObj, Values, ICollectionClass, IDataSet, ISelectedCase } from "../../types";
 import { nestedTableCollisionDetection } from "../../utils/table-collision-detection";
 import { Menu } from "../menu";
 import { FlatTable } from "./flat/flat-table";
@@ -32,13 +32,16 @@ interface IProps {
   editCaseValue: (newValue: string, caseObj: IProcessedCaseObj, attrTitle: string) => Promise<IResult | undefined>;
   handleAddAttribute: (collection: ICollection, attrName: string, tableIndex: number) => Promise<void>;
   renameAttribute: (collectionName: string, attrId: number, oldName: string, newName: string) => Promise<void>;
+  selectCases?: (caseIds: number[]) => Promise<void>;
+  selectionList?: ISelectedCase[];
 }
 
 export const NestedTable = observer(function NestedTable(props: IProps) {
   const {selectedDataSet, dataSets, collectionsModel, cases, interactiveState,
          handleSelectDataSet, updateInteractiveState, handleShowComponent,
          handleUpdateAttributePosition, handleCreateCollectionFromAttribute,
-         editCaseValue, renameAttribute, handleAddAttribute} = props;
+         editCaseValue, renameAttribute, handleAddAttribute, selectCases,
+         selectionList} = props;
   const [collectionClasses, setCollectionClasses] = useState<ICollectionClass[]>([]);
   const [paddingStyle, setPaddingStyle] = useState<Record<string, string>>({padding: "0px"});
   const collections = collectionsModel.collections;
@@ -112,7 +115,8 @@ export const NestedTable = observer(function NestedTable(props: IProps) {
     const tableProps = {showHeaders: interactiveState.showHeaders, collectionClasses, collectionsModel,
       selectedDataSet, getClassName, getValueLength, paddingStyle, editCaseValue,
       dataSetName: selectedDataSet.name, renameAttribute, handleAddAttribute,
-      activeTableIndex: interactiveState.activeTableIndex};
+      activeTableIndex: interactiveState.activeTableIndex, selectCases, selectionList
+    };
     const flatProps = {...tableProps, cases};
     if (isNoHierarchy && classesExist) {
       return <FlatTable {...flatProps}/>;

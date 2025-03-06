@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo } from "react";
 import { observer } from "mobx-react-lite";
 import { InteractiveState } from "../../hooks/useCodapState";
-import { IDataSet, ICaseObjCommon, ICollection } from "../../types";
+import { IDataSet, ICaseObjCommon, ICollection, ISelectedCase } from "../../types";
 import { Menu } from "../menu";
 import { CaseView } from "./case-view";
 import { CollectionsModelType } from "../../models/collections";
@@ -16,16 +16,17 @@ interface ICardViewProps {
   handleSelectDataSet: (e: React.ChangeEvent<HTMLSelectElement>) => void
   updateTitle: (title: string) => Promise<void>
   selectCases: (caseIds: number[]) => Promise<void>
-  codapSelectedCase: ICaseObjCommon|undefined;
+  selectedCase: ISelectedCase | undefined;
 }
 
 export const CardView = observer(function CardView(props: ICardViewProps) {
-  const {collectionsModel, dataSets, selectedDataSet, updateTitle, selectCases, codapSelectedCase,
-         handleSelectDataSet} = props;
+  const {collectionsModel, dataSets, selectedDataSet, updateTitle, selectCases,
+         handleSelectDataSet, selectedCase} = props;
 
   const collections = collectionsModel.collections;
   const rootCollection = collectionsModel.rootCollection;
   const attrs = collectionsModel.attrs;
+  const selectedCaseCollection = collectionsModel.collections.find(c => c.id === selectedCase?.collectionID);
 
   useEffect(() => {
     if (selectedDataSet?.title) {
@@ -35,7 +36,7 @@ export const CardView = observer(function CardView(props: ICardViewProps) {
 
   // array of case ids from root collection down to selected case
   const codapSelectedCaseLineage = useMemo<number[]>(() => {
-    if (!codapSelectedCase) {
+    if (!selectedCase) {
       return [];
     }
 
@@ -45,7 +46,7 @@ export const CardView = observer(function CardView(props: ICardViewProps) {
     }, {});
 
     const result: number[] = [];
-    let caseItem: ICaseObjCommon|undefined = codapSelectedCase;
+    let caseItem: ICaseObjCommon|undefined = selectedCaseCollection?.cases.find(c => c.id === selectedCase.caseID);
     while (caseItem) {
       const {id, parent} = caseItem;
       result.unshift(id);
@@ -56,7 +57,7 @@ export const CardView = observer(function CardView(props: ICardViewProps) {
     }
 
     return result;
-  }, [codapSelectedCase, collections]);
+  }, [collections, selectedCase, selectedCaseCollection?.cases]);
 
   if (!selectedDataSet || !rootCollection) {
     return (
