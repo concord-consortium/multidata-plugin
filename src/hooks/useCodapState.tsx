@@ -273,37 +273,25 @@ export const useCodapState = () => {
   };
 
   const updateSelection = async () => {
-    try {
-      const selectionListResult = await getSelectionList(selectedDataSetName);
-      if (selectionListResult.success) {
-        return selectionListResult.values;
+    if (selectedDataSet) {
+      try {
+        const selectionListResult = await getSelectionList(selectedDataSet.name);
+        if (selectionListResult.success) {
+          return selectionListResult.values;
+        }
+      } catch (error) {
+        // This will happen if not embedded in CODAP
+        console.warn("Not embedded in CODAP", error);
       }
-    } catch (error) {
-      // This will happen if not embedded in CODAP
-      console.warn("Not embedded in CODAP", error);
     }
   };
 
+  // This is used to select cases in CODAP when the user clicks on a MD plugin row in the table
+  // or when user navigates to a different case in the card view
   const selectCODAPCases = useCallback(async (caseIds: number[]) => {
     const caseIdsToStrings = caseIds.map(c => c.toString());
     if (selectedDataSet) {
      selectCases(selectedDataSet.name, caseIdsToStrings);
-    }
-  }, [selectedDataSet]);
-
-  const selectCasesInCodap = useCallback(async (caseIds: number[]) => {
-    const caseIdsToStrings = caseIds.map(c => c.toString());
-    console.log(" in selectCODAPCases", caseIdsToStrings);
-
-    if (selectedDataSet) {
-      // try {
-        await addCasesToSelection(selectedDataSet.name, caseIdsToStrings);
-        // check if the selection was successful
-        const selectionList = await getSelectionList(selectedDataSet.name);
-        console.log("selectionList", selectionList);
-        if (selectionList.success) {
-          console.log("Selected cases: ", selectionList.values);
-        }
     }
   }, [selectedDataSet]);
 
@@ -314,7 +302,7 @@ export const useCodapState = () => {
     }
   }, [interactiveState, updateInteractiveState]);
 
-  const listenForSelectionChanges = useCallback((callback: (notification: any) => void) => {
+  const listenForSelectionChanges = useCallback(async (callback: (notification: any) => void) => {
     if (selectedDataSet) {
       addDataContextChangeListener(selectedDataSet.name, callback);
     }

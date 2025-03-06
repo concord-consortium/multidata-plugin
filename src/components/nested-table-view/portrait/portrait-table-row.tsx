@@ -16,11 +16,11 @@ export type PortraitTableRowProps = {
 export const PortraitTableRow = observer(function PortraitTableRow(props: PortraitTableRowProps) {
   const { paddingStyle, showHeaders, getClassName, caseObj, index, isParent, parentLevel = 0, dataSetName,
     handleAddAttribute, collectionsModel, renameAttribute, editCaseValue,
-    selectedDataSet, getsFocusOnAddAttr, tableIndex, selectCases, codapSelectedCases } = props;
+    selectedDataSet, getsFocusOnAddAttr, tableIndex, selectCases, selectionList } = props;
   const { collections, attrVisibilities, attrPrecisions, attrTypes } = collectionsModel;
   const collectionId = caseObj.collection.id;
   const { children, id, values } = caseObj;
-  const selectedCase = codapSelectedCases?.some(sCase => sCase.id === id);
+  const selectedCase = selectionList?.some(sCase => sCase.caseID === id);
   const rowRef = useRef<HTMLTableRowElement>(null);
 
   useEffect(() => {
@@ -30,9 +30,9 @@ export const PortraitTableRow = observer(function PortraitTableRow(props: Portra
       window.scrollTo({ top, behavior: "smooth" });    }
   }, [parentLevel, selectedCase]);
 
-  const handleSelectCase = (caseId: number, e: React.MouseEvent<HTMLDivElement>) => {
+  const handleSelectCase = (caseIds: number | number[], e: React.MouseEvent<HTMLDivElement>) => {
     e.stopPropagation();
-    selectCases?.([caseId]);
+    selectCases?.(Array.isArray(caseIds) ? caseIds : [caseIds]);
   };
 
   if (!children.length) {
@@ -51,6 +51,7 @@ export const PortraitTableRow = observer(function PortraitTableRow(props: Portra
           selectedDataSetName={dataSetName}
           editCaseValue={editCaseValue}
           onSelectCase={handleSelectCase}
+          selectionList={selectionList}
         />
       </tr>
     );
@@ -98,6 +99,7 @@ export const PortraitTableRow = observer(function PortraitTableRow(props: Portra
             parentLevel={parentLevel}
             selectedDataSetName={dataSetName}
             editCaseValue={editCaseValue}
+            selectionList={selectionList}
           />
           <DroppableTableData collectionId={collectionId} style={paddingStyle}>
             <DraggableTableContainer caseId={id} collectionId={collectionId}>

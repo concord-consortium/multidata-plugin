@@ -1,5 +1,5 @@
 import React from "react";
-import { IProcessedCaseObj } from "../../../types";
+import { IProcessedCaseObj, ISelectedCase } from "../../../types";
 import { DraggableTableData } from "./draggable-table-tags";
 import { IResult } from "@concord-consortium/codap-plugin-api";
 
@@ -14,12 +14,13 @@ interface IProps {
   parentLevel?: number;
   selectedDataSetName: string;
   editCaseValue: (newValue: string, caseObj: IProcessedCaseObj, attrTitle: string) => Promise<IResult | undefined>;
-  onSelectCase?: (caseId: number, e: React.MouseEvent<HTMLDivElement>) => void;
+  onSelectCase?: (caseId: number | number[], e: React.MouseEvent<HTMLDivElement>) => void;
+  selectionList?: ISelectedCase[];
 }
 
 export const TableCells = (props: IProps) => {
   const { collectionId, rowKey, cCase, precisions, attrTypes, attrVisibilities, isParent, parentLevel,
-    selectedDataSetName, editCaseValue, onSelectCase } = props;
+    selectedDataSetName, editCaseValue, onSelectCase, selectionList } = props;
   if (!selectedDataSetName) return null;
   const aCase = cCase.values;
   return (
@@ -44,6 +45,7 @@ export const TableCells = (props: IProps) => {
             selectedDataSetName={selectedDataSetName}
             editCaseValue={editCaseValue}
             onSelectCase={onSelectCase}
+            selectionList={selectionList}
           />
         );
       })}

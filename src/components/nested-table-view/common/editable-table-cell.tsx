@@ -1,8 +1,8 @@
 import React, { useState } from "react";
 import { observer } from "mobx-react-lite";
-import { Editable, EditablePreview, EditableInput, Input, Box, Text, Textarea } from "@chakra-ui/react";
+import { Box, Text, Textarea } from "@chakra-ui/react";
 import { IResult } from "@concord-consortium/codap-plugin-api";
-import { IProcessedCaseObj } from "../../../types";
+import { IProcessedCaseObj, ISelectedCase } from "../../../types";
 import { getDisplayValue } from "../../../utils/utils";
 
 import css from "./editable-table-cell.scss";
@@ -13,11 +13,12 @@ interface IProps {
   editCaseValue: (newValue: string, cCase: IProcessedCaseObj, attrTitle: string) => Promise<IResult | undefined>;
   precisions: Record<string, number>;
   attrTypes: Record<string, string | undefined | null>;
-  onSelectCase?: (caseId: number, e: React.MouseEvent<HTMLDivElement>) => void;
+  onSelectCase?: (caseId: number | number[], e: React.MouseEvent<HTMLDivElement>) => void;
+  selectionList?: ISelectedCase[];
 }
 
 export const EditableTableCell = observer(function EditableTableCell(props: IProps) {
-  const { attrTitle, case: cCase, editCaseValue, attrTypes, precisions, onSelectCase } = props;
+  const { attrTitle, case: cCase, editCaseValue, attrTypes, precisions, onSelectCase, selectionList } = props;
   const cellValue = cCase.values.get(attrTitle);
   const displayValue = getDisplayValue(cellValue, attrTitle, attrTypes, precisions);
   const [editingValue, setEditingValue] = useState(displayValue);
@@ -49,7 +50,12 @@ export const EditableTableCell = observer(function EditableTableCell(props: IPro
   const handleCellClick = (e: React.MouseEvent<HTMLDivElement>) => {
     e.preventDefault();
     if (isEditing) return;
-    onSelectCase?.(cCase.id, e);
+    const isExtending = e.altKey || e.metaKey;
+    const selectedCasesIdsArray = selectionList?.map(sCase => sCase.caseID);
+    const selectCasesArray = isExtending && selectedCasesIdsArray
+            ? [...selectedCasesIdsArray, cCase.id]
+            : [cCase.id];
+    selectCasesArray && onSelectCase?.(selectCasesArray, e);
     setIsEditing(false);
   };
 

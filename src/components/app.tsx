@@ -3,7 +3,7 @@ import { InteractiveState, useCodapState } from "../hooks/useCodapState";
 import { NestedTable } from "./nested-table-view/nested-table";
 import { Hierarchy } from "./hierarchy-view/hierarchy";
 import { CardView } from "./card-view/card-view";
-import { ICaseObjCommon } from "../types";
+import { ISelectedCase } from "../types";
 
 import css from "./app.scss";
 
@@ -12,10 +12,12 @@ function App() {
          updateInteractiveState: _updateInteractiveState, init,
          handleSelectDataSet: _handleSelectDataSet, handleUpdateAttributePosition,
          handleAddCollection, handleAddAttribute, handleSelectSelf,
-         updateTitle, selectCODAPCases, getSelectionList, listenForSelectionChanges,
+         updateTitle, selectCODAPCases, listenForSelectionChanges, updateSelection,
          handleCreateCollectionFromAttribute, handleSetCollections,
          editCaseValue, renameAttribute } = useCodapState();
   const collections = collectionsModel.collections;
+  const listeningToDataSetId = useRef(0);
+  const [selectionList, setSelectionList] = useState<ISelectedCase[]>([]);
 
   useEffect(() => {
     init();
@@ -33,7 +35,8 @@ function App() {
     updateInteractiveState({view});
   }, [updateInteractiveState]);
 
-  const handleSelectDataSet = useCallback((e: React.ChangeEvent<HTMLSelectElement>, defaultDisplayMode?: string) => {
+  const handleSelectDataSet = useCallback(
+      async (e: React.ChangeEvent<HTMLSelectElement>, defaultDisplayMode?: string) => {
     const dataSetName = e.target.value;
     _handleSelectDataSet(dataSetName);
     const update: Partial<InteractiveState> = {dataSetName};
@@ -62,11 +65,21 @@ function App() {
 
   // select the saved dataset on startup
   useEffect(() => {
-    if (interactiveState?.dataSetName && !selectedDataSet) {
-      _handleSelectDataSet(interactiveState.dataSetName);
-    }
+      if (interactiveState?.dataSetName && !selectedDataSet) {
+        _handleSelectDataSet(interactiveState.dataSetName);
+      }
   }, [interactiveState, selectedDataSet, _handleSelectDataSet]);
 
+  //if there is a selected dataset, check if there are selected cases
+  useEffect(() => {
+    const fetchData = async () => {
+      if (selectedDataSet  && !selectionList) {
+        const initSelectedCases: ISelectedCase[] = await updateSelection()
+        setSelectionList(initSelectedCases);
+      }
+    };
+    fetchData();
+  }, [selectedDataSet, selectionList, updateSelection]);
   // unselect the dataset if it is deleted
   useEffect(() => {
     if (selectedDataSet && !dataSets.find(ds => ds.id === selectedDataSet.id)) {
@@ -74,21 +87,18 @@ function App() {
     }
   }, [interactiveState, dataSets, selectedDataSet, _handleSelectDataSet]);
 
-  const listeningToDataSetId = useRef(0);
-  const [codapSelectedCases, setCodapSelectedCases] = useState<ICaseObjCommon[]|undefined>(undefined);
   useEffect(() => {
     if (selectedDataSet && listeningToDataSetId.current !== selectedDataSet.id) {
       listenForSelectionChanges(async (notification) => {
         const result = notification?.values?.result;
-        let newCases: ICaseObjCommon[]|undefined = undefined;
-        if (result?.success && result.cases?.length >= 0) {
-          newCases = result.cases;
+        if (result?.success) {
+          const newList = await updateSelection();
+          setSelectionList(newList);
         }
-        setCodapSelectedCases(newCases);
       });
       listeningToDataSetId.current = selectedDataSet.id;
     }
-  }, [selectedDataSet, listenForSelectionChanges, getSelectionList, ]);
+  }, [selectedDataSet, listenForSelectionChanges, updateSelection]);
 
   if (!connected) {
     return <div className={css.loading}>Loading...</div>;
@@ -112,7 +122,7 @@ function App() {
           handleAddAttribute={handleAddAttribute}
           renameAttribute={renameAttribute}
           selectCases={selectCODAPCases}
-          codapSelectedCases={codapSelectedCases}
+          selectionList={selectionList}
         />
       );
 
@@ -143,7 +153,7 @@ function App() {
           handleSelectDataSet={handleSelectDataSet}
           updateTitle={updateTitle}
           selectCases={selectCODAPCases}
-          codapSelectedCase={codapSelectedCases?.[0]}
+          selectedCase={selectionList?.[0]}
         />
       );
 
