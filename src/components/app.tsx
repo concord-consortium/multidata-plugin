@@ -65,16 +65,16 @@ function App() {
 
   // select the saved dataset on startup
   useEffect(() => {
-      if (interactiveState?.dataSetName && !selectedDataSet) {
-        _handleSelectDataSet(interactiveState.dataSetName);
-      }
+    if (interactiveState?.dataSetName && !selectedDataSet) {
+      _handleSelectDataSet(interactiveState.dataSetName);
+    }
   }, [interactiveState, selectedDataSet, _handleSelectDataSet]);
 
   //if there is a selected dataset, check if there are selected cases
   useEffect(() => {
     const fetchData = async () => {
       if (selectedDataSet  && !selectionList) {
-        const initSelectedCases: ISelectedCase[] = await updateSelection()
+        const initSelectedCases: ISelectedCase[] = await updateSelection();
         setSelectionList(initSelectedCases);
       }
     };

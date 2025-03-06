@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef } from "react";
 import { IProcessedCaseObj, ITableProps } from "../../../types";
 import { observer } from "mobx-react-lite";
 import { TableCells } from "../common/table-cells";
