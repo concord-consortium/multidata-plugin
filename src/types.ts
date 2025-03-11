@@ -52,6 +52,12 @@ export interface ICaseObjCommon {
   values: Values;
 }
 
+export interface ISelectedCase {
+  caseID: number;
+  collectionID: number;
+  collectionName: string;
+}
+
 export type Values = Map<string|number, any>;
 
 export interface ICaseObj extends ICaseObjCommon {
@@ -81,6 +87,8 @@ export interface ITableProps {
   activeTableIndex?: number;
   handleAddAttribute: (collection: ICollection, attrName: string, tableIndex: number) => Promise<void>;
   renameAttribute: (collectionName: string, attrId: number, oldName: string, newName: string) => Promise<void>;
+  selectCases?: (caseIds: number[]) => Promise<void>;
+  selectionList?: ISelectedCase[];
 }
 
 export interface IBoundingBox {

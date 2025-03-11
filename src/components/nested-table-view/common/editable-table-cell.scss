@@ -16,9 +16,16 @@
       width: 100%;
     }
   }
+}
 
-  input {
-    background: white;
-    width: calc(100% - 8px);
-  }
+.editableInput {
+  background: white;
+  width: calc(100% - 8px);
+  font-size: 8pt;
+  height: 100% !important;
+  text-wrap: wrap;
+  resize: none;
+  font-family: "Montserrat", sans-serif;
+  line-height: normal;
+  margin: 10px 0;
 }

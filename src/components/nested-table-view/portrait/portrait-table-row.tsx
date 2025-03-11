@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useRef } from "react";
 import { IProcessedCaseObj, ITableProps } from "../../../types";
 import { observer } from "mobx-react-lite";
 import { TableCells } from "../common/table-cells";
@@ -6,6 +6,9 @@ import { TableHeaders } from "../common/table-headers";
 import { DraggableTableContainer, DroppableTableData, DroppableTableHeader } from "../common/draggable-table-tags";
 
 import css from "../common/tables.scss";
+
+const kTableHeaderHeight = 60;
+const kParentLevelHeight = 20;
 
 export type PortraitTableRowProps = {
   caseObj: IProcessedCaseObj, index?: null | number,
@@ -16,14 +19,30 @@ export type PortraitTableRowProps = {
 export const PortraitTableRow = observer(function PortraitTableRow(props: PortraitTableRowProps) {
   const { paddingStyle, showHeaders, getClassName, caseObj, index, isParent, parentLevel = 0, dataSetName,
     handleAddAttribute, collectionsModel, renameAttribute, editCaseValue,
-    selectedDataSet, getsFocusOnAddAttr, tableIndex } = props;
+    selectedDataSet, getsFocusOnAddAttr, tableIndex, selectCases, selectionList } = props;
   const { collections, attrVisibilities, attrPrecisions, attrTypes } = collectionsModel;
   const collectionId = caseObj.collection.id;
   const { children, id, values } = caseObj;
+  const selectedCase = selectionList?.some(sCase => sCase.caseID === id);
+  const rowRef = useRef<HTMLTableRowElement>(null);
+
+  useEffect(() => {
+    if (selectedCase && rowRef.current) {
+      // Offset for the table header and each parent level
+      const offset = kTableHeaderHeight + (kParentLevelHeight * parentLevel);
+      const top = rowRef.current.getBoundingClientRect().top + window.scrollY - offset;
+      window.scrollTo({ top, behavior: "smooth" });    }
+  }, [parentLevel, selectedCase]);
+
+  const handleSelectCase = (caseIds: number | number[], e: React.MouseEvent<HTMLDivElement>) => {
+    e.stopPropagation();
+    selectCases?.(Array.isArray(caseIds) ? caseIds : [caseIds]);
+  };
 
   if (!children.length) {
     return (
-      <tr>
+      <tr ref={rowRef} className={`${selectedCase ? css.selected : ""}`}
+          onClick={(e)=>handleSelectCase(caseObj.id, e)}>
         <TableCells
           collectionId={collectionId}
           rowKey={`row-${index}`}
@@ -35,6 +54,8 @@ export const PortraitTableRow = observer(function PortraitTableRow(props: Portra
           parentLevel={parentLevel}
           selectedDataSetName={dataSetName}
           editCaseValue={editCaseValue}
+          onSelectCase={handleSelectCase}
+          selectionList={selectionList}
         />
       </tr>
     );
@@ -69,7 +90,8 @@ export const PortraitTableRow = observer(function PortraitTableRow(props: Portra
             ) : <th />}
           </tr>
         }
-        <tr className={`${css[getClassName(caseObj)]} parent-row`}>
+        <tr ref={rowRef} className={`${css[getClassName(caseObj)]} parent-row ${selectedCase ? css.selected : ""}`}
+            onClick={(e)=>handleSelectCase(caseObj.id, e)}>
           <TableCells
             collectionId={collectionId}
             rowKey={`parent-row-${index}`}
@@ -81,6 +103,7 @@ export const PortraitTableRow = observer(function PortraitTableRow(props: Portra
             parentLevel={parentLevel}
             selectedDataSetName={dataSetName}
             editCaseValue={editCaseValue}
+            selectionList={selectionList}
           />
           <DroppableTableData collectionId={collectionId} style={paddingStyle}>
             <DraggableTableContainer caseId={id} collectionId={collectionId}>

@@ -10,7 +10,7 @@ import {
 } from "../../../utils/apiHelpers";
 import { getDisplayValue } from "../../../utils/utils";
 import {
-  ICollection, ICollections, IDndData, IProcessedCaseObj, isCollectionData, PropsWithChildren
+  ICollection, ICollections, IDndData, IProcessedCaseObj, isCollectionData, ISelectedCase, PropsWithChildren
 } from "../../../types";
 import { EditableTableCell } from "./editable-table-cell";
 import { AddAttributeButton } from "./add-attribute-button";
@@ -283,11 +283,14 @@ interface DraggableTableDataProps {
   precisions: Record<string, number>;
   attrTypes: Record<string, string | undefined | null>;
   editCaseValue: (newValue: string, caseObj: IProcessedCaseObj, attrTitle: string) => Promise<IResult | undefined>;
+  onSelectCase?: (caseId: number | number[], e: React.MouseEvent<HTMLDivElement>) => void;
+  selectionList?: ISelectedCase[];
 }
 
 export const DraggableTableData: React.FC<PropsWithChildren<DraggableTableDataProps>> =
   observer(function DraggableTableData(props) {
-    const {collectionId, attrTitle, attrTypes, caseObj, isParent, parentLevel=0, precisions, editCaseValue} = props;
+    const {collectionId, attrTitle, attrTypes, caseObj, isParent, parentLevel=0, precisions, editCaseValue,
+            onSelectCase, selectionList} = props;
     const { dragSide } = useDraggableTableContext();
     const { over } = useDndContext();
     const style = getStyle(collectionId, attrTitle, over, dragSide);
@@ -354,6 +357,8 @@ export const DraggableTableData: React.FC<PropsWithChildren<DraggableTableDataPr
                   editCaseValue={editCaseValue}
                   precisions={precisions}
                   attrTypes={attrTypes}
+                  onSelectCase={onSelectCase}
+                  selectionList={selectionList}
                 />
               </div>
             </>
@@ -363,6 +368,8 @@ export const DraggableTableData: React.FC<PropsWithChildren<DraggableTableDataPr
               editCaseValue={editCaseValue}
               precisions={precisions}
               attrTypes={attrTypes}
+              onSelectCase={onSelectCase}
+              selectionList={selectionList}
             />
         }
       </td>

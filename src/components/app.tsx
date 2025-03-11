@@ -3,7 +3,7 @@ import { InteractiveState, useCodapState } from "../hooks/useCodapState";
 import { NestedTable } from "./nested-table-view/nested-table";
 import { Hierarchy } from "./hierarchy-view/hierarchy";
 import { CardView } from "./card-view/card-view";
-import { ICaseObjCommon } from "../types";
+import { ISelectedCase } from "../types";
 
 import css from "./app.scss";
 
@@ -12,10 +12,12 @@ function App() {
          updateInteractiveState: _updateInteractiveState, init,
          handleSelectDataSet: _handleSelectDataSet, handleUpdateAttributePosition,
          handleAddCollection, handleAddAttribute, handleSelectSelf,
-         updateTitle, selectCODAPCases, listenForSelectionChanges,
+         updateTitle, selectCODAPCases, listenForSelectionChanges, updateSelection,
          handleCreateCollectionFromAttribute, handleSetCollections,
          editCaseValue, renameAttribute } = useCodapState();
   const collections = collectionsModel.collections;
+  const listeningToDataSetId = useRef(0);
+  const [selectionList, setSelectionList] = useState<ISelectedCase[]>([]);
 
   useEffect(() => {
     init();
@@ -67,6 +69,16 @@ function App() {
     }
   }, [interactiveState, selectedDataSet, _handleSelectDataSet]);
 
+  //if there is a selected dataset, check if there are selected cases
+  useEffect(() => {
+    const fetchSelectedCases = async () => {
+      if (selectedDataSet  && !selectionList) {
+        const initSelectedCases: ISelectedCase[] = await updateSelection();
+        setSelectionList(initSelectedCases);
+      }
+    };
+    fetchSelectedCases();
+  }, [selectedDataSet, selectionList, updateSelection]);
   // unselect the dataset if it is deleted
   useEffect(() => {
     if (selectedDataSet && !dataSets.find(ds => ds.id === selectedDataSet.id)) {
@@ -74,21 +86,18 @@ function App() {
     }
   }, [interactiveState, dataSets, selectedDataSet, _handleSelectDataSet]);
 
-  const listeningToDataSetId = useRef(0);
-  const [codapSelectedCase, setCodapSelectedCase] = useState<ICaseObjCommon|undefined>(undefined);
   useEffect(() => {
     if (selectedDataSet && listeningToDataSetId.current !== selectedDataSet.id) {
-      listenForSelectionChanges((notification) => {
+      listenForSelectionChanges(async (notification) => {
         const result = notification?.values?.result;
-        let newCase: ICaseObjCommon|undefined = undefined;
-        if (result?.success && result.cases?.length >= 0) {
-          newCase = result.cases[0];
+        if (result?.success) {
+          const newList = await updateSelection();
+          setSelectionList(newList);
         }
-        setCodapSelectedCase(newCase);
       });
       listeningToDataSetId.current = selectedDataSet.id;
     }
-  }, [selectedDataSet, listenForSelectionChanges, setCodapSelectedCase]);
+  }, [selectedDataSet, listenForSelectionChanges, updateSelection]);
 
   if (!connected) {
     return <div className={css.loading}>Loading...</div>;
@@ -111,6 +120,8 @@ function App() {
           editCaseValue={editCaseValue}
           handleAddAttribute={handleAddAttribute}
           renameAttribute={renameAttribute}
+          selectCases={selectCODAPCases}
+          selectionList={selectionList}
         />
       );
 
@@ -141,7 +152,7 @@ function App() {
           handleSelectDataSet={handleSelectDataSet}
           updateTitle={updateTitle}
           selectCases={selectCODAPCases}
-          codapSelectedCase={codapSelectedCase}
+          selectedCase={selectionList?.[0]}
         />
       );
 

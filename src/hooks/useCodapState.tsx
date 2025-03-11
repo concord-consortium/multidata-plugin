@@ -4,6 +4,7 @@ import {
   addDataContextsListListener,
   getDataContext,
   getListOfDataContexts,
+  getSelectionList,
   initializePlugin,
   codapInterface,
   selectCases,
@@ -14,7 +15,7 @@ import {
   getAttribute,
   updateAttribute,
   updateAttributePosition,
-  updateCaseById
+  updateCaseById,
 } from "@concord-consortium/codap-plugin-api";
 import { runInAction } from "mobx";
 import { applySnapshot, unprotect } from "mobx-state-tree";
@@ -270,6 +271,22 @@ export const useCodapState = () => {
     await codapInterface.sendRequest(message);
   };
 
+  const updateSelection = async () => {
+    if (selectedDataSet) {
+      try {
+        const selectionListResult = await getSelectionList(selectedDataSet.name);
+        if (selectionListResult.success) {
+          return selectionListResult.values;
+        }
+      } catch (error) {
+        // This will happen if not embedded in CODAP
+        console.warn("Not embedded in CODAP", error);
+      }
+    }
+  };
+
+  // This is used to select cases in CODAP when the user clicks on a MD plugin row in the table
+  // or when user navigates to a different case in the card view
   const selectCODAPCases = useCallback(async (caseIds: number[]) => {
     const caseIdsToStrings = caseIds.map(c => c.toString());
     if (selectedDataSet) {
@@ -342,6 +359,7 @@ export const useCodapState = () => {
     handleAddAttribute,
     updateTitle,
     selectCODAPCases,
+    updateSelection,
     listenForSelectionChanges,
     handleCreateCollectionFromAttribute,
     handleUpdateCollections: updateCollections,
