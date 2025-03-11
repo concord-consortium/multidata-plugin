@@ -301,7 +301,7 @@ export const useCodapState = () => {
     }
   }, [interactiveState, updateInteractiveState]);
 
-  const listenForSelectionChanges = useCallback(async (callback: (notification: any) => void) => {
+  const listenForSelectionChanges = useCallback((callback: (notification: any) => void) => {
     if (selectedDataSet) {
       addDataContextChangeListener(selectedDataSet.name, callback);
     }

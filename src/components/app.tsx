@@ -35,8 +35,7 @@ function App() {
     updateInteractiveState({view});
   }, [updateInteractiveState]);
 
-  const handleSelectDataSet = useCallback(
-      async (e: React.ChangeEvent<HTMLSelectElement>, defaultDisplayMode?: string) => {
+  const handleSelectDataSet = useCallback((e: React.ChangeEvent<HTMLSelectElement>, defaultDisplayMode?: string) => {
     const dataSetName = e.target.value;
     _handleSelectDataSet(dataSetName);
     const update: Partial<InteractiveState> = {dataSetName};
@@ -72,13 +71,13 @@ function App() {
 
   //if there is a selected dataset, check if there are selected cases
   useEffect(() => {
-    const fetchData = async () => {
+    const fetchSelectedCases = async () => {
       if (selectedDataSet  && !selectionList) {
         const initSelectedCases: ISelectedCase[] = await updateSelection();
         setSelectionList(initSelectedCases);
       }
     };
-    fetchData();
+    fetchSelectedCases();
   }, [selectedDataSet, selectionList, updateSelection]);
   // unselect the dataset if it is deleted
   useEffect(() => {

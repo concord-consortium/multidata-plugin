@@ -7,6 +7,9 @@ import { DraggableTableContainer, DroppableTableData, DroppableTableHeader } fro
 
 import css from "../common/tables.scss";
 
+const kTableHeaderHeight = 60;
+const kParentLevelHeight = 20;
+
 export type PortraitTableRowProps = {
   caseObj: IProcessedCaseObj, index?: null | number,
   isParent: boolean, parentLevel?: number
@@ -25,7 +28,8 @@ export const PortraitTableRow = observer(function PortraitTableRow(props: Portra
 
   useEffect(() => {
     if (selectedCase && rowRef.current) {
-      const offset = 60 + (20 * parentLevel); // Offset for the table header and each parent level
+      // Offset for the table header and each parent level
+      const offset = kTableHeaderHeight + (kParentLevelHeight * parentLevel);
       const top = rowRef.current.getBoundingClientRect().top + window.scrollY - offset;
       window.scrollTo({ top, behavior: "smooth" });    }
   }, [parentLevel, selectedCase]);
