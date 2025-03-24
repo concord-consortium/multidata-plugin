@@ -26,7 +26,7 @@ import { CollectionsModel, CollectionsModelSnapshot, CollectionsModelType } from
 import { newAttributeSlug } from "../utils/utils";
 
 const iFrameDescriptor = {
-  version: "0.8.0",
+  version: "0.9.0",
   pluginName: "multidata-plugin",
   title: "MultiData",
   dimensions: {
