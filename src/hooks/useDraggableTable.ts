@@ -43,7 +43,15 @@ export const useDraggableTable = (options: IUseDraggableTableOptions) => {
 
   const handleDrop = useCallback((e: DragEndEvent) => {
     const { active, over } = e;
+      // Ensure the drop is within the `.nested-table-nestedTableWrapper`
+  const dropTarget = document.querySelector(".nested-table-nestedTableWrapper");
+  if (!dropTarget?.contains(over?.data?.current?.node as Node)) {
+    console.log("Drop occurred outside the nested table wrapper.");
+    setDragSide(undefined);
+    return;
+  }
     if (over) {
+      console.log("over", over);
       const source = getCollectionAndAttribute(active.data.current as IDndData);
       const overData = over.data.current;
       const target = getCollectionAndAttribute(overData as IDndData);
