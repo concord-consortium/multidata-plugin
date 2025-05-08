@@ -41,17 +41,22 @@ export const useDraggableTable = (options: IUseDraggableTableOptions) => {
     }
   };
 
-  const handleDrop = useCallback((e: DragEndEvent) => {
+  const handleDrop = useCallback(async (e: DragEndEvent) => {
     const { active, over } = e;
-      // Ensure the drop is within the `.nested-table-nestedTableWrapper`
-  const dropTarget = document.querySelector(".nested-table-nestedTableWrapper");
-  if (!dropTarget?.contains(over?.data?.current?.node as Node)) {
-    console.log("Drop occurred outside the nested table wrapper.");
-    setDragSide(undefined);
-    return;
-  }
+    const activatorEvent = e.activatorEvent as MouseEvent;
+    const pluginApp = window.parent.document.querySelector(".codap-web-view-iframe");
+    const pluginAppRect = pluginApp?.getBoundingClientRect();
+    const pointerX = activatorEvent?.screenX;
+    const pointerY = activatorEvent?.screenY;
+    const outsidePlugin = pluginAppRect !== null && typeof pluginAppRect === "object" &&
+                            (pointerX < pluginAppRect.left || pointerX > pluginAppRect.right ||
+                              pointerY < pluginAppRect.top || pointerY > pluginAppRect.bottom);
+    // Plugin should ignore drops if it is outside the CODAP webview
+    if (outsidePlugin) {
+      return;
+    }
+
     if (over) {
-      console.log("over", over);
       const source = getCollectionAndAttribute(active.data.current as IDndData);
       const overData = over.data.current;
       const target = getCollectionAndAttribute(overData as IDndData);
@@ -77,7 +82,8 @@ export const useDraggableTable = (options: IUseDraggableTableOptions) => {
       }
     }
     setDragSide(undefined);
-  }, [dragSide, getCollectionAndAttribute, handleUpdateAttributePosition, handleCreateCollectionFromAttribute]);
+  }, [dragSide, getCollectionAndAttribute, handleCreateCollectionFromAttribute,
+      handleUpdateAttributePosition]);
 
   return {
     handleDragOver,
