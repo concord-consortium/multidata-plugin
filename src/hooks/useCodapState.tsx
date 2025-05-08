@@ -19,7 +19,7 @@ import {
 } from "@concord-consortium/codap-plugin-api";
 import { runInAction } from "mobx";
 import { applySnapshot, unprotect } from "mobx-state-tree";
-import { getCases, getCollectionById, getDataSetCollections } from "../utils/apiHelpers";
+import { getCases, getCollectionById, getDataSetCollections, getPluginFrame, getPluginId } from "../utils/apiHelpers";
 import { ICollection, IDataSet, IProcessedCaseObj } from "../types";
 import { DataSetsModel, DataSetsModelType } from "../models/datasets";
 import { CollectionsModel, CollectionsModelSnapshot, CollectionsModelType } from "../models/collections";
@@ -341,6 +341,31 @@ export const useCodapState = () => {
     }
   };
 
+  const getPluginFrameRect = async () => {
+    const pluginId = await getPluginId();
+    if (!pluginId) {
+      console.error("Failed to retrieve pluginId");
+      return null;
+    }
+    const pluginFrame: any = await getPluginFrame(pluginId);
+    if (!pluginFrame) {
+      console.error("Failed to retrieve plugin frame");
+      return null;
+    }
+    const pluginFrameValues = pluginFrame.values;
+    console.log("pluginFrameValues", pluginFrameValues);
+    if (pluginFrameValues) {
+      return {
+        width: pluginFrameValues.dimensions.width,
+        height: pluginFrameValues.dimensions.height,
+        left: pluginFrameValues.position.left,
+        top: pluginFrameValues.position.top,
+        right: pluginFrameValues.position.left + pluginFrameValues.dimensions.width,
+        bottom: pluginFrameValues.position.top + pluginFrameValues.dimensions.height
+      };
+    }
+  };
+
   return {
     init,
     handleSelectSelf,
@@ -366,6 +391,7 @@ export const useCodapState = () => {
     editCaseValue,
     addAttributeToCollection,
     handleUpdateInteractiveState,
-    renameAttribute
+    renameAttribute,
+    getPluginFrameRect
   };
 };

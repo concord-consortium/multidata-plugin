@@ -1,6 +1,7 @@
 import { DragEndEvent, Over } from "@dnd-kit/core";
 import { useContext, useState, createContext, useCallback } from "react";
 import { ICollection, IDndData, isCollectionData } from "../types";
+import { useCodapState } from "./useCodapState";
 
 export type Side = "left"|"right";
 
@@ -24,6 +25,7 @@ interface IUseDraggableTableOptions {
 export const useDraggableTable = (options: IUseDraggableTableOptions) => {
   const {collections, handleUpdateAttributePosition, handleCreateCollectionFromAttribute} = options;
   const [dragSide, setDragSide] = useState<Side|undefined>("left");
+  const { getPluginFrameRect } = useCodapState();
 
   const getCollectionAndAttribute = useCallback((data?: IDndData) => {
     if (!data) return;
@@ -41,8 +43,29 @@ export const useDraggableTable = (options: IUseDraggableTableOptions) => {
     }
   };
 
-  const handleDrop = useCallback((e: DragEndEvent) => {
+  const handleDrop = useCallback(async (e: DragEndEvent) => {
     const { active, over } = e;
+
+    // FIXME: A little hacky, but it figures out mouse position based on where mousedown happened and
+    // the delta of current mouse position, and checks to see if it is bigger than the plugin iframe.
+    // We couldn't get the exact position of the mouse nor the plugin iframe, so everything is relative
+    // to the mousedown. Tried using screenX and screenY from both activatorEvent, winddow, and window.parent
+    // and the values for positions and dimensions didn't make sense.
+    // A better solution is to prevent calling this function if the mouse is outside the plugin iframe.
+    const pluginFrameRect = await getPluginFrameRect();
+    const activatorEvent = e.activatorEvent as MouseEvent;
+    const pointerX = activatorEvent?.clientX + e.delta.x;
+    const pointerY = activatorEvent?.clientY + e.delta.y;
+
+    const outsidePlugin = pluginFrameRect !== null && typeof pluginFrameRect === "object" &&
+                            (pointerX < 0 || pointerX > pluginFrameRect.width ||
+                              pointerY < 0 || pointerY > pluginFrameRect.height);
+
+    // Plugin should ignore drops if it is outside the CODAP webview
+    if (outsidePlugin) {
+      return;
+    }
+
     if (over) {
       const source = getCollectionAndAttribute(active.data.current as IDndData);
       const overData = over.data.current;
@@ -69,7 +92,8 @@ export const useDraggableTable = (options: IUseDraggableTableOptions) => {
       }
     }
     setDragSide(undefined);
-  }, [dragSide, getCollectionAndAttribute, handleUpdateAttributePosition, handleCreateCollectionFromAttribute]);
+  }, [getPluginFrameRect, dragSide, getCollectionAndAttribute, handleCreateCollectionFromAttribute,
+      handleUpdateAttributePosition]);
 
   return {
     handleDragOver,
