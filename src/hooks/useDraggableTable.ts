@@ -46,6 +46,12 @@ export const useDraggableTable = (options: IUseDraggableTableOptions) => {
   const handleDrop = useCallback(async (e: DragEndEvent) => {
     const { active, over } = e;
 
+    // FIXME: A little hacky, but it figures out mouse position based on where mousedown happened and
+    // the delta of current mouse position, and checks to see if it is bigger than the plugin iframe.
+    // We couldn't get the exact position of the mouse nor the plugin iframe, so everything is relative
+    // to the mousedown. Tried using screenX and screenY from both activatorEvent, winddow, and window.parent
+    // and the values for positions and dimensions didn't make sense.
+    // A better solution is to prevent calling this function if the mouse is outside the plugin iframe.
     const pluginFrameRect = await getPluginFrameRect();
     const activatorEvent = e.activatorEvent as MouseEvent;
     const pointerX = activatorEvent?.clientX + e.delta.x;
