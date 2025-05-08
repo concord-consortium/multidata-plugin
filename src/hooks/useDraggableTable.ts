@@ -5,9 +5,6 @@ import { useCodapState } from "./useCodapState";
 
 export type Side = "left"|"right";
 
-const topDiff = 120;
-const heightDiff = 25;
-
 type DraggableTableContextType = {
   handleDragOver: (clientX: number, over?: Over) => void
   dragSide: Side | undefined
@@ -48,27 +45,21 @@ export const useDraggableTable = (options: IUseDraggableTableOptions) => {
 
   const handleDrop = useCallback(async (e: DragEndEvent) => {
     const { active, over } = e;
-// FIXME: using the pluginframeRect from the plugin API doesn't return a consistent
-// top and height value. It differes from actual CODAP webview top and height values.
-    const pluginFrameRect = await getPluginFrameRect();
-    const pointerX = (e.activatorEvent as MouseEvent)?.clientX;
-    const pointerY = (e.activatorEvent  as MouseEvent)?.clientY;
 
-    console.log("e.activatorEvent:", {
-      x: pointerX,
-      y: pointerY,
-    });
-    const pluginFrameBottom = pluginFrameRect ? pluginFrameRect.top + pluginFrameRect.height - heightDiff  : 0;
+    const pluginFrameRect = await getPluginFrameRect();
+    const activatorEvent = e.activatorEvent as MouseEvent;
+    const pointerX = activatorEvent?.clientX + e.delta.x;
+    const pointerY = activatorEvent?.clientY + e.delta.y;
 
     const outsidePlugin = pluginFrameRect !== null && typeof pluginFrameRect === "object" &&
-                            (pointerX < pluginFrameRect.left || pointerX > pluginFrameRect.right ||
-                              pointerY < pluginFrameRect.top || pointerY > pluginFrameBottom);
-    console.log("outsidePlugin", outsidePlugin);
+                            (pointerX < 0 || pointerX > pluginFrameRect.width ||
+                              pointerY < 0 || pointerY > pluginFrameRect.height);
+
     // Plugin should ignore drops if it is outside the CODAP webview
     if (outsidePlugin) {
       return;
     }
-    
+
     if (over) {
       const source = getCollectionAndAttribute(active.data.current as IDndData);
       const overData = over.data.current;
