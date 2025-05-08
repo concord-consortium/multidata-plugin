@@ -1,8 +1,12 @@
 import { DragEndEvent, Over } from "@dnd-kit/core";
 import { useContext, useState, createContext, useCallback } from "react";
 import { ICollection, IDndData, isCollectionData } from "../types";
+import { useCodapState } from "./useCodapState";
 
 export type Side = "left"|"right";
+
+const topDiff = 120;
+const heightDiff = 25;
 
 type DraggableTableContextType = {
   handleDragOver: (clientX: number, over?: Over) => void
@@ -24,6 +28,7 @@ interface IUseDraggableTableOptions {
 export const useDraggableTable = (options: IUseDraggableTableOptions) => {
   const {collections, handleUpdateAttributePosition, handleCreateCollectionFromAttribute} = options;
   const [dragSide, setDragSide] = useState<Side|undefined>("left");
+  const { getPluginFrameRect } = useCodapState();
 
   const getCollectionAndAttribute = useCallback((data?: IDndData) => {
     if (!data) return;
@@ -41,17 +46,30 @@ export const useDraggableTable = (options: IUseDraggableTableOptions) => {
     }
   };
 
-  const handleDrop = useCallback((e: DragEndEvent) => {
+  const handleDrop = useCallback(async (e: DragEndEvent) => {
     const { active, over } = e;
-      // Ensure the drop is within the `.nested-table-nestedTableWrapper`
-  const dropTarget = document.querySelector(".nested-table-nestedTableWrapper");
-  if (!dropTarget?.contains(over?.data?.current?.node as Node)) {
-    console.log("Drop occurred outside the nested table wrapper.");
-    setDragSide(undefined);
-    return;
-  }
+// FIXME: using the pluginframeRect from the plugin API doesn't return a consistent
+// top and height value. It differes from actual CODAP webview top and height values.
+    const pluginFrameRect = await getPluginFrameRect();
+    const pointerX = (e.activatorEvent as MouseEvent)?.clientX;
+    const pointerY = (e.activatorEvent  as MouseEvent)?.clientY;
+
+    console.log("e.activatorEvent:", {
+      x: pointerX,
+      y: pointerY,
+    });
+    const pluginFrameBottom = pluginFrameRect ? pluginFrameRect.top + pluginFrameRect.height - heightDiff  : 0;
+
+    const outsidePlugin = pluginFrameRect !== null && typeof pluginFrameRect === "object" &&
+                            (pointerX < pluginFrameRect.left || pointerX > pluginFrameRect.right ||
+                              pointerY < pluginFrameRect.top || pointerY > pluginFrameBottom);
+    console.log("outsidePlugin", outsidePlugin);
+    // Plugin should ignore drops if it is outside the CODAP webview
+    if (outsidePlugin) {
+      return;
+    }
+    
     if (over) {
-      console.log("over", over);
       const source = getCollectionAndAttribute(active.data.current as IDndData);
       const overData = over.data.current;
       const target = getCollectionAndAttribute(overData as IDndData);
@@ -77,7 +95,8 @@ export const useDraggableTable = (options: IUseDraggableTableOptions) => {
       }
     }
     setDragSide(undefined);
-  }, [dragSide, getCollectionAndAttribute, handleUpdateAttributePosition, handleCreateCollectionFromAttribute]);
+  }, [getPluginFrameRect, dragSide, getCollectionAndAttribute, handleCreateCollectionFromAttribute,
+      handleUpdateAttributePosition]);
 
   return {
     handleDragOver,

@@ -111,3 +111,30 @@ export function moveCodapDrag(context: string, attrTitle: string, mouseX: number
 export function endCodapDrag(context: string, attrTitle: string, mouseX: number, mouseY: number) {
   continueCodapDrag("dragEnd", context, attrTitle, mouseX, mouseY);
 }
+
+export async function getPluginId(): Promise<number | undefined> {
+  try {
+    const response: any = await codapInterface.sendRequest({
+      action: "get",
+      resource: "componentList"
+    });
+    if (response.success) {
+      const plugin = response.values.find((component: any) =>
+        component.type === "game" && component.title === "multidata-plugin"
+      );
+      return plugin?.id;
+    } else {
+      console.error("Error getting plugin ID:", response);
+    }
+  } catch(error) {
+    console.error("Error in getPluginId:", error);
+  }
+  return undefined;
+}
+
+export async function getPluginFrame(pluginId: number | string) {
+  return codapInterface.sendRequest({
+    action: "get",
+    resource: `component[${pluginId}]`
+  });
+}
